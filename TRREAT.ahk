@@ -19,7 +19,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
-IfInString, fileDir, Dropbox					; Change enviroment if run from development vs production directory
+IfInString, A_WorkingDir, Dropbox					; Change enviroment if run from development vs production directory
 {
 	isAdmin := true
 	holterDir := ".\Holter PDFs\"
@@ -52,7 +52,9 @@ Loop, *.pdf
 	RunWait, pdftotext.exe -l 2 -table -fixed 3 "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
 
-	IfInString, maintxt, © Medtronic
+	;~ IfInString, maintxt, © Medtronic
+		;~ gosub PaceArt
+	if RegExMatch(maintxt,"i)©.*Medtronic")
 		gosub PaceArt
 }
 
@@ -431,13 +433,12 @@ PaceArtPrint:
 	Gui, Show
 	FileDelete, %fileOut%.rtf
 	FileAppend, %rtfOut%, %fileOut%.rtf
-	outDir := (isAdmin)
-		? ".\completed\" . fileOut . ".rtf"
-		: ".\test\" . fileOut . ".rtf"
+	outDir := (isAdmin) 
+		? ".\completed\"
+		: ".\test\"
 ;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
-	;outDir := "\\chmc16\Cardio\EP\TRRIQ or TRREAT\completed\" . fileOut . ".rtf"
 
-	FileCopy, %fileOut%.rtf, %outDir%, 1
+	FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1
 	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1
 	FileMove, %fileIn%, archive\%fileout%-done.pdf, 1
 	
