@@ -52,10 +52,10 @@ Loop, *.pdf
 	RunWait, pdftotext.exe -l 2 -table -fixed 3 "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
 
-	;~ IfInString, maintxt, © Medtronic
-		;~ gosub PaceArt
-	if RegExMatch(maintxt,"i)©.*Medtronic")
+	IfInString, maintxt, © Medtronic
 		gosub PaceArt
+	;~ if RegExMatch(maintxt,"i)©.*Medtronic")
+		;~ gosub PaceArt
 }
 
 MsgBox Directory scan complete.
@@ -94,6 +94,7 @@ PaceArt:
 		newtxtL .= j . "`n"										; strip left from right columns
 	}
 	devtype := trim(strX(maintxt,":",RegExMatch(maintxt,"Device\s*Type:"),1,"`n",1,2))		; PM or ICD?
+	
 	FileDelete tempfile.txt
 	FileAppend %newtxtL%, tempfile.txt
 
@@ -205,6 +206,38 @@ PaceArt:
 		. ((det_sv+=((tmp:=blk["Brady"]) ? tmp : 0)) ? tmp " brady" : "")
 		. ((det_sv) ? "" : "no atrial arrhythmia")
 		. " episodes detected.\par`n"
+	}
+	if (devtype~="ILR") {
+		gosub PaceArtLINQ
+		if (reportErr) {
+			LV_Modify(fileNum,"col4","no")
+			LV_Modify(fileNum,"col5",reportErr)
+			Gui, Show
+			reportErr := ""
+			return
+		}
+		; No errors, now generate report
+		rtfBody := "\fs22\b\ul`nPATIENT INFORMATION\ul0\b0\par`n"
+		. "\fs18\b Rhythm:\b0\tab " blk["Rhythm"] " \tab\b Referring MD:\b0\tab " blk["Referring"] "\par`n"
+		. "\b Dependency:\b0\tab " blk["Dependency"] " \tab\b Following:\b0\tab " blk["Following"] "\par`n"
+		. "\b Diagnosis:\b0\tab " StrX(blk["Diagnosis"]," - ",1,3,,1,1) "\par`n"
+		. "}\fs22\par`n"
+		. "\b\ul DEVICE INFORMATION\ul0\b0\par`n"
+		. "\fs18 " blk["Manufacturer and Model"] ", serial number " blk["Serial Number"] 
+		. ((pm_imp:=blk["Implant Date"]) ? ", implanted " pm_imp ((pm_impMD:=blk["Implant Provider"]) ? " by " pm_impMD : "") : "") ". `n"
+		. "Generator cell voltage " (instr(tmp:=blk["Battery Voltage"],"(ERT = V )") ? tmp : substr(tmp,1,instr(tmp,"(ERT")-2)) ". "
+		. ((pm_bat:=blk["Battery Status"]) ? "Battery status is " pm_bat ", with r" : "R") "emaining longevity " blk["Remaining Longevity"] ". `n"
+		. "Brady programming mode is " blk["Mode"] " with lower rate " blk["Lower Rate"]
+		. ((pm_URL:=blk["Upper Rate"])="bpm" ? "" : ", upper tracking rate " pm_URL)
+		. ((pm_USR:=blk["Upper Sensor"])="bpm" ? "" : ", upper sensor rate " pm_USR) . ". `n"
+		. ((pm_ADL:=blk["ADL Rate"])="bpm" ? "" : "ADL rate is " pm_ADL ". ")
+		. ((pm_adap:=blk["Adaptive"]) ? "Adaptive mode is " pm_adap ". " : "")
+		. (((pm_PAV:=blk["Paced"])="ms" or (pm_SAV:=blk["Sensed"])="ms") ? "" : "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. `n")
+		. ((pm_RA:=blk["RA"])="%" ? "" : "RA pacing " pm_RA ". ") . ((pm_RV:=blk["RV"])="%" ? "" : "RV Pacing " pm_RV ". ")
+		. ((pm_ASVS:=blk["AS-VS"])="%" ? "" : "AS-VS " pm_ASVS " ") . ((pm_ASVP:=blk["AS-VP"])="%" ? "" : "AS-VP " pm_ASVP " ")
+		. ((pm_APVS:=blk["AP-VS"])="%" ? "" : "AP-VS " pm_APVS " ") . ((pm_APVP:=blk["AP-VP"])="%" ? "" : "AP-VP " pm_APVP) . "\par`n"
+		. "\fs22\par`n"
+		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	}
 	gosub PaceArtPrint
 	Gui, Show
@@ -388,6 +421,83 @@ PaceArtLeads:
 Return	
 }
 
+PaceArtLINQ:
+{
+	LV_Modify(fileNum,"col3","ILR")
+	Gui, Show
+	blocks := ["Patient Information"
+		,"Device Information"
+		,"Past Encounters"
+		,"Detections"
+		,"Encounter Summary","© Medtronic"]
+	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Blood Pressure:"
+		,"Referring:","Following:","Rhythm:"
+		,"Next In-clinic:","Next Remote:","Diagnosis:","Dependency:"]
+	fields[2] := ["Implant Date:","Serial Number:","Battery Status:"]
+	fields[3] := ["Mode:","Lower Rate:","Upper Rate:","Upper Sensor:","ADL Rate:","Hysteresis:","Sleep Rate:","Detection:","Fallback Rate:","Fallback Mode:"
+		,"Amplitude:","Pulse Width:","Pace Polarity:","Sensitivity:","Blanking:","Refractory:","Sense Polarity:","LV Pace Path:","VV Delay:"
+		,"Adaptive:","Paced:","Sensed:","Paced Min:","Sensed Min:","PMT Int.:","PVC Resp.:","Notes"]
+	fields[4] := ["Presenting","Rate:","AV Delay:","Magnet Mode","Rate:","Interval:","AV Delay:","Duration:","Capture:","Sensing:"
+		,"Pacing Impedance:","Capture Amplitude:","Capture Duration:","Sensing Amplitude:","Lead Information"
+		,"Lead Status:","Integrity Count:","Polarization:","Evoked Response:"
+		,"Percent Pacing","RA:","RV:","LV:","CRT:","AS-VS:","AS-VP:","AP-VS:","AP-VP:"]
+	fields[5] := ["Electronically Signed By:","Last Modified By:","Signed Date:","Encounter Date:","Encounter Type:"]
+
+	; Get the PATIENT INFORMATION block
+	ptInfo := columns(newtxtL,blocks[1],"Comments:",,"Referring:","Next In-Clinic:")
+	fieldvals(ptInfo,1)
+
+	; Get the DEVICE INFORMATION block
+	devInfo := columns(newtxtL,blocks[2],blocks[3],,"Device Type:","Serial Number:")
+	fieldvals(devInfo,2)
+	tmp := trim(strX(newtxtL,"Manufacturer and Model:",1,23,"`n",1,1), " `n")
+	blk["Manufacturer and Model"] := tmp								; Has different column width
+
+	; Get the DETECTIONS block
+	epdet := columns(newtxtL,blocks[4],blocks[5],,"Detection")
+	epBlk := columns(epdet,"","Detection",,"Asystole:")
+	detBlk := strX(epdet,"Detection",1,0)
+	MsgBox % detBlk
+	ExitApp
+
+	; BRADY PROGRAMMING parameters
+	bradyParam := columns(newtxtL,blocks[4],blocks[5],"leads","Amplitude:","Adaptive:")
+	fieldvals(bradyParam,3)
+
+	; PACING AND SENSING subtable
+	outputs := cellvals(bradyParam,"Pacing and Sensing","Heart Failure")
+	val := "Sensitivity", chamber := "LV"
+
+	; MEASUREMENTS table
+	meas := columns(newtxtL,blocks[5],blocks[6],,"Pacing Impedance:","RA:")
+	fieldvals(meas,4)
+
+	; LEAD IMPEDANCE AND THRESHOLDS subtable
+	thr := cellvals(meas,"Lead Impedance and Thresholds","Lead Information")
+	val := "Capture Duration", chamber := "rv"
+
+	; ENCOUNTER SUMMARY block
+	summBl := trim(columns(maintxt,blocks[6],blocks[7])," `n")
+	cleanSpace(summBl)
+	if (instr(summBl,"(Since Last Reset)",1)) {
+		reportErr .= "Save file in 'Encounter Brady (no strips)' format. "
+	} 
+	if !(instr(summBl,"Electronically Signed By:")) {
+		reportErr .= "Report not signed. "
+	}
+	if !(summ:=trim(SubStr(summBl,1,RegExMatch(summBl,"(Electronically Signed By)|(Last Modified By)|(Encounter Date)")-1))) {
+		reportErr .= "No summary. "
+	}
+	fieldvals(summBl,5)
+	enc_MD := docs[strX(blk["Electronically Signed By"],,1,1," MD",1,3)]
+	enc_signed := strX(blk["Signed Date"],,1,1," ",1,1)
+	enc_date := strX(blk["Encounter Date"],,1,1," ",1,1)
+	if !(enc_MD) {
+		reportErr .= "Not MD signed. "
+	}
+Return
+}
+
 PaceArtPrint:
 {
 	if (RegExMatch(summ,"\<\d*\>")) {
@@ -438,9 +548,9 @@ PaceArtPrint:
 		: ".\test\"
 ;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
 
-	FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1
-	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1
-	FileMove, %fileIn%, archive\%fileout%-done.pdf, 1
+	FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1			; copy to the final directory
+	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1			; store in Completed, is this necessary?
+	;FileMove, %fileIn%, archive\%fileout%-done.pdf, 1			; archive the PDF. Comment out if don't want to keep moving test PDF.
 	
 Return	
 }
@@ -463,11 +573,11 @@ columns(x,blk1,blk2,incl:="",col2:="",col3:="",col4:="") {
 	loop, parse, txt, `n,`r										; find position of columns 2, 3, and 4
 	{
 		i:=A_LoopField
-		if (t:=RegExMatch(i,col2))
+		if (t:=RegExMatch(i,"i)" col2))
 			pos2:=t
-		if (t:=RegExMatch(i,col3))
+		if (t:=RegExMatch(i,"i)" col3))
 			pos3:=t
-		if (t:=RegExMatch(i,col4))
+		if (t:=RegExMatch(i,"i)" col4))
 			pos4:=t
 	}
 	loop, parse, txt, `n,`r
@@ -658,6 +768,7 @@ fieldvals(x,bl,bl2:="") {
 			blk2[i] := cleancolon(m)
 		} else {
 			blk[i] := m
+			;MsgBox,,% i, % m
 		}
 	}
 	if (bl2) {
@@ -683,6 +794,26 @@ cleanspace(ByRef txt) {
 			break
 	}
 	return txt
+}
+
+stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
+/*	modified version: searches from BS to "   "
+	h = Haystack
+	BS = beginning string
+	BO = beginning offset
+	BT = beginning trim, TRUE or FALSE
+	ES = ending string
+	ET = ending trim, TRUE or FALSE
+	N = variable for next offset
+*/
+	;BS .= "(.*?)\s{3}"
+	MsgBox % ES
+	;rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
+	pos0 := RegExMatch(h,BS,bPat,((BO<1)?1:BO))
+	pos1 := RegExMatch(h,ES,ePat,pos0+bPat.len)
+	MsgBox % pos0 " - " pos1
+	N := pos1+((ET)?0:(ePat.len))
+	return substr(h,pos0+((BT)?(bPat.len):0),N-pos0-bPat.len)
 }
 
 #Include strx.ahk
