@@ -434,13 +434,9 @@ PaceArtLINQ:
 		,"Referring:","Following:","Rhythm:"
 		,"Next In-clinic:","Next Remote:","Diagnosis:","Dependency:"]
 	fields[2] := ["Implant Date:","Serial Number:","Battery Status:"]
-	fields[3] := ["Mode:","Lower Rate:","Upper Rate:","Upper Sensor:","ADL Rate:","Hysteresis:","Sleep Rate:","Detection:","Fallback Rate:","Fallback Mode:"
-		,"Amplitude:","Pulse Width:","Pace Polarity:","Sensitivity:","Blanking:","Refractory:","Sense Polarity:","LV Pace Path:","VV Delay:"
-		,"Adaptive:","Paced:","Sensed:","Paced Min:","Sensed Min:","PMT Int.:","PVC Resp.:","Notes"]
-	fields[4] := ["Presenting","Rate:","AV Delay:","Magnet Mode","Rate:","Interval:","AV Delay:","Duration:","Capture:","Sensing:"
-		,"Pacing Impedance:","Capture Amplitude:","Capture Duration:","Sensing Amplitude:","Lead Information"
-		,"Lead Status:","Integrity Count:","Polarization:","Evoked Response:"
-		,"Percent Pacing","RA:","RV:","LV:","CRT:","AS-VS:","AS-VP:","AP-VS:","AP-VP:"]
+	fields[3] := ["VF (VHR):","VT:","SVT:","VT-NS:","AF (AHR):","AT:","AT-NS:"
+		,"Switch:","Activated:","Asystole:","Brady:","Other:"]
+	fields[4] := ["VF (VHR):","Fast VT:","Slow VT:","V-Slow VT:","AF (AHR):","AT:","Asystole:","Brady:"]
 	fields[5] := ["Electronically Signed By:","Last Modified By:","Signed Date:","Encounter Date:","Encounter Type:"]
 
 	; Get the PATIENT INFORMATION block
@@ -453,35 +449,16 @@ PaceArtLINQ:
 	tmp := trim(strX(newtxtL,"Manufacturer and Model:",1,23,"`n",1,1), " `n")
 	blk["Manufacturer and Model"] := tmp								; Has different column width
 
-	; Get the DETECTIONS block
+	; Get the EPISODES and DETECTIONS block
 	epdet := columns(newtxtL,blocks[4],blocks[5],,"Detection")
 	epBlk := columns(epdet,"","Detection",,"Asystole:")
+	fieldvals(epBlk,3,,"ep")
 	detBlk := strX(epdet,"Detection",1,0)
-	MsgBox % detBlk
-	ExitApp
-
-	; BRADY PROGRAMMING parameters
-	bradyParam := columns(newtxtL,blocks[4],blocks[5],"leads","Amplitude:","Adaptive:")
-	fieldvals(bradyParam,3)
-
-	; PACING AND SENSING subtable
-	outputs := cellvals(bradyParam,"Pacing and Sensing","Heart Failure")
-	val := "Sensitivity", chamber := "LV"
-
-	; MEASUREMENTS table
-	meas := columns(newtxtL,blocks[5],blocks[6],,"Pacing Impedance:","RA:")
-	fieldvals(meas,4)
-
-	; LEAD IMPEDANCE AND THRESHOLDS subtable
-	thr := cellvals(meas,"Lead Impedance and Thresholds","Lead Information")
-	val := "Capture Duration", chamber := "rv"
+	fieldvals(detBlk,4,,"det")
 
 	; ENCOUNTER SUMMARY block
-	summBl := trim(columns(maintxt,blocks[6],blocks[7])," `n")
+	summBl := trim(columns(maintxt,blocks[5],blocks[6])," `n")
 	cleanSpace(summBl)
-	if (instr(summBl,"(Since Last Reset)",1)) {
-		reportErr .= "Save file in 'Encounter Brady (no strips)' format. "
-	} 
 	if !(instr(summBl,"Electronically Signed By:")) {
 		reportErr .= "Report not signed. "
 	}
@@ -496,6 +473,21 @@ PaceArtLINQ:
 		reportErr .= "Not MD signed. "
 	}
 Return
+}
+
+fieldPrefix(x,pre) {
+/*	Replaces key names with a prefixed name for given field group
+	x	= field num
+	pre	= prefix string
+*/
+	global fields, blk
+	for k,v in fields[x] 
+	{
+		nm := trim(v," :")
+		blk[pre "_" nm] := blk[x, nm]
+		blk[x, nm] := ""
+	}
+	return
 }
 
 PaceArtPrint:
@@ -747,11 +739,12 @@ cellvals(x,blk1:="",blk2:="",type:="") {
 	return cells
 }
 
-fieldvals(x,bl,bl2:="") {
+fieldvals(x,bl,bl2:="",pre:="") {
 /*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
 	x	= input text
 	bl	= which FIELD number to use
 	bl2	= if present, use blk2
+	pre	= if present, prefix name
 */
 	global blocks, fields, blk, blk2
 	blk2 := ""
@@ -763,6 +756,9 @@ fieldvals(x,bl,bl2:="") {
 		cleanSpace(m)
 		if (substr(i,0)=":") {
 			StringTrimRight i,i,1
+		}
+		if (pre) {
+			i := pre "_" i
 		}
 		if (bl2) {
 			blk2[i] := cleancolon(m)
