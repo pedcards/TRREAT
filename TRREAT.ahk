@@ -19,6 +19,19 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
+IfInString, fileDir, Dropbox					; Change enviroment if run from development vs production directory
+{
+	isAdmin := true
+	holterDir := ".\Holter PDFs\"
+	importFld := ".\Import\"
+	chipDir := ".\Chipotle\"
+} else {
+	isAdmin := false
+	holterDir := "\\chmc16\Cardio\EP\HoltER Database\Holter PDFs\"
+	importFld := "\\chmc16\Cardio\EP\HoltER Database\Import\"
+	chipDir := "\\chmc16\Cardio\Inpatient List\chipotle\"
+}
+user := A_UserName
 
 Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
 Gui, Add, Button, Disabled w600 h50 , Reload
@@ -418,7 +431,10 @@ PaceArtPrint:
 	Gui, Show
 	FileDelete, %fileOut%.rtf
 	FileAppend, %rtfOut%, %fileOut%.rtf
-	outDir := "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
+	outDir := (isAdmin)
+		? ".\completed\" . fileOut . ".rtf"
+		: ".\test\" . fileOut . ".rtf"
+;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
 	;outDir := "\\chmc16\Cardio\EP\TRRIQ or TRREAT\completed\" . fileOut . ".rtf"
 
 	FileCopy, %fileOut%.rtf, %outDir%, 1
