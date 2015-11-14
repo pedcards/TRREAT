@@ -218,24 +218,26 @@ PaceArt:
 		}
 		; No errors, now generate report
 		rtfBody := "\fs22\b\ul`nPATIENT INFORMATION\ul0\b0\par`n"
-		. "\fs18\b Rhythm:\b0\tab " blk["Rhythm"] " \tab\b Referring MD:\b0\tab " blk["Referring"] "\par`n"
-		. "\b Dependency:\b0\tab " blk["Dependency"] " \tab\b Following:\b0\tab " blk["Following"] "\par`n"
+		. "\fs18"
 		. "\b Diagnosis:\b0\tab " StrX(blk["Diagnosis"]," - ",1,3,,1,1) "\par`n"
+		. "\b Referring MD:\b0\tab " blk["Referring"] "\par`n"
+		. "\b Following:\b0\tab " blk["Following"] "\par`n"
 		. "}\fs22\par`n"
 		. "\b\ul DEVICE INFORMATION\ul0\b0\par`n"
 		. "\fs18 " blk["Manufacturer and Model"] ", serial number " blk["Serial Number"] 
-		. ((pm_imp:=blk["Implant Date"]) ? ", implanted " pm_imp ((pm_impMD:=blk["Implant Provider"]) ? " by " pm_impMD : "") : "") ". `n"
-		. "Generator cell voltage " (instr(tmp:=blk["Battery Voltage"],"(ERT = V )") ? tmp : substr(tmp,1,instr(tmp,"(ERT")-2)) ". "
-		. ((pm_bat:=blk["Battery Status"]) ? "Battery status is " pm_bat ", with r" : "R") "emaining longevity " blk["Remaining Longevity"] ". `n"
-		. "Brady programming mode is " blk["Mode"] " with lower rate " blk["Lower Rate"]
-		. ((pm_URL:=blk["Upper Rate"])="bpm" ? "" : ", upper tracking rate " pm_URL)
-		. ((pm_USR:=blk["Upper Sensor"])="bpm" ? "" : ", upper sensor rate " pm_USR) . ". `n"
-		. ((pm_ADL:=blk["ADL Rate"])="bpm" ? "" : "ADL rate is " pm_ADL ". ")
-		. ((pm_adap:=blk["Adaptive"]) ? "Adaptive mode is " pm_adap ". " : "")
-		. (((pm_PAV:=blk["Paced"])="ms" or (pm_SAV:=blk["Sensed"])="ms") ? "" : "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. `n")
-		. ((pm_RA:=blk["RA"])="%" ? "" : "RA pacing " pm_RA ". ") . ((pm_RV:=blk["RV"])="%" ? "" : "RV Pacing " pm_RV ". ")
-		. ((pm_ASVS:=blk["AS-VS"])="%" ? "" : "AS-VS " pm_ASVS " ") . ((pm_ASVP:=blk["AS-VP"])="%" ? "" : "AS-VP " pm_ASVP " ")
-		. ((pm_APVS:=blk["AP-VS"])="%" ? "" : "AP-VS " pm_APVS " ") . ((pm_APVP:=blk["AP-VP"])="%" ? "" : "AP-VP " pm_APVP) . "\par`n"
+		. ((pm_imp:=blk["Implant Date"]) ? ", implanted " pm_imp : "") ". "
+		. ((pm_bat:=blk["Battery Status"]) ? "Battery status is " pm_bat "." : "") "\par`n"
+		. "\fs22\par`n"
+		. "\b\ul DETECTION CRITERIA\ul0\b0\par`n"
+		. "\fs18 "
+		. (RegExMatch((d_VF:=blk["det_VF (VHR)"]),"i)(Enabled|Disabled)") ? "VF: " RegExReplace(d_VF,"\d\sbpm\sms\ss") ".\par`n" : "")
+		. (RegExMatch((d_FVT:=blk["det_Fast VT"]),"i)(Enabled|Disabled)") ? "Fast VT: " d_FVT ".\par`n" : "")
+		. (RegExMatch((d_SlowVT:=blk["det_Slow VT"]),"i)(Enabled|Disabled)") ? "Slow VT: " d_SlowVT ".\par`n" : "")
+		. (RegExMatch((d_VSlow:=blk["det_V-Slow VT"]),"i)(Enabled|Disabled)") ? "V-Slow VT: " d_VSlow ".\par`n" : "")
+		. (RegExMatch((d_AF:=blk["det_AF (AHR)"]),"i)(Enabled|Disabled)") ? "AF: " RegExReplace(d_AF,"\d\sbpm\sms\ss") ".\par`n" : "")
+		. (RegExMatch((d_AT:=blk["det_AT"]),"i)(Enabled|Disabled)") ? "AT: " d_AT ".\par`n" : "")
+		. (RegExMatch((d_Asys:=blk["det_Asystole"]),"i)(Enabled|Disabled)") ? "Asystole: " d_Asys ".\par`n" : "")
+		. (RegExMatch((d_Brady:=blk["det_Brady"]),"i)(Enabled|Disabled)") ? "Brady: " d_Brady ".\par`n" : "")
 		. "\fs22\par`n"
 		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	}
@@ -459,35 +461,20 @@ PaceArtLINQ:
 	; ENCOUNTER SUMMARY block
 	summBl := trim(columns(maintxt,blocks[5],blocks[6])," `n")
 	cleanSpace(summBl)
-	if !(instr(summBl,"Electronically Signed By:")) {
-		reportErr .= "Report not signed. "
-	}
-	if !(summ:=trim(SubStr(summBl,1,RegExMatch(summBl,"(Electronically Signed By)|(Last Modified By)|(Encounter Date)")-1))) {
-		reportErr .= "No summary. "
-	}
+	;~ if !(instr(summBl,"Electronically Signed By:")) {
+		;~ reportErr .= "Report not signed. "
+	;~ }
+	;~ if !(summ:=trim(SubStr(summBl,1,RegExMatch(summBl,"(Electronically Signed By)|(Last Modified By)|(Encounter Date)")-1))) {
+		;~ reportErr .= "No summary. "
+	;~ }
 	fieldvals(summBl,5)
 	enc_MD := docs[strX(blk["Electronically Signed By"],,1,1," MD",1,3)]
 	enc_signed := strX(blk["Signed Date"],,1,1," ",1,1)
 	enc_date := strX(blk["Encounter Date"],,1,1," ",1,1)
-	if !(enc_MD) {
-		reportErr .= "Not MD signed. "
-	}
+	;~ if !(enc_MD) {
+		;~ reportErr .= "Not MD signed. "
+	;~ }
 Return
-}
-
-fieldPrefix(x,pre) {
-/*	Replaces key names with a prefixed name for given field group
-	x	= field num
-	pre	= prefix string
-*/
-	global fields, blk
-	for k,v in fields[x] 
-	{
-		nm := trim(v," :")
-		blk[pre "_" nm] := blk[x, nm]
-		blk[x, nm] := ""
-	}
-	return
 }
 
 PaceArtPrint:
@@ -754,6 +741,13 @@ fieldvals(x,bl,bl2:="",pre:="") {
 		j := fields[bl][k+1]
 		m := trim(strX(x,i,n,StrLen(i),j,1,StrLen(j)+1,n), " `n")
 		cleanSpace(m)
+		if (pre="det") {
+			if !(m~="i)(Enabled|Disabled)") {
+				m := ""
+			} else {
+				m := RegExReplace(m,"d\sbpm\sms\ss","d")
+			}
+		}
 		if (substr(i,0)=":") {
 			StringTrimRight i,i,1
 		}
