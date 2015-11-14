@@ -228,18 +228,33 @@ PaceArt:
 		. ((pm_imp:=blk["Implant Date"]) ? ", implanted " pm_imp : "") ". "
 		. ((pm_bat:=blk["Battery Status"]) ? "Battery status is " pm_bat "." : "") "\par`n"
 		. "\fs22\par`n"
-		. "\b\ul DETECTION CRITERIA\ul0\b0\par`n"
-		. "\fs18 "
-		. (RegExMatch((d_VF:=blk["det_VF (VHR)"]),"i)(Enabled|Disabled)") ? "VF: " RegExReplace(d_VF,"\d\sbpm\sms\ss") ".\par`n" : "")
-		. (RegExMatch((d_FVT:=blk["det_Fast VT"]),"i)(Enabled|Disabled)") ? "Fast VT: " d_FVT ".\par`n" : "")
-		. (RegExMatch((d_SlowVT:=blk["det_Slow VT"]),"i)(Enabled|Disabled)") ? "Slow VT: " d_SlowVT ".\par`n" : "")
-		. (RegExMatch((d_VSlow:=blk["det_V-Slow VT"]),"i)(Enabled|Disabled)") ? "V-Slow VT: " d_VSlow ".\par`n" : "")
-		. (RegExMatch((d_AF:=blk["det_AF (AHR)"]),"i)(Enabled|Disabled)") ? "AF: " RegExReplace(d_AF,"\d\sbpm\sms\ss") ".\par`n" : "")
-		. (RegExMatch((d_AT:=blk["det_AT"]),"i)(Enabled|Disabled)") ? "AT: " d_AT ".\par`n" : "")
-		. (RegExMatch((d_Asys:=blk["det_Asystole"]),"i)(Enabled|Disabled)") ? "Asystole: " d_Asys ".\par`n" : "")
-		. (RegExMatch((d_Brady:=blk["det_Brady"]),"i)(Enabled|Disabled)") ? "Brady: " d_Brady ".\par`n" : "")
-		. "\fs22\par`n"
-		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
+		tmp := ((d_VF:=blk["det_VF (VHR)"]) ? "VF: " d_VF ".\par`n" : "")
+		. ((d_FVT:=blk["det_Fast VT"]) ? "Fast VT: " d_FVT ".\par`n" : "")
+		. ((d_SlowVT:=blk["det_Slow VT"]) ? "Slow VT: " d_SlowVT ".\par`n" : "")
+		. ((d_VSlow:=blk["det_V-Slow VT"]) ? "V-Slow VT: " d_VSlow ".\par`n" : "")
+		. ((d_AF:=blk["det_AF (AHR)"]) ? "AF: " d_AF ".\par`n" : "")
+		. ((d_AT:=blk["det_AT"]) ? "AT: " d_AT ".\par`n" : "")
+		. ((d_Asys:=blk["det_Asystole"]) ? "Asystole: " d_Asys ".\par`n" : "")
+		. ((d_Brady:=blk["det_Brady"]) ? "Brady: " d_Brady ".\par`n" : "")
+		if (tmp) {
+			rtfBody .= "\b\ul DETECTION CRITERIA\ul0\b0\par`n\fs18 " tmp "\fs22\par`n"
+			tmp := ""
+		}
+		tmp := ((ep_VF:=blk["ep_VF (VHR)"]) ? "VF: " ep_VF ".\par`n" : "")
+		. ((ep_FVT:=blk["ep_VT"]) ? "Fast VT: " ep_FVT ".\par`n" : "")
+		. ((ep_SlowVT:=blk["ep_SVT"]) ? "Slow VT: " ep_SlowVT ".\par`n" : "")
+		. ((ep_VSlow:=blk["ep_VT-NS"]) ? "VT-NS: " ep_VSlow ".\par`n" : "")
+		. ((ep_AF:=blk["ep_AF (AHR)"]) ? "AF: " ep_AF ".\par`n" : "")
+		. ((ep_AT:=blk["ep_AT"]) ? "AT: " ep_AT ".\par`n" : "")
+		. ((ep_ATNS:=blk["ep_AT-NS"]) ? "AT-NS: " ep_ATNS ".\par`n" : "")
+		. ((ep_MS:=blk["ep_Switch"]) ? "Mode: " ep_MS ".\par`n" : "")
+		. ((ep_Act:=blk["ep_Activated"]) ? "Activated: " ep_Act ".\par`n" : "")
+		. ((ep_Asys:=blk["ep_Asystole"]) ? "Asystole: " ep_Asys ".\par`n" : "")
+		. ((ep_Brady:=blk["ep_Brady"]) ? "Brady: " ep_Brady ".\par`n" : "")
+		if (tmp) {
+			rtfBody .= "\b\ul EPISODES SINCE LAST CHECK\ul0\b0\par`n\fs18 " tmp "\fs22\par`n"
+			tmp := ""
+		}
 	}
 	gosub PaceArtPrint
 	Gui, Show
