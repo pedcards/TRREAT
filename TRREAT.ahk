@@ -452,7 +452,7 @@ PaceArtLINQ:
 		,"Next In-clinic:","Next Remote:","Diagnosis:","Dependency:"]
 	fields[2] := ["Implant Date:","Serial Number:","Battery Status:"]
 	fields[3] := ["VF (VHR):","VT:","SVT:","VT-NS:","AF (AHR):","AT:","AT-NS:"
-		,"Switch:","Activated:","Asystole:","Brady:","Other:"]
+		,"Mode","Switch:","Patient","Activated:","Asystole:","Brady:","Other:"]
 	fields[4] := ["VF (VHR):","Fast VT:","Slow VT:","V-Slow VT:","AF (AHR):","AT:","Asystole:","Brady:"]
 	fields[5] := ["Electronically Signed By:","Last Modified By:","Signed Date:","Encounter Date:","Encounter Type:"]
 
@@ -474,21 +474,21 @@ PaceArtLINQ:
 	fieldvals(detBlk,4,,"det")
 
 	; ENCOUNTER SUMMARY block
-	summBl := trim(columns(maintxt,blocks[5],blocks[6])," `n")
+	summBl := trim(columns(newtxtL,blocks[5],blocks[6])," `n")
 	cleanSpace(summBl)
-	;~ if !(instr(summBl,"Electronically Signed By:")) {
-		;~ reportErr .= "Report not signed. "
-	;~ }
-	;~ if !(summ:=trim(SubStr(summBl,1,RegExMatch(summBl,"(Electronically Signed By)|(Last Modified By)|(Encounter Date)")-1))) {
-		;~ reportErr .= "No summary. "
-	;~ }
+	if !(instr(summBl,"Electronically Signed By:")) {
+		reportErr .= "Report not signed. "
+	}
+	if !(summ:=trim(SubStr(summBl,1,RegExMatch(summBl,"(Electronically Signed By)|(Last Modified By)|(Encounter Date)")-1))) {
+		reportErr .= "No summary. "
+	}
 	fieldvals(summBl,5)
 	enc_MD := docs[strX(blk["Electronically Signed By"],,1,1," MD",1,3)]
 	enc_signed := strX(blk["Signed Date"],,1,1," ",1,1)
 	enc_date := strX(blk["Encounter Date"],,1,1," ",1,1)
-	;~ if !(enc_MD) {
-		;~ reportErr .= "Not MD signed. "
-	;~ }
+	if !(enc_MD) {
+		reportErr .= "Not MD signed. "
+	}
 Return
 }
 
