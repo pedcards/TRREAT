@@ -19,6 +19,19 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
+IfInString, A_WorkingDir, Dropbox					; Change enviroment if run from development vs production directory
+{
+	isAdmin := true
+	holterDir := ".\Holter PDFs\"
+	importFld := ".\Import\"
+	chipDir := ".\Chipotle\"
+} else {
+	isAdmin := false
+	holterDir := "\\chmc16\Cardio\EP\HoltER Database\Holter PDFs\"
+	importFld := "\\chmc16\Cardio\EP\HoltER Database\Import\"
+	chipDir := "\\chmc16\Cardio\Inpatient List\chipotle\"
+}
+user := A_UserName
 
 Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
 Gui, Add, Button, Disabled w600 h50 , Reload
@@ -41,6 +54,8 @@ Loop, *.pdf
 
 	IfInString, maintxt, © Medtronic
 		gosub PaceArt
+	;~ if RegExMatch(maintxt,"i)©.*Medtronic")
+		;~ gosub PaceArt
 }
 
 MsgBox Directory scan complete.
@@ -79,6 +94,7 @@ PaceArt:
 		newtxtL .= j . "`n"										; strip left from right columns
 	}
 	devtype := trim(strX(maintxt,":",RegExMatch(maintxt,"Device\s*Type:"),1,"`n",1,2))		; PM or ICD?
+	
 	FileDelete tempfile.txt
 	FileAppend %newtxtL%, tempfile.txt
 
@@ -190,6 +206,55 @@ PaceArt:
 		. ((det_sv+=((tmp:=blk["Brady"]) ? tmp : 0)) ? tmp " brady" : "")
 		. ((det_sv) ? "" : "no atrial arrhythmia")
 		. " episodes detected.\par`n"
+	}
+	if (devtype~="ILR") {
+		gosub PaceArtLINQ
+		if (reportErr) {
+			LV_Modify(fileNum,"col4","no")
+			LV_Modify(fileNum,"col5",reportErr)
+			Gui, Show
+			reportErr := ""
+			return
+		}
+		; No errors, now generate report
+		rtfBody := "\fs22\b\ul`nPATIENT INFORMATION\ul0\b0\par`n"
+		. "\fs18"
+		. "\b Diagnosis:\b0\tab " StrX(blk["Diagnosis"]," - ",1,3,,1,1) "\par`n"
+		. "\b Referring MD:\b0\tab " blk["Referring"] "\par`n"
+		. "\b Following:\b0\tab " blk["Following"] "\par`n"
+		. "}\fs22\par`n"
+		. "\b\ul DEVICE INFORMATION\ul0\b0\par`n"
+		. "\fs18 " blk["Manufacturer and Model"] ", serial number " blk["Serial Number"] 
+		. ((pm_imp:=blk["Implant Date"]) ? ", implanted " pm_imp : "") ". "
+		. ((pm_bat:=blk["Battery Status"]) ? "Battery status is " pm_bat "." : "") "\par`n"
+		. "\fs22\par`n"
+		tmp := ((d_VF:=blk["det_VF (VHR)"]) ? "VF: " d_VF ".\par`n" : "")
+		. ((d_FVT:=blk["det_Fast VT"]) ? "Fast VT: " d_FVT ".\par`n" : "")
+		. ((d_SlowVT:=blk["det_Slow VT"]) ? "Slow VT: " d_SlowVT ".\par`n" : "")
+		. ((d_VSlow:=blk["det_V-Slow VT"]) ? "V-Slow VT: " d_VSlow ".\par`n" : "")
+		. ((d_AF:=blk["det_AF (AHR)"]) ? "AF: " d_AF ".\par`n" : "")
+		. ((d_AT:=blk["det_AT"]) ? "AT: " d_AT ".\par`n" : "")
+		. ((d_Asys:=blk["det_Asystole"]) ? "Asystole: " d_Asys ".\par`n" : "")
+		. ((d_Brady:=blk["det_Brady"]) ? "Brady: " d_Brady ".\par`n" : "")
+		if (tmp) {
+			rtfBody .= "\b\ul DETECTION CRITERIA\ul0\b0\par`n\fs18 " tmp "\fs22\par`n"
+			tmp := ""
+		}
+		tmp := ((ep_VF:=blk["ep_VF (VHR)"]) ? "VF: " ep_VF ".\par`n" : "")
+		. ((ep_FVT:=blk["ep_VT"]) ? "Fast VT: " ep_FVT ".\par`n" : "")
+		. ((ep_SlowVT:=blk["ep_SVT"]) ? "Slow VT: " ep_SlowVT ".\par`n" : "")
+		. ((ep_VSlow:=blk["ep_VT-NS"]) ? "VT-NS: " ep_VSlow ".\par`n" : "")
+		. ((ep_AF:=blk["ep_AF (AHR)"]) ? "AF: " ep_AF ".\par`n" : "")
+		. ((ep_AT:=blk["ep_AT"]) ? "AT: " ep_AT ".\par`n" : "")
+		. ((ep_ATNS:=blk["ep_AT-NS"]) ? "AT-NS: " ep_ATNS ".\par`n" : "")
+		. ((ep_MS:=blk["ep_Switch"]) ? "Mode: " ep_MS ".\par`n" : "")
+		. ((ep_Act:=blk["ep_Activated"]) ? "Activated: " ep_Act ".\par`n" : "")
+		. ((ep_Asys:=blk["ep_Asystole"]) ? "Asystole: " ep_Asys ".\par`n" : "")
+		. ((ep_Brady:=blk["ep_Brady"]) ? "Brady: " ep_Brady ".\par`n" : "")
+		if (tmp) {
+			rtfBody .= "\b\ul EPISODES SINCE LAST CHECK\ul0\b0\par`n\fs18 " tmp "\fs22\par`n"
+			tmp := ""
+		}
 	}
 	gosub PaceArtPrint
 	Gui, Show
@@ -373,6 +438,60 @@ PaceArtLeads:
 Return	
 }
 
+PaceArtLINQ:
+{
+	LV_Modify(fileNum,"col3","ILR")
+	Gui, Show
+	blocks := ["Patient Information"
+		,"Device Information"
+		,"Past Encounters"
+		,"Detections"
+		,"Encounter Summary","© Medtronic"]
+	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Blood Pressure:"
+		,"Referring:","Following:","Rhythm:"
+		,"Next In-clinic:","Next Remote:","Diagnosis:","Dependency:"]
+	fields[2] := ["Implant Date:","Serial Number:","Battery Status:"]
+	fields[3] := ["VF (VHR):","VT:","SVT:","VT-NS:","AF (AHR):","AT:","AT-NS:"
+		,"Mode","Switch:","Patient","Activated:","Asystole:","Brady:","Other:"]
+	fields[4] := ["VF (VHR):","Fast VT:","Slow VT:","V-Slow VT:","AF (AHR):","AT:","Asystole:","Brady:"]
+	fields[5] := ["Electronically Signed By:","Last Modified By:","Signed Date:","Encounter Date:","Encounter Type:"]
+
+	; Get the PATIENT INFORMATION block
+	ptInfo := columns(newtxtL,blocks[1],"Comments:",,"Referring:","Next In-Clinic:")
+	fieldvals(ptInfo,1)
+
+	; Get the DEVICE INFORMATION block
+	devInfo := columns(newtxtL,blocks[2],blocks[3],,"Device Type:","Serial Number:")
+	fieldvals(devInfo,2)
+	tmp := trim(strX(newtxtL,"Manufacturer and Model:",1,23,"`n",1,1), " `n")
+	blk["Manufacturer and Model"] := tmp								; Has different column width
+
+	; Get the EPISODES and DETECTIONS block
+	epdet := columns(newtxtL,blocks[4],blocks[5],,"Detection")
+	epBlk := columns(epdet,"","Detection",,"Asystole:")
+	fieldvals(epBlk,3,,"ep")
+	detBlk := strX(epdet,"Detection",1,0)
+	fieldvals(detBlk,4,,"det")
+
+	; ENCOUNTER SUMMARY block
+	summBl := trim(columns(newtxtL,blocks[5],blocks[6])," `n")
+	cleanSpace(summBl)
+	if !(instr(summBl,"Electronically Signed By:")) {
+		reportErr .= "Report not signed. "
+	}
+	if !(summ:=trim(SubStr(summBl,1,RegExMatch(summBl,"(Electronically Signed By)|(Last Modified By)|(Encounter Date)")-1))) {
+		reportErr .= "No summary. "
+	}
+	fieldvals(summBl,5)
+	enc_MD := docs[strX(blk["Electronically Signed By"],,1,1," MD",1,3)]
+	enc_signed := strX(blk["Signed Date"],,1,1," ",1,1)
+	enc_date := strX(blk["Encounter Date"],,1,1," ",1,1)
+	if !(enc_MD) {
+		reportErr .= "Not MD signed. "
+	}
+Return
+}
+
 PaceArtPrint:
 {
 	if (RegExMatch(summ,"\<\d*\>")) {
@@ -418,12 +537,14 @@ PaceArtPrint:
 	Gui, Show
 	FileDelete, %fileOut%.rtf
 	FileAppend, %rtfOut%, %fileOut%.rtf
-	outDir := "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
-	;outDir := "\\chmc16\Cardio\EP\TRRIQ or TRREAT\completed\" . fileOut . ".rtf"
+	outDir := (isAdmin) 
+		? ".\completed\"
+		: ".\test\"
+;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
 
-	FileCopy, %fileOut%.rtf, %outDir%, 1
-	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1
-	FileMove, %fileIn%, archive\%fileout%-done.pdf, 1
+	FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1			; copy to the final directory
+	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1			; store in Completed, is this necessary?
+	;FileMove, %fileIn%, archive\%fileout%-done.pdf, 1			; archive the PDF. Comment out if don't want to keep moving test PDF.
 	
 Return	
 }
@@ -446,11 +567,11 @@ columns(x,blk1,blk2,incl:="",col2:="",col3:="",col4:="") {
 	loop, parse, txt, `n,`r										; find position of columns 2, 3, and 4
 	{
 		i:=A_LoopField
-		if (t:=RegExMatch(i,col2))
+		if (t:=RegExMatch(i,"i)" col2))
 			pos2:=t
-		if (t:=RegExMatch(i,col3))
+		if (t:=RegExMatch(i,"i)" col3))
 			pos3:=t
-		if (t:=RegExMatch(i,col4))
+		if (t:=RegExMatch(i,"i)" col4))
 			pos4:=t
 	}
 	loop, parse, txt, `n,`r
@@ -620,11 +741,12 @@ cellvals(x,blk1:="",blk2:="",type:="") {
 	return cells
 }
 
-fieldvals(x,bl,bl2:="") {
+fieldvals(x,bl,bl2:="",pre:="") {
 /*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
 	x	= input text
 	bl	= which FIELD number to use
 	bl2	= if present, use blk2
+	pre	= if present, prefix name
 */
 	global blocks, fields, blk, blk2
 	blk2 := ""
@@ -634,13 +756,24 @@ fieldvals(x,bl,bl2:="") {
 		j := fields[bl][k+1]
 		m := trim(strX(x,i,n,StrLen(i),j,1,StrLen(j)+1,n), " `n")
 		cleanSpace(m)
+		if (pre="det") {
+			if !(m~="i)(Enabled|Disabled)") {
+				m := ""
+			} else {
+				m := RegExReplace(m,"d\sbpm\sms\ss","d")
+			}
+		}
 		if (substr(i,0)=":") {
 			StringTrimRight i,i,1
+		}
+		if (pre) {
+			i := pre "_" i
 		}
 		if (bl2) {
 			blk2[i] := cleancolon(m)
 		} else {
 			blk[i] := m
+			;MsgBox,,% i, % m
 		}
 	}
 	if (bl2) {
@@ -666,6 +799,26 @@ cleanspace(ByRef txt) {
 			break
 	}
 	return txt
+}
+
+stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
+/*	modified version: searches from BS to "   "
+	h = Haystack
+	BS = beginning string
+	BO = beginning offset
+	BT = beginning trim, TRUE or FALSE
+	ES = ending string
+	ET = ending trim, TRUE or FALSE
+	N = variable for next offset
+*/
+	;BS .= "(.*?)\s{3}"
+	MsgBox % ES
+	;rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
+	pos0 := RegExMatch(h,BS,bPat,((BO<1)?1:BO))
+	pos1 := RegExMatch(h,ES,ePat,pos0+bPat.len)
+	MsgBox % pos0 " - " pos1
+	N := pos1+((ET)?0:(ePat.len))
+	return substr(h,pos0+((BT)?(bPat.len):0),N-pos0-bPat.len)
 }
 
 #Include strx.ahk
