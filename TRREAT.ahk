@@ -19,7 +19,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
-IfInString, A_WorkingDir, Dropbox					; Change enviroment if run from development vs production directory
+IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isAdmin := true
 	holterDir := ".\Holter PDFs\"
@@ -29,7 +29,7 @@ IfInString, A_WorkingDir, Dropbox					; Change enviroment if run from developmen
 	isAdmin := false
 	holterDir := "\\chmc16\Cardio\EP\HoltER Database\Holter PDFs\"
 	importFld := "\\chmc16\Cardio\EP\HoltER Database\Import\"
-	chipDir := "\\chmc16\Cardio\Inpatient List\chipotle\"
+	chipDir := "\\childrens\files\HCChipotle\"
 }
 user := A_UserName
 
