@@ -52,6 +52,17 @@ Loop, *.pdf
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
 	cleanlines(maintxt)
+	if (maintxt~="Medtronic,\s+Inc") {
+		if (instr(maintxt,"Pacemaker Model")) {
+			MsgBox pm
+		}
+		if (instr(maintxt,"Defibrillation")) {
+			MsgBox icd
+		}
+		ExitApp
+	}
+	;~ if RegExMatch(maintxt,"i)�.*Medtronic")
+		;~ gosub PaceArt
 }
 
 MsgBox Directory scan complete.
