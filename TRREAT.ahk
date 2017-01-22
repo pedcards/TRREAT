@@ -629,11 +629,21 @@ columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 
 rxFix(hay,req,spc:="")
 {
-	opts:="^[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
-	out := (hay~=opts) ? req . hay : req ")" hay
-	if (spc) {
-		out := RegExReplace(out,"\s+","\s+")
-	}
+/*	Adds required options to regex string, pad whitespace with "\s+"
+	hay = haystack baseline regex string
+	req = required option codes to insert
+	spc = if !null, pad whitespace with "\s+"; if null, leave space alone
+*/
+	opts:="^[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"									; all the regex opts I could think of
+	
+	out := (hay~=opts)															; prepend the required opt string 
+		? req . hay 
+		: req ")" hay
+	
+	out := (spc) 																; pad whitespace if needed
+		? RegExReplace(out,"\s+","\s+") 
+		: out
+	
 	return out
 }
 
