@@ -103,6 +103,17 @@ MDTpm:
 	}
 return	
 }
+MDTpmParse:
+{
+	if instr(fintxt,"Pacemaker Status") {
+		MsgBox % fintxt
+		Clipboard := fintxt
+	}
+	if instr(fintxt,"Permanent Parameters") {
+		MsgBox % fintxt1
+	}
+Return	
+}
 
 PaceArt:
 {
