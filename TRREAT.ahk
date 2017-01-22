@@ -49,13 +49,8 @@ Loop, *.pdf
 	summBl := summ := ""
 	fileIn := A_LoopFileName
 	SplitPath, fileIn,,,,fileOut
-	RunWait, pdftotext.exe -l 2 -table -fixed 3 "%fileIn%" temp.txt , , hide
+	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
-
-	IfInString, maintxt, © Medtronic
-		gosub PaceArt
-	;~ if RegExMatch(maintxt,"i)©.*Medtronic")
-		;~ gosub PaceArt
 }
 
 MsgBox Directory scan complete.
@@ -270,7 +265,7 @@ PaceArtPM:
 		,"Lead Manufacturer"
 		,"Brady Programming"
 		,"Measurements"
-		,"Encounter Summary","© Medtronic"]
+		,"Encounter Summary","ï¿½ Medtronic"]
 	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Rhythm:","Dependency:","Next In-Clinic:","Next Remote:"
 		,"Referring:","Following:","Blood Press.:","Diagnosis:"]
 	fields[2] := ["Serial Number:","Implant Date:","Implant Provider:","Battery Voltage:","Battery Status:","Remaining Longevity:"]
@@ -348,7 +343,7 @@ PaceArtICD:
 		,"Lead Data"
 		,"Lead Status:"
 		,"Encounter Summary"
-		,"© Medtronic"]
+		,"ï¿½ Medtronic"]
 	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Rhythm:","Dependency:","Next In-Clinic:","Next Remote:","Comments:"
 		,"Referring:","Following:","Blood Press.:","Diagnosis:"]
 	fields[2] := ["Serial Number:","Implant Date:","Implant Provider:","Battery Voltage:","Battery Status:","Remaining Longevity:"]
@@ -446,7 +441,7 @@ PaceArtLINQ:
 		,"Device Information"
 		,"Past Encounters"
 		,"Detections"
-		,"Encounter Summary","© Medtronic"]
+		,"Encounter Summary","ï¿½ Medtronic"]
 	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Blood Pressure:"
 		,"Referring:","Following:","Rhythm:"
 		,"Next In-clinic:","Next Remote:","Diagnosis:","Dependency:"]
