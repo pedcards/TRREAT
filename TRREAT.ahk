@@ -54,7 +54,7 @@ Loop, *.pdf
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {
 		if (instr(maintxt,"Pacemaker Model")) {
-			MsgBox pm
+			gosub MDTpm
 		}
 		if (instr(maintxt,"Defibrillation")) {
 			MsgBox icd
@@ -84,6 +84,12 @@ Return
 
 GuiClose:
 ExitApp
+
+MDTpm:
+{
+	MsgBox MDT pm
+return	
+}
 
 PaceArt:
 {
