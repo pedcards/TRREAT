@@ -51,6 +51,7 @@ Loop, *.pdf
 	SplitPath, fileIn,,,,fileOut
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
+	cleanlines(maintxt)
 }
 
 MsgBox Directory scan complete.
@@ -774,6 +775,19 @@ fieldvals(x,bl,bl2:="",pre:="") {
 	if (bl2) {
 		blk[bl2] := blk2
 	}
+}
+
+cleanlines(ByRef txt) {
+	Loop, Parse, txt, `n, `r
+	{
+		i := A_LoopField
+		if !(i){
+			continue
+		}
+		newtxt .= i "`n"
+	}
+	txt := newtxt
+	return txt
 }
 
 cleancolon(txt) {
