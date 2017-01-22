@@ -87,7 +87,20 @@ ExitApp
 
 MDTpm:
 {
-	MsgBox MDT pm
+	fileNum += 1
+	LV_Add("", fileIN)
+	LV_Modify(fileNum,"col3","PM")
+	Gui, Show
+	;demog := columns(newtxt,"Initial Interrogation Report","Heart Rate Data",,"Reading Physician")
+	splTxt := "Final Report"
+	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
+	Loop, % fin.length()
+	{
+		fintxt := fin[A_index]
+		if instr(fintxt,splTxt) {
+			gosub MDTpmParse
+		}
+	}
 return	
 }
 
