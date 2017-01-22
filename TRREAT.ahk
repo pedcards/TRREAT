@@ -569,37 +569,41 @@ PaceArtPrint:
 Return	
 }
 
-columns(x,blk1,blk2,incl:="",col2:="",col3:="",col4:="") {
+columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 /*	Returns string as a single column.
 	x 		= input string
-	blk1	= leading string to start block
-	blk2	= ending string to end block
-	incl	= if null, exclude blk1 string; if !null, remove blk1 string
+	blk1	= leading regex string to start block
+	blk2	= ending regex string to end block
+	excl	= if null (default), leave blk1 string in result; if !null, remove blk1 string
 	col2	= string demarcates start of COLUMN 2
 	col3	= string demarcates start of COLUMN 3
 	col4	= string demarcates start of COLUMN 4
 */
-	txt := strX(x,blk1,1,(incl ? 0 : StrLen(blk1)),blk2,1,StrLen(blk2))
-	StringReplace, col2, col2, %A_space%, [ ]+, All
-	StringReplace, col3, col3, %A_space%, [ ]+, All
-	StringReplace, col4, col4, %A_space%, [ ]+, All
+	blk1 := rxFix(blk1,"O",1)													; Adds "O)" to blk1, pad whitespace with "\s+"
+	blk2 := rxFix(blk2,"O",1)
+	RegExMatch(x,blk1,blo1)														; Creates blo1 object out of blk1 match in x
+	RegExMatch(x,blk2,blo2)														; necessary to get final string result of regex match
+	
+	col2 := RegExReplace(col2,"\s+","\s+")										; pad whitespace of col regex strings
+	col3 := RegExReplace(col3,"\s+","\s+")
+	col4 := RegExReplace(col4,"\s+","\s+")
+	
+	txt := stRegX(x,blk1,1,(excl) ? blo1.len : 0,blk2,blo2.len)					; get string between blk1 and blk2
+	;~ MsgBox % txt
 	
 	loop, parse, txt, `n,`r										; find position of columns 2, 3, and 4
 	{
 		i:=A_LoopField
-		if (t:=RegExMatch(i,"i)" col2))
+		if (t:=RegExMatch(i,col2))
 			pos2:=t
-		if (t:=RegExMatch(i,"i)" col3))
+		if (t:=RegExMatch(i,col3))
 			pos3:=t
-		if (t:=RegExMatch(i,"i)" col4))
+		if (t:=RegExMatch(i,col4))
 			pos4:=t
 	}
 	loop, parse, txt, `n,`r
 	{
 		i:=A_LoopField
-		if (instr(i,"Manufacturer and Model:")) {				; Skip the M and M line, screws up the table formatting
-			continue
-		}
 		txt1 .= substr(i,1,pos2-1) . "`n"
 		if (col4) {
 			pos4ck := pos4
@@ -619,6 +623,16 @@ columns(x,blk1,blk2,incl:="",col2:="",col3:="",col4:="") {
 		txt2 .= substr(i,pos2) . "`n"
 	}
 	return txt1 . txt2 . txt3 . txt4
+}
+
+rxFix(hay,req,spc:="")
+{
+	opts:="^[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
+	out := (hay~=opts) ? req . hay : req ")" hay
+	if (spc) {
+		out := RegExReplace(out,"\s+","\s+")
+	}
+	return out
 }
 
 cellvals(x,blk1:="",blk2:="",type:="") {
