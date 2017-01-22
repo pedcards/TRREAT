@@ -591,14 +591,14 @@ columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 	txt := stRegX(x,blk1,1,(excl) ? blo1.len : 0,blk2,blo2.len)					; get string between blk1 and blk2
 	;~ MsgBox % txt
 	
-	loop, parse, txt, `n,`r										; find position of columns 2, 3, and 4
+	loop, parse, txt, `n,`r														; find position of columns 2, 3, and 4
 	{
 		i:=A_LoopField
-		if (t:=RegExMatch(i,col2))
+		if (!(pos2) && (t:=RegExMatch(i,col2)))									; get first occurence of pos2
 			pos2:=t
-		if (t:=RegExMatch(i,col3))
+		if (!(pos3) && (t:=RegExMatch(i,col3)))
 			pos3:=t
-		if (t:=RegExMatch(i,col4))
+		if (!(pos4) && (t:=RegExMatch(i,col4)))
 			pos4:=t
 	}
 	loop, parse, txt, `n,`r
