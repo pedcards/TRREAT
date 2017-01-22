@@ -65,14 +65,11 @@ Loop, *.pdf
 		if (instr(maintxt,"Shock")) {
 			MsgBox BSCI icd
 		}
-		else 
-		{
+		else {
 			MsgBox BSCI pm
 		}
 		ExitApp
 	}
-	;~ if RegExMatch(maintxt,"i)�.*Medtronic")
-		;~ gosub PaceArt
 }
 
 MsgBox Directory scan complete.
