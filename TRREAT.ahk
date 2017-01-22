@@ -601,26 +601,28 @@ columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 		if (!(pos4) && (t:=RegExMatch(i,col4)))
 			pos4:=t
 	}
-	loop, parse, txt, `n,`r
+	
+	loop, parse, txt, `n,`r														; Generate column text
 	{
 		i:=A_LoopField
-		txt1 .= substr(i,1,pos2-1) . "`n"
-		if (col4) {
+		txt1 .= substr(i,1,pos2-1) . "`n"										; Add to txt1
+		
+		if (col4) {																; Handle 4 columns
 			pos4ck := pos4
-			while !(substr(i,pos4ck-1,1)=" ") {
+			while !(substr(i,pos4ck-1,1)=" ") {									; Can adjust leftward until finds true start of col4
 				pos4ck := pos4ck-1
 			}
-			txt4 .= substr(i,pos4ck) . "`n"
-			txt3 .= substr(i,pos3,pos4ck-pos3) . "`n"
-			txt2 .= substr(i,pos2,pos3-pos2) . "`n"
+			txt4 .= substr(i,pos4ck) . "`n"										; Add to txt4
+			txt3 .= substr(i,pos3,pos4ck-pos3) . "`n"							; Add to txt3
+			txt2 .= substr(i,pos2,pos3-pos2) . "`n"								; Add to txt2
 			continue
 		} 
-		if (col3) {
-			txt2 .= substr(i,pos2,pos3-pos2) . "`n"
-			txt3 .= substr(i,pos3) . "`n"
+		if (col3) {																; Handle 3 columns
+			txt3 .= substr(i,pos3) . "`n"										; Add to txt3
+			txt2 .= substr(i,pos2,pos3-pos2) . "`n"								; Add to txt2
 			continue
 		}
-		txt2 .= substr(i,pos2) . "`n"
+		txt2 .= substr(i,pos2) . "`n"											; Handle 2 columns
 	}
 	return txt1 . txt2 . txt3 . txt4
 }
