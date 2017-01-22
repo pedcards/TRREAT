@@ -61,6 +61,16 @@ Loop, *.pdf
 		}
 		ExitApp
 	}
+	if (maintxt~="Boston Scientific Corporation") {
+		if (instr(maintxt,"Shock")) {
+			MsgBox BSCI icd
+		}
+		else 
+		{
+			MsgBox BSCI pm
+		}
+		ExitApp
+	}
 	;~ if RegExMatch(maintxt,"i)�.*Medtronic")
 		;~ gosub PaceArt
 }
