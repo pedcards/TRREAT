@@ -106,8 +106,17 @@ return
 MDTpmParse:
 {
 	if instr(fintxt,"Pacemaker Status") {
-		MsgBox % fintxt
-		Clipboard := fintxt
+		ipg := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
+		MsgBox % ipg
+		Clipboard := ipg
+		fields[1] := ["Name", "ID #", "Second ID", "Date Of Birth", "Age", "Sex"
+			, "Referring Physician", "Indications", "Medications", "Analyst", "Hookup Tech"
+			, "Date Recorded", "Date Processed", "Scan Number", "Recorder", "Recorder No", "Hookup time", "Location", "Acct num"]
+		labels[1] := ["Name", "MRN", "VOID_ID", "DOB", "VOID_Age", "Sex"
+			, "Ordering", "Indication", "Meds", "Scanned_by", "Hookup_tech"
+			, "Test_date", "Scan_date", "Scan_num", "Recorder", "Device_SN", "Hookup_time", "Site", "Billing"]
+		;~ fieldvals(demog,1,"dem")
+	
 	}
 	if instr(fintxt,"Permanent Parameters") {
 		MsgBox % fintxt1
@@ -651,6 +660,22 @@ columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 	return txt1 . txt2 . txt3 . txt4
 }
 
+strVal(hay,n1,n2,BO:="",ByRef N:="") {
+/*	hay = search haystack
+	n1	= needle1 begin string
+	n2	= needle2 end string
+	BO	= trim offset, true or false
+	N	= return end position
+*/
+	;~ opt := "Oi" ((span) ? "s" : "") ")"
+	opt := "Oi)"
+	RegExMatch(hay,opt . n1 ":?(.*?)" n2 ":?",res,(BO)?BO:1)
+	;~ MsgBox % trim(res[1]," `n") "`nPOS = " res.pos(1) "`nLEN = " res.len(1) "`n" res.value() "`n" res.len()
+	N := res.pos()+res.len(1)
+
+	return trim(res[1]," :`n")
+}
+
 rxFix(hay,req,spc:="")
 {
 /*	Adds required options to regex string, pad whitespace with "\s+"
@@ -894,12 +919,10 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	ET = ending trim, TRUE or FALSE
 	N = variable for next offset
 */
-	;BS .= "(.*?)\s{3}"
-	MsgBox % ES
-	;rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
-	pos0 := RegExMatch(h,BS,bPat,((BO<1)?1:BO))
-	pos1 := RegExMatch(h,ES,ePat,pos0+bPat.len)
-	MsgBox % pos0 " - " pos1
+	BS .= "(.*?)\s{3}"
+	rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
+	pos0 := RegExMatch(h,((BS~=rem)?"Oim"BS:"Oim)"BS),bPat,((BO<1)?1:BO))
+	pos1 := RegExMatch(h,((ES~=rem)?"Oim"ES:"Oim)"ES),ePat,pos0+bPat.len)
 	N := pos1+((ET)?0:(ePat.len))
 	return substr(h,pos0+((BT)?(bPat.len):0),N-pos0-bPat.len)
 }
