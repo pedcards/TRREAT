@@ -38,6 +38,8 @@ Gui, Add, Button, Disabled w600 h50 , Reload
 Gui, Show
 blocks := Object()
 fields := Object()
+labels := Object()
+fldval := Object()
 newTxt := Object()
 blk := Object()
 blk2 := Object()
@@ -106,16 +108,24 @@ return
 MDTpmParse:
 {
 	if instr(fintxt,"Pacemaker Status") {
-		ipg := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
-		MsgBox % ipg
-		Clipboard := ipg
-		fields[1] := ["Name", "ID #", "Second ID", "Date Of Birth", "Age", "Sex"
-			, "Referring Physician", "Indications", "Medications", "Analyst", "Hookup Tech"
-			, "Date Recorded", "Date Processed", "Scan Number", "Recorder", "Recorder No", "Hookup time", "Location", "Acct num"]
-		labels[1] := ["Name", "MRN", "VOID_ID", "DOB", "VOID_Age", "Sex"
-			, "Ordering", "Indication", "Meds", "Scanned_by", "Hookup_tech"
-			, "Test_date", "Scan_date", "Scan_num", "Recorder", "Device_SN", "Hookup_time", "Site", "Billing"]
-		;~ fieldvals(demog,1,"dem")
+		dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
+		fields[1] := ["Patient Name", "DOB", "ID", "Physician"
+					, "Pacemaker Model", "Implanted"
+					, "Atrial Lead", "Implanted"
+					, "Ventricular Lead", "Implanted"
+					, "Pacemaker Status", "Estimated remaining longevity"
+					, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
+		labels[1] := ["Name", "DOB", "MRN", "Physician"
+					, "IPG", "IPG_impl"
+					, "Alead", "Alead_impl"
+					, "Vlead", "Vlead_impl"
+					, "IPG_stat", "IPG_longevity"
+					, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
+		fieldvals(dev,1,"dev")
+		;~ MsgBox % fldval["dev-Vlead"]
+		
+		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+		MsgBox % leads
 	
 	}
 	if instr(fintxt,"Permanent Parameters") {
@@ -836,7 +846,34 @@ cellvals(x,blk1:="",blk2:="",type:="") {
 	return cells
 }
 
-fieldvals(x,bl,bl2:="",pre:="") {
+fieldvals(x,bl,bl2:="",per:="") {
+/*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
+	x	= input text
+	bl	= which FIELD number to use
+	bl2	= label prefix
+*/
+	global fields, labels, fldval
+	
+	for k, i in fields[bl]
+	{
+		pre := bl2
+		j := fields[bl][k+1]
+		m := (j) ?	strVal(x,i,j,n,n)			;trim(stRegX(x,i,n,1,j,1,n), " `n")
+				:	trim(strX(SubStr(x,n),":",1,1,"",0)," `n")
+		lbl := labels[bl][A_index]
+		;~ if (lbl~="^\w{3}:") {											; has prefix e.g. "dem:"
+			;~ pre := substr(lbl,1,3)
+			;~ lbl := substr(lbl,5)
+		;~ }
+		cleanSpace(m)
+		cleanColon(m)
+		fldval[pre "-" lbl] := m
+		;~ MsgBox % pre "-" lbl "`n" m
+		;~ formatField(pre,lbl,m)
+	}
+}
+
+oldfieldvals(x,bl,bl2:="",pre:="") {
 /*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
 	x	= input text
 	bl	= which FIELD number to use
@@ -875,6 +912,125 @@ fieldvals(x,bl,bl2:="",pre:="") {
 		blk[bl2] := blk2
 	}
 }
+
+;~ formatField(pre, lab, txt) {
+	;~ global monType, Docs, ptDem
+	;~ if (txt ~= "\d{1,2} hr \d{1,2} min") {
+		;~ StringReplace, txt, txt, %A_Space%hr%A_space% , :
+		;~ StringReplace, txt, txt, %A_Space%min , 
+	;~ }
+	;~ txt:=RegExReplace(txt,"i)BPM|Event(s)?|Beat(s)?|( sec(s)?)")			; 	Remove units from numbers
+	;~ txt:=RegExReplace(txt,"(:\d{2}?)(AM|PM)","$1 $2")						;	Fix time strings without space before AM|PM
+	;~ txt := trim(txt)
+	
+	;~ if (lab="Ordering") {
+		;~ tmpCrd := checkCrd(RegExReplace(txt,"i)^Dr(\.)?\s"))
+		;~ fieldColAdd(pre,lab,tmpCrd.best)
+		;~ fieldColAdd(pre,lab "_grp",tmpCrd.group)
+		;~ fieldColAdd(pre,lab "_eml",Docs[tmpCrd.Group ".eml",ObjHasValue(Docs[tmpCrd.Group],tmpCrd.best)])
+		;~ return
+	;~ }
+	
+;~ ;	Lifewatch Holter specific search fixes
+	;~ if (monType="H") {
+		;~ if txt ~= ("^[0-9]+.*at.*(AM|PM)$") {								;	Split timed results "139 at 8:31:47 AM" into two fields
+			;~ tx1 := trim(strX(txt,,1,1," at",1,3))							;		labels e.g. xxx and xxx_time
+			;~ tx2 := trim(strX(txt," at",1,3,"",1,0))							;		result e.g. "139" and "8:31:47 AM"
+			;~ fieldColAdd(pre,lab,tx1)
+			;~ fieldColAdd(pre,lab "_time",tx2)
+			;~ return
+		;~ }
+		;~ if (lab~="i)(Longest|Fastest)") {
+			;~ fieldColAdd(pre,lab,txt)
+			;~ fieldColAdd(pre,lab "_time","")
+			;~ return
+		;~ }
+		;~ if (txt ~= "^[0-9]+\s\([0-9.]+\%\)$") {								;	Split percents |\(.*%\)
+			;~ tx1 := trim(strX(txt,,1,1,"(",1,1))
+			;~ tx2 := trim(strX(txt,"(",1,1,"%",1,0))
+			;~ fieldColAdd(pre,lab,tx1)
+			;~ fieldColAdd(pre,lab "_per",tx2)
+			;~ return
+		;~ }
+		;~ if (txt ~= "^[0-9,]{1,}\/[0-9,]{1,}$") {							;	Split multiple number value results "5/0" into two fields, ignore date formats (5/1/12)
+			;~ tx1 := strX(txt,,1,1,"/",1,1,n)
+			;~ tx2 := SubStr(txt,n+1)
+			;~ lb1 := strX(lab,,1,1,"_",1,1,n)									;	label[] fields are named "xxx_yyy", split into "xxx" and "yyy"
+			;~ lb2 := SubStr(lab,n+1)
+			;~ fieldColAdd(pre,lb1,tx1)
+			;~ fieldColAdd(pre,lb2,tx2)
+			;~ return
+		;~ }
+	;~ }
+	
+;~ ;	Preventice Holter specific fixes
+	;~ if (monType="PR") {
+		;~ if (lab="Name") {
+			;~ fieldColAdd(pre,"Name_L",trim(strX(txt,"",1,0,",",1,1)))
+			;~ fieldColAdd(pre,"Name_F",trim(strX(txt,",",1,1,"",0)))
+			;~ return
+		;~ }
+		;~ if (RegExMatch(txt,"O)^(\d{1,2})\s+hr,\s+(\d{1,2})\s+min",tx)) {
+			;~ fieldColAdd(pre,lab,zDigit(tx.value(1)) ":" zDigit(tx.value(2)))
+			;~ return
+		;~ }
+		;~ if (RegExMatch(txt,"O)^([0-9.]+).*at.*(\d{2}:\d{2}:\d{2})(AM|PM)?$",tx)) {		;	Split timed results "139 at 8:31:47 AM" into two fields
+			;~ fieldColAdd(pre,lab,tx.value(1))
+			;~ fieldColAdd(pre,lab "_time",tx.value(2))
+			;~ return
+		;~ }
+	;~ }
+
+;~ ;	Body Guardian Heart specific fixes
+	;~ if (monType="BGH") {
+		;~ if (lab="Name") {
+			;~ ptDem["nameL"] := strX(txt," ",0,1,"",0)
+			;~ ptDem["nameF"] := strX(txt,"",1,0," ",1,1)
+			;~ fieldColAdd(pre,"Name_L",ptDem["nameL"])
+			;~ fieldColAdd(pre,"Name_F",ptDem["nameF"])
+			;~ return
+		;~ }
+		;~ if (lab="Test_date") {
+			;~ RegExMatch(txt,"O)(\d{1,2}/\d{1,2}/\d{4}).* (\d{1,2}/\d{1,2}/\d{4})",dt)
+			;~ fieldColAdd(pre,lab,dt.value(1))
+			;~ fieldColAdd(pre,lab "_end",dt.value(2))
+			;~ return
+		;~ }
+	;~ }
+	
+;~ ;	ZIO patch specific search fixes
+	;~ if (monType="Z") {
+		;~ if (RegExMatch(txt,"(\d){1,2} days (\d){1,2} hours ",tmp)) {		;	Split recorded/analyzed time in to Days and Hours
+			;~ fieldColAdd(pre,lab "_D",strX(tmp,"",1,1, " days",1,5))
+			;~ fieldColAdd(pre,lab "_H",strX(tmp," days",1,6, " hours",1,6))
+			;~ fieldColAdd(pre,lab "_Dates",substr(txt,instr(txt," hours ")+7))
+			;~ return
+		;~ }
+		;~ if InStr(txt,"(at ") {												;	Split timed results "139 (at 8:31:47 AM)" into two fields
+			;~ tx1 := strX(txt,,1,1,"(at ",1,4,n)
+			;~ tx2 := trim(SubStr(txt,n+4), " )")
+			;~ fieldColAdd(pre,lab,tx1)
+			;~ fieldColAdd(pre,lab "_time",tx2)
+			;~ return
+		;~ }
+		;~ if (RegExMatch(txt,"i)[a-z]+\s+[\>\<\.0-9%]+\s+\d",tmp)) {			;	Split "RARE <1.0% 2457" into result "2457" and text quant "RARE <1.0%"
+			;~ tx1 := substr(txt,1,StrLen(tmp)-2)
+			;~ tx2 := substr(txt,strlen(tmp))
+			;~ fieldColAdd(pre,lab,tx2)
+			;~ fieldColAdd(pre,lab "_amt",tx1)
+			;~ return
+		;~ }
+		;~ if (txt ~= "3rd.*\)") {												;	fix AV block field
+			;~ txt := substr(txt, InStr(txt, ")")+2)
+		;~ }
+		;~ if (txt=="None found") {											;	fix 0 results
+			;~ txt := "0"
+		;~ }
+	;~ }
+	
+	;~ fieldColAdd(pre,lab,txt)
+	;~ return
+;~ }
 
 cleanlines(ByRef txt) {
 	Loop, Parse, txt, `n, `r
@@ -919,12 +1075,12 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	ET = ending trim, TRUE or FALSE
 	N = variable for next offset
 */
-	BS .= "(.*?)\s{3}"
+	;~ BS .= "(.*?)\s{3}"
 	rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
 	pos0 := RegExMatch(h,((BS~=rem)?"Oim"BS:"Oim)"BS),bPat,((BO<1)?1:BO))
-	pos1 := RegExMatch(h,((ES~=rem)?"Oim"ES:"Oim)"ES),ePat,pos0+bPat.len)
-	N := pos1+((ET)?0:(ePat.len))
-	return substr(h,pos0+((BT)?(bPat.len):0),N-pos0-bPat.len)
+	pos1 := RegExMatch(h,((ES~=rem)?"Oim"ES:"Oim)"ES),ePat,pos0+bPat.len())
+	N := pos1+((ET)?0:(ePat.len()))
+	return substr(h,pos0+((BT)?(bPat.len()):0),N-pos0-bPat.len())
 }
 
 #Include strx.ahk
