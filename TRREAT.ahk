@@ -128,7 +128,7 @@ MDTpmParse:
 		leads_date := strX(leads,"Lead Status: ",1,0,"`n",1,0,n)
 		leads_tbl := strX(leads," ",n,0,"",0,0)
 		Clipboard := leads_tbl
-		leads_tbl = 
+		leads_tbl0 = 
 (
                           Ventricular Lead      Atrial Lead
 Output Energy             11.03 µJ              1.03 µJ
@@ -157,8 +157,10 @@ parseTable(txt,title:="") {
 */
 	Loop, parse, txt, `n,`r
 	{
-		pos1 := RegExMatch(A_LoopField,"O)(?<=(\s{2}))[^\s].*",col1)
-		MsgBox % A_LoopField "`n" pos1 "`n" col1.value() " (" col1.count() ")"
+		pos := RegExMatch(A_LoopField "  ","O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))",col,(lastpos)?lastpos:1)
+		res0 := trim(substr(A_LoopField,1,pos-1))
+		
+		MsgBox % A_LoopField "`n'" res0 "'`n" pos "`n" col.value() " (" col.count() ")"
 	}
 	
 return	
