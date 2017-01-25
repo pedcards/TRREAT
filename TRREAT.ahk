@@ -125,13 +125,43 @@ MDTpmParse:
 		;~ MsgBox % fldval["dev-Vlead"]
 		
 		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-		MsgBox % leads
-	
+		leads_date := strX(leads,"Lead Status: ",1,0,"`n",1,0,n)
+		leads_tbl := strX(leads," ",n,0,"",0,0)
+		Clipboard := leads_tbl
+		leads_tbl = 
+(
+                          Ventricular Lead      Atrial Lead
+Output Energy             11.03 µJ              1.03 µJ
+Measured Current          8.28 mA               8.8 mA
+Measured Impedance        247 ohms              27 ohms
+Pace Polarity             Unipolar              Bipolar
+)
+		parseTable(leads_tbl)
+		
 	}
 	if instr(fintxt,"Permanent Parameters") {
 		MsgBox % fintxt1
 	}
 Return	
+}
+
+parseTable(txt,title:="") {
+/*	Analyze text block for vertical table format
+	If "title" not null or if first row begins with spaces, consider top row as title row
+*/
+
+/*	FIRST PASS - Analyze structure
+	Check for title row (either "title=1" or row starts with spaces)
+	Scan for columns (?<=(/s{2}))[^\s] = col1, 
+	Each line check that pos1 is start
+*/
+	Loop, parse, txt, `n,`r
+	{
+		pos1 := RegExMatch(A_LoopField,"O)(?<=(\s{2}))[^\s].*",col1)
+		MsgBox % A_LoopField "`n" pos1 "`n" col1.value() " (" col1.count() ")"
+	}
+	
+return	
 }
 
 PaceArt:
