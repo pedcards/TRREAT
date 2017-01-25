@@ -38,6 +38,8 @@ Gui, Add, Button, Disabled w600 h50 , Reload
 Gui, Show
 blocks := Object()
 fields := Object()
+labels := Object()
+fldval := Object()
 newTxt := Object()
 blk := Object()
 blk2 := Object()
@@ -49,13 +51,27 @@ Loop, *.pdf
 	summBl := summ := ""
 	fileIn := A_LoopFileName
 	SplitPath, fileIn,,,,fileOut
-	RunWait, pdftotext.exe -l 2 -table -fixed 3 "%fileIn%" temp.txt , , hide
+	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
-
-	IfInString, maintxt, © Medtronic
-		gosub PaceArt
-	;~ if RegExMatch(maintxt,"i)©.*Medtronic")
-		;~ gosub PaceArt
+	cleanlines(maintxt)
+	if (maintxt~="Medtronic,\s+Inc") {
+		if (instr(maintxt,"Pacemaker Model")) {
+			gosub MDTpm
+		}
+		if (instr(maintxt,"Defibrillation")) {
+			MsgBox icd
+		}
+		ExitApp
+	}
+	if (maintxt~="Boston Scientific Corporation") {
+		if (instr(maintxt,"Shock")) {
+			MsgBox BSCI icd
+		}
+		else {
+			MsgBox BSCI pm
+		}
+		ExitApp
+	}
 }
 
 MsgBox Directory scan complete.
@@ -70,6 +86,110 @@ Return
 
 GuiClose:
 ExitApp
+
+MDTpm:
+{
+	fileNum += 1
+	LV_Add("", fileIN)
+	LV_Modify(fileNum,"col3","PM")
+	Gui, Show
+	;demog := columns(newtxt,"Initial Interrogation Report","Heart Rate Data",,"Reading Physician")
+	splTxt := "Final Report"
+	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
+	Loop, % fin.length()
+	{
+		fintxt := fin[A_index]
+		if instr(fintxt,splTxt) {
+			gosub MDTpmParse
+		}
+	}
+return	
+}
+MDTpmParse:
+{
+	if instr(fintxt,"Pacemaker Status") {
+		dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
+		fields[1] := ["Patient Name", "DOB", "ID", "Physician"
+					, "Pacemaker Model", "Implanted"
+					, "Atrial Lead", "Implanted"
+					, "Ventricular Lead", "Implanted"
+					, "Pacemaker Status", "Estimated remaining longevity"
+					, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
+		labels[1] := ["Name", "DOB", "MRN", "Physician"
+					, "IPG", "IPG_impl"
+					, "Alead", "Alead_impl"
+					, "Vlead", "Vlead_impl"
+					, "IPG_stat", "IPG_longevity"
+					, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
+		fieldvals(dev,1,"dev")
+		;~ MsgBox % fldval["dev-Vlead"]
+		
+		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+		fields[2] := ["Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
+					, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"
+					, "Atrial lead-Output Energy","Atrial Lead-Measured Current"
+					, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"]
+		labels[2] := ["V_output","V_curr","V_imp","V_pol"
+					, "A_output","A_curr","A_imp","A_pol"]
+		fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
+		tbl := substr(leads,n)
+		fieldvals(parseTable(tbl,1),2,"leads")
+		
+		thresh := parseTable(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
+		MsgBox % thresh
+	}
+	if instr(fintxt,"Permanent Parameters") {
+		MsgBox % fintxt1
+	}
+Return	
+}
+
+parseTable(txt,title:="") {
+/*	Analyze text block for vertical table format
+	If "title" not null or if first row begins with spaces, consider top row as title row
+*/
+
+	Loop																		; Iterate for each column found
+	{
+		Loop, parse, txt, `n,`r													; Read through text block
+		{
+			pos := RegExMatch(A_LoopField "  "									; Add "  " to end of scan string
+							,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"				; Search "  text  " as each column 
+							,col												; return result in var "col"
+							,(maxpos)?maxpos:1)									; search position at next column
+			
+			if !(pos) {															; break if no matches
+				break
+			}
+			
+			fld := strX(A_LoopField,"",1,0,"  ",1,2)							; field name
+			
+			if ((A_index = 1)&&((title)||!(fld))) {								; first row blank field or "title" flag set
+				pre := col.value()												; result is column name
+				continue														; and move to next iteration
+			}
+			
+			if !(fld) {															; blank field, probably end
+				continue														; skip to next iteration
+			}
+			
+			maxpos := (maxpos>pos)?maxpos:pos									; maxpos furthest right for this column,
+			result .= pre "-" fld ":  " col.value() "`n"						; used as start to find next column
+		}
+		result .= "endcolumn`n"
+		maxpos += 1																; start next search 1 space over
+		
+		if !(pos) {																; break when no more hits
+			break
+		}
+	}
+return result
+}
+
+oneCol() {
+	
+	return
+}
 
 PaceArt:
 {
@@ -270,7 +390,7 @@ PaceArtPM:
 		,"Lead Manufacturer"
 		,"Brady Programming"
 		,"Measurements"
-		,"Encounter Summary","© Medtronic"]
+		,"Encounter Summary","ï¿½ Medtronic"]
 	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Rhythm:","Dependency:","Next In-Clinic:","Next Remote:"
 		,"Referring:","Following:","Blood Press.:","Diagnosis:"]
 	fields[2] := ["Serial Number:","Implant Date:","Implant Provider:","Battery Voltage:","Battery Status:","Remaining Longevity:"]
@@ -348,7 +468,7 @@ PaceArtICD:
 		,"Lead Data"
 		,"Lead Status:"
 		,"Encounter Summary"
-		,"© Medtronic"]
+		,"ï¿½ Medtronic"]
 	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Rhythm:","Dependency:","Next In-Clinic:","Next Remote:","Comments:"
 		,"Referring:","Following:","Blood Press.:","Diagnosis:"]
 	fields[2] := ["Serial Number:","Implant Date:","Implant Provider:","Battery Voltage:","Battery Status:","Remaining Longevity:"]
@@ -446,7 +566,7 @@ PaceArtLINQ:
 		,"Device Information"
 		,"Past Encounters"
 		,"Detections"
-		,"Encounter Summary","© Medtronic"]
+		,"Encounter Summary","ï¿½ Medtronic"]
 	fields[1] := ["Patient Name:","Patient ID:","Date of Birth:","Gender:","Blood Pressure:"
 		,"Referring:","Following:","Rhythm:"
 		,"Next In-clinic:","Next Remote:","Diagnosis:","Dependency:"]
@@ -549,56 +669,98 @@ PaceArtPrint:
 Return	
 }
 
-columns(x,blk1,blk2,incl:="",col2:="",col3:="",col4:="") {
+columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 /*	Returns string as a single column.
 	x 		= input string
-	blk1	= leading string to start block
-	blk2	= ending string to end block
-	incl	= if null, exclude blk1 string; if !null, remove blk1 string
+	blk1	= leading regex string to start block
+	blk2	= ending regex string to end block
+	excl	= if null (default), leave blk1 string in result; if !null, remove blk1 string
 	col2	= string demarcates start of COLUMN 2
 	col3	= string demarcates start of COLUMN 3
 	col4	= string demarcates start of COLUMN 4
 */
-	txt := strX(x,blk1,1,(incl ? 0 : StrLen(blk1)),blk2,1,StrLen(blk2))
-	StringReplace, col2, col2, %A_space%, [ ]+, All
-	StringReplace, col3, col3, %A_space%, [ ]+, All
-	StringReplace, col4, col4, %A_space%, [ ]+, All
+	blk1 := rxFix(blk1,"O",1)													; Adds "O)" to blk1, pad whitespace with "\s+"
+	blk2 := rxFix(blk2,"O",1)
+	RegExMatch(x,blk1,blo1)														; Creates blo1 object out of blk1 match in x
+	RegExMatch(x,blk2,blo2)														; necessary to get final string result of regex match
 	
-	loop, parse, txt, `n,`r										; find position of columns 2, 3, and 4
+	col2 := RegExReplace(col2,"\s+","\s+")										; pad whitespace of col regex strings
+	col3 := RegExReplace(col3,"\s+","\s+")
+	col4 := RegExReplace(col4,"\s+","\s+")
+	
+	txt := stRegX(x,blk1,1,(excl) ? blo1.len : 0,blk2,blo2.len)					; get string between blk1 and blk2
+	;~ MsgBox % txt
+	
+	loop, parse, txt, `n,`r														; find position of columns 2, 3, and 4
 	{
 		i:=A_LoopField
-		if (t:=RegExMatch(i,"i)" col2))
+		if (!(pos2) && (t:=RegExMatch(i,col2)))									; get first occurence of pos2
 			pos2:=t
-		if (t:=RegExMatch(i,"i)" col3))
+		if (!(pos3) && (t:=RegExMatch(i,col3)))
 			pos3:=t
-		if (t:=RegExMatch(i,"i)" col4))
+		if (!(pos4) && (t:=RegExMatch(i,col4)))
 			pos4:=t
 	}
-	loop, parse, txt, `n,`r
+	
+	loop, parse, txt, `n,`r														; Generate column text
 	{
 		i:=A_LoopField
-		if (instr(i,"Manufacturer and Model:")) {				; Skip the M and M line, screws up the table formatting
-			continue
-		}
-		txt1 .= substr(i,1,pos2-1) . "`n"
-		if (col4) {
+		txt1 .= substr(i,1,pos2-1) . "`n"										; Add to txt1
+		
+		if (col4) {																; Handle 4 columns
 			pos4ck := pos4
-			while !(substr(i,pos4ck-1,1)=" ") {
+			while !(substr(i,pos4ck-1,1)=" ") {									; Can adjust leftward until finds true start of col4
 				pos4ck := pos4ck-1
 			}
-			txt4 .= substr(i,pos4ck) . "`n"
-			txt3 .= substr(i,pos3,pos4ck-pos3) . "`n"
-			txt2 .= substr(i,pos2,pos3-pos2) . "`n"
+			txt4 .= substr(i,pos4ck) . "`n"										; Add to txt4
+			txt3 .= substr(i,pos3,pos4ck-pos3) . "`n"							; Add to txt3
+			txt2 .= substr(i,pos2,pos3-pos2) . "`n"								; Add to txt2
 			continue
 		} 
-		if (col3) {
-			txt2 .= substr(i,pos2,pos3-pos2) . "`n"
-			txt3 .= substr(i,pos3) . "`n"
+		if (col3) {																; Handle 3 columns
+			txt3 .= substr(i,pos3) . "`n"										; Add to txt3
+			txt2 .= substr(i,pos2,pos3-pos2) . "`n"								; Add to txt2
 			continue
 		}
-		txt2 .= substr(i,pos2) . "`n"
+		txt2 .= substr(i,pos2) . "`n"											; Handle 2 columns
 	}
 	return txt1 . txt2 . txt3 . txt4
+}
+
+strVal(hay,n1,n2,BO:="",ByRef N:="") {
+/*	hay = search haystack
+	n1	= needle1 begin string
+	n2	= needle2 end string
+	BO	= trim offset, true or false
+	N	= return end position
+*/
+	;~ opt := "Oi" ((span) ? "s" : "") ")"
+	opt := "Oi)"
+	RegExMatch(hay,opt . n1 ":?(.*?)" n2 ":?",res,(BO)?BO:1)
+	;~ MsgBox % trim(res[1]," `n") "`nPOS = " res.pos(1) "`nLEN = " res.len(1) "`n" res.value() "`n" res.len()
+	N := res.pos()+res.len(1)
+
+	return trim(res[1]," :`n")
+}
+
+rxFix(hay,req,spc:="")
+{
+/*	Adds required options to regex string, pad whitespace with "\s+"
+	hay = haystack baseline regex string
+	req = required option codes to insert
+	spc = if !null, pad whitespace with "\s+"; if null, leave space alone
+*/
+	opts:="^[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"									; all the regex opts I could think of
+	
+	out := (hay~=opts)															; prepend the required opt string 
+		? req . hay 
+		: req ")" hay
+	
+	out := (spc) 																; pad whitespace if needed
+		? RegExReplace(out,"\s+","\s+") 
+		: out
+	
+	return out
 }
 
 cellvals(x,blk1:="",blk2:="",type:="") {
@@ -741,7 +903,34 @@ cellvals(x,blk1:="",blk2:="",type:="") {
 	return cells
 }
 
-fieldvals(x,bl,bl2:="",pre:="") {
+fieldvals(x,bl,bl2:="",per:="") {
+/*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
+	x	= input text
+	bl	= which FIELD number to use
+	bl2	= label prefix
+*/
+	global fields, labels, fldval
+	
+	for k, i in fields[bl]
+	{
+		pre := bl2
+		j := fields[bl][k+1]
+		m := (j) ?	strVal(x,i,j,n,n)			;trim(stRegX(x,i,n,1,j,1,n), " `n")
+				:	trim(strX(SubStr(x,n),":",1,1,"",0)," `n")
+		lbl := labels[bl][A_index]
+		;~ if (lbl~="^\w{3}:") {											; has prefix e.g. "dem:"
+			;~ pre := substr(lbl,1,3)
+			;~ lbl := substr(lbl,5)
+		;~ }
+		cleanSpace(m)
+		cleanColon(m)
+		fldval[pre "-" lbl] := m
+		;~ MsgBox % pre "-" lbl "`n" m
+		;~ formatField(pre,lbl,m)
+	}
+}
+
+oldfieldvals(x,bl,bl2:="",pre:="") {
 /*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
 	x	= input text
 	bl	= which FIELD number to use
@@ -781,6 +970,138 @@ fieldvals(x,bl,bl2:="",pre:="") {
 	}
 }
 
+;~ formatField(pre, lab, txt) {
+	;~ global monType, Docs, ptDem
+	;~ if (txt ~= "\d{1,2} hr \d{1,2} min") {
+		;~ StringReplace, txt, txt, %A_Space%hr%A_space% , :
+		;~ StringReplace, txt, txt, %A_Space%min , 
+	;~ }
+	;~ txt:=RegExReplace(txt,"i)BPM|Event(s)?|Beat(s)?|( sec(s)?)")			; 	Remove units from numbers
+	;~ txt:=RegExReplace(txt,"(:\d{2}?)(AM|PM)","$1 $2")						;	Fix time strings without space before AM|PM
+	;~ txt := trim(txt)
+	
+	;~ if (lab="Ordering") {
+		;~ tmpCrd := checkCrd(RegExReplace(txt,"i)^Dr(\.)?\s"))
+		;~ fieldColAdd(pre,lab,tmpCrd.best)
+		;~ fieldColAdd(pre,lab "_grp",tmpCrd.group)
+		;~ fieldColAdd(pre,lab "_eml",Docs[tmpCrd.Group ".eml",ObjHasValue(Docs[tmpCrd.Group],tmpCrd.best)])
+		;~ return
+	;~ }
+	
+;~ ;	Lifewatch Holter specific search fixes
+	;~ if (monType="H") {
+		;~ if txt ~= ("^[0-9]+.*at.*(AM|PM)$") {								;	Split timed results "139 at 8:31:47 AM" into two fields
+			;~ tx1 := trim(strX(txt,,1,1," at",1,3))							;		labels e.g. xxx and xxx_time
+			;~ tx2 := trim(strX(txt," at",1,3,"",1,0))							;		result e.g. "139" and "8:31:47 AM"
+			;~ fieldColAdd(pre,lab,tx1)
+			;~ fieldColAdd(pre,lab "_time",tx2)
+			;~ return
+		;~ }
+		;~ if (lab~="i)(Longest|Fastest)") {
+			;~ fieldColAdd(pre,lab,txt)
+			;~ fieldColAdd(pre,lab "_time","")
+			;~ return
+		;~ }
+		;~ if (txt ~= "^[0-9]+\s\([0-9.]+\%\)$") {								;	Split percents |\(.*%\)
+			;~ tx1 := trim(strX(txt,,1,1,"(",1,1))
+			;~ tx2 := trim(strX(txt,"(",1,1,"%",1,0))
+			;~ fieldColAdd(pre,lab,tx1)
+			;~ fieldColAdd(pre,lab "_per",tx2)
+			;~ return
+		;~ }
+		;~ if (txt ~= "^[0-9,]{1,}\/[0-9,]{1,}$") {							;	Split multiple number value results "5/0" into two fields, ignore date formats (5/1/12)
+			;~ tx1 := strX(txt,,1,1,"/",1,1,n)
+			;~ tx2 := SubStr(txt,n+1)
+			;~ lb1 := strX(lab,,1,1,"_",1,1,n)									;	label[] fields are named "xxx_yyy", split into "xxx" and "yyy"
+			;~ lb2 := SubStr(lab,n+1)
+			;~ fieldColAdd(pre,lb1,tx1)
+			;~ fieldColAdd(pre,lb2,tx2)
+			;~ return
+		;~ }
+	;~ }
+	
+;~ ;	Preventice Holter specific fixes
+	;~ if (monType="PR") {
+		;~ if (lab="Name") {
+			;~ fieldColAdd(pre,"Name_L",trim(strX(txt,"",1,0,",",1,1)))
+			;~ fieldColAdd(pre,"Name_F",trim(strX(txt,",",1,1,"",0)))
+			;~ return
+		;~ }
+		;~ if (RegExMatch(txt,"O)^(\d{1,2})\s+hr,\s+(\d{1,2})\s+min",tx)) {
+			;~ fieldColAdd(pre,lab,zDigit(tx.value(1)) ":" zDigit(tx.value(2)))
+			;~ return
+		;~ }
+		;~ if (RegExMatch(txt,"O)^([0-9.]+).*at.*(\d{2}:\d{2}:\d{2})(AM|PM)?$",tx)) {		;	Split timed results "139 at 8:31:47 AM" into two fields
+			;~ fieldColAdd(pre,lab,tx.value(1))
+			;~ fieldColAdd(pre,lab "_time",tx.value(2))
+			;~ return
+		;~ }
+	;~ }
+
+;~ ;	Body Guardian Heart specific fixes
+	;~ if (monType="BGH") {
+		;~ if (lab="Name") {
+			;~ ptDem["nameL"] := strX(txt," ",0,1,"",0)
+			;~ ptDem["nameF"] := strX(txt,"",1,0," ",1,1)
+			;~ fieldColAdd(pre,"Name_L",ptDem["nameL"])
+			;~ fieldColAdd(pre,"Name_F",ptDem["nameF"])
+			;~ return
+		;~ }
+		;~ if (lab="Test_date") {
+			;~ RegExMatch(txt,"O)(\d{1,2}/\d{1,2}/\d{4}).* (\d{1,2}/\d{1,2}/\d{4})",dt)
+			;~ fieldColAdd(pre,lab,dt.value(1))
+			;~ fieldColAdd(pre,lab "_end",dt.value(2))
+			;~ return
+		;~ }
+	;~ }
+	
+;~ ;	ZIO patch specific search fixes
+	;~ if (monType="Z") {
+		;~ if (RegExMatch(txt,"(\d){1,2} days (\d){1,2} hours ",tmp)) {		;	Split recorded/analyzed time in to Days and Hours
+			;~ fieldColAdd(pre,lab "_D",strX(tmp,"",1,1, " days",1,5))
+			;~ fieldColAdd(pre,lab "_H",strX(tmp," days",1,6, " hours",1,6))
+			;~ fieldColAdd(pre,lab "_Dates",substr(txt,instr(txt," hours ")+7))
+			;~ return
+		;~ }
+		;~ if InStr(txt,"(at ") {												;	Split timed results "139 (at 8:31:47 AM)" into two fields
+			;~ tx1 := strX(txt,,1,1,"(at ",1,4,n)
+			;~ tx2 := trim(SubStr(txt,n+4), " )")
+			;~ fieldColAdd(pre,lab,tx1)
+			;~ fieldColAdd(pre,lab "_time",tx2)
+			;~ return
+		;~ }
+		;~ if (RegExMatch(txt,"i)[a-z]+\s+[\>\<\.0-9%]+\s+\d",tmp)) {			;	Split "RARE <1.0% 2457" into result "2457" and text quant "RARE <1.0%"
+			;~ tx1 := substr(txt,1,StrLen(tmp)-2)
+			;~ tx2 := substr(txt,strlen(tmp))
+			;~ fieldColAdd(pre,lab,tx2)
+			;~ fieldColAdd(pre,lab "_amt",tx1)
+			;~ return
+		;~ }
+		;~ if (txt ~= "3rd.*\)") {												;	fix AV block field
+			;~ txt := substr(txt, InStr(txt, ")")+2)
+		;~ }
+		;~ if (txt=="None found") {											;	fix 0 results
+			;~ txt := "0"
+		;~ }
+	;~ }
+	
+	;~ fieldColAdd(pre,lab,txt)
+	;~ return
+;~ }
+
+cleanlines(ByRef txt) {
+	Loop, Parse, txt, `n, `r
+	{
+		i := A_LoopField
+		if !(i){
+			continue
+		}
+		newtxt .= i "`n"
+	}
+	txt := newtxt
+	return txt
+}
+
 cleancolon(txt) {
 	if substr(txt,1,1)=":" {
 		txt:=substr(txt,2)
@@ -811,14 +1132,12 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	ET = ending trim, TRUE or FALSE
 	N = variable for next offset
 */
-	;BS .= "(.*?)\s{3}"
-	MsgBox % ES
-	;rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
-	pos0 := RegExMatch(h,BS,bPat,((BO<1)?1:BO))
-	pos1 := RegExMatch(h,ES,ePat,pos0+bPat.len)
-	MsgBox % pos0 " - " pos1
-	N := pos1+((ET)?0:(ePat.len))
-	return substr(h,pos0+((BT)?(bPat.len):0),N-pos0-bPat.len)
+	;~ BS .= "(.*?)\s{3}"
+	rem:="[OPimsxADJUXPSC(\`n)(\`r)(\`a)]+\)"
+	pos0 := RegExMatch(h,((BS~=rem)?"Oim"BS:"Oim)"BS),bPat,((BO<1)?1:BO))
+	pos1 := RegExMatch(h,((ES~=rem)?"Oim"ES:"Oim)"ES),ePat,pos0+bPat.len())
+	N := pos1+((ET)?0:(ePat.len()))
+	return substr(h,pos0+((BT)?(bPat.len()):0),N-pos0-bPat.len())
 }
 
 #Include strx.ahk
