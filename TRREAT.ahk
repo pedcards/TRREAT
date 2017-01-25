@@ -150,32 +150,36 @@ parseTable(txt,title:="") {
 	If "title" not null or if first row begins with spaces, consider top row as title row
 */
 
-/*	FIRST PASS - Analyze structure
-	Check for title row (either "title=1" or row starts with spaces)
-	Scan for columns (?<=(/s{2}))[^\s] = col1, 
-	Each line check that pos1 is start
-*/
-	Loop
+	Loop																		; Iterate for each column found
 	{
-		Loop, parse, txt, `n,`r
+		Loop, parse, txt, `n,`r													; Read through text block
 		{
-			pos := RegExMatch(A_LoopField "  ","O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))",col,(maxpos)?maxpos:1)
-			if !(pos) {
+			pos := RegExMatch(A_LoopField "  "									; Add "  " to end of scan string
+							,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"				; Search "  text  " as each column 
+							,col												; return result in var "col"
+							,(maxpos)?maxpos:1)									; search position at next column
+			
+			if !(pos) {															; break if no matches
 				break
 			}
-			res0 := strX(A_LoopField,"",1,0,"  ",1,2)
-			if ((A_index = 1)&&((title)||!(res0))) {
-				pre := col.value()
-				continue
+			
+			fld := strX(A_LoopField,"",1,0,"  ",1,2)							; field name
+			
+			if ((A_index = 1)&&((title)||!(fld))) {								; first row blank field or "title" flag set
+				pre := col.value()												; result is column name
+				continue														; and move to next iteration
 			}
-			if !(res0) {
-				continue
+			
+			if !(fld) {															; blank field, probably end
+				continue														; skip to next iteration
 			}
-			maxpos := (maxpos>pos)?maxpos:pos
-			result .= pre "-" res0 " = " col.value() "`n"
+			
+			maxpos := (maxpos>pos)?maxpos:pos									; maxpos furthest right for this column,
+			result .= pre "-" fld ":  " col.value() "`n"						; used as start to find next column
 		}
-		maxpos += 1
-		if !(pos) {
+		maxpos += 1																; start next search 1 space over
+		
+		if !(pos) {																; break when no more hits
 			break
 		}
 	}
