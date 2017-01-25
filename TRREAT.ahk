@@ -135,9 +135,8 @@ MDTpmParse:
 		tbl := substr(leads,n)
 		fieldvals(parseTable(tbl,1),2,"leads")
 		
-		MsgBox % tbl
-		MsgBox % fldval["leads-V_pol"]
-		
+		thresh := parseTable(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
+		MsgBox % thresh
 	}
 	if instr(fintxt,"Permanent Parameters") {
 		MsgBox % fintxt1
@@ -185,6 +184,11 @@ parseTable(txt,title:="") {
 		}
 	}
 return result
+}
+
+oneCol() {
+	
+	return
 }
 
 PaceArt:
