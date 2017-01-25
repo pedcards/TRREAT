@@ -130,13 +130,13 @@ MDTpmParse:
 		Clipboard := leads_tbl
 		leads_tbl0 = 
 (
-                          Ventricular Lead      Atrial Lead
+.                         Ventricular Lead      Atrial Lead
 Output Energy             11.03 µJ              1.03 µJ
 Measured Current          8.28 mA               8.8 mA
 Measured Impedance        247 ohms              27 ohms
 Pace Polarity             Unipolar              Bipolar
 )
-		parseTable(leads_tbl)
+		MsgBox % parseTable(leads_tbl,1)
 		
 	}
 	if instr(fintxt,"Permanent Parameters") {
@@ -155,15 +155,31 @@ parseTable(txt,title:="") {
 	Scan for columns (?<=(/s{2}))[^\s] = col1, 
 	Each line check that pos1 is start
 */
-	Loop, parse, txt, `n,`r
+	Loop
 	{
-		pos := RegExMatch(A_LoopField "  ","O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))",col,(lastpos)?lastpos:1)
-		res0 := trim(substr(A_LoopField,1,pos-1))
-		
-		MsgBox % A_LoopField "`n'" res0 "'`n" pos "`n" col.value() " (" col.count() ")"
+		Loop, parse, txt, `n,`r
+		{
+			pos := RegExMatch(A_LoopField "  ","O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))",col,(maxpos)?maxpos:1)
+			if !(pos) {
+				break
+			}
+			res0 := strX(A_LoopField,"",1,0,"  ",1,2)
+			if ((A_index = 1)&&((title)||!(res0))) {
+				pre := col.value()
+				continue
+			}
+			if !(res0) {
+				continue
+			}
+			maxpos := (maxpos>pos)?maxpos:pos
+			result .= pre "-" res0 " = " col.value() "`n"
+		}
+		maxpos += 1
+		if !(pos) {
+			break
+		}
 	}
-	
-return	
+return result
 }
 
 PaceArt:
