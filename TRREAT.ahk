@@ -177,6 +177,7 @@ parseTable(txt,title:="") {
 			maxpos := (maxpos>pos)?maxpos:pos									; maxpos furthest right for this column,
 			result .= pre "-" fld ":  " col.value() "`n"						; used as start to find next column
 		}
+		result .= "endcolumn`n"
 		maxpos += 1																; start next search 1 space over
 		
 		if !(pos) {																; break when no more hits
