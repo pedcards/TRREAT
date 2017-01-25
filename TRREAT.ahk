@@ -125,18 +125,18 @@ MDTpmParse:
 		;~ MsgBox % fldval["dev-Vlead"]
 		
 		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-		leads_date := strX(leads,"Lead Status: ",1,0,"`n",1,0,n)
-		leads_tbl := strX(leads," ",n,0,"",0,0)
-		Clipboard := leads_tbl
-		leads_tbl0 = 
-(
-.                         Ventricular Lead      Atrial Lead
-Output Energy             11.03 µJ              1.03 µJ
-Measured Current          8.28 mA               8.8 mA
-Measured Impedance        247 ohms              27 ohms
-Pace Polarity             Unipolar              Bipolar
-)
-		MsgBox % parseTable(leads_tbl,1)
+		fields[2] := ["Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
+					, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"
+					, "Atrial lead-Output Energy","Atrial Lead-Measured Current"
+					, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"]
+		labels[2] := ["V_output","V_curr","V_imp","V_pol"
+					, "A_output","A_curr","A_imp","A_pol"]
+		fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
+		tbl := substr(leads,n)
+		fieldvals(parseTable(tbl,1),2,"leads")
+		
+		MsgBox % tbl
+		MsgBox % fldval["leads-V_pol"]
 		
 	}
 	if instr(fintxt,"Permanent Parameters") {
