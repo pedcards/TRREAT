@@ -142,7 +142,13 @@ MDTpmParse:
 		;~ MsgBox % fldval["thresh-sense"]
 	}
 	if instr(fintxt,"Permanent Parameters") {
-		MsgBox % fintxt1
+		fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
+		Clipboard := fintxt
+		fields[1] := ["Mode ","Lower Rate","Upper Rate","Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
+					, "Pace Polarity","Sense Polarity","Capture Management"]
+		labels[1] := ["Mode","LRL","URL","PVARP","Amp","PW","Sens"
+					, "Pol_pace","Pol_sens","Cap_Mgt"]
+		getParams(fintxt,1,"param")
 	}
 Return	
 }
