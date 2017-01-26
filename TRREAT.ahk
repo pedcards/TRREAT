@@ -193,7 +193,7 @@ oneCol(txt,cols:=2) {
 	Loop, parse, txt, `n,`r
 	{
 		pos := RegExMatch(A_LoopField "  "										; Add "  " to end of scan string
-						,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"					; Search "  text  " as each column 
+						,"O)(?<=(\s{2}))[^\s].*"								; Search "  text  " as each column 
 						,col)													; search position at next column
 		
 		maxpos := (maxpos>pos)?maxpos:pos										; maxpos furthest right for this column
@@ -201,7 +201,7 @@ oneCol(txt,cols:=2) {
 		col1 .= substr(A_LoopField,1,maxpos-1) "`n"								; field name
 		col2 .= substr(A_LoopField,maxpos) "`n"
 	}
-	return col1 . col2
+	return col1 . col2 . ">>>end"
 }
 
 PaceArt:
