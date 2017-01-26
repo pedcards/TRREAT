@@ -213,6 +213,21 @@ oneCol(txt,cols:=2) {
 	return col1 . col2 . ">>>end"
 }
 
+getParams(txt,blk,pre:="param") {
+	global fields, labels, fldval
+	
+	Loop, parse, txt, `n,`r
+	{
+		i := A_LoopField
+		val := trim(strX(i,"",1,0,"  ",1,2))
+		RegExMatch(i "  "														; Add "  " to end of scan string
+				,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"							; Search "  text  " as each column 
+				,col1)															; return result in var "col1"
+		MsgBox % "'" col1.value() "'"
+	}
+	return
+}
+
 PaceArt:
 {
 	fileNum += 1
