@@ -1143,6 +1143,27 @@ cleanspace(ByRef txt) {
 	return txt
 }
 
+ObjHasValue(aObj, aValue, rx:="") {
+; modified from http://www.autohotkey.com/board/topic/84006-ahk-l-containshasvalue-method/	
+	if (rx="med") {
+		med := true
+	}
+    for key, val in aObj
+		if (rx) {
+			if (med) {													; if a med regex, preface with "i)" to make case insensitive search
+				val := "i)" val
+			}
+			if (aValue ~= val) {
+				return, key, Errorlevel := 0
+			}
+		} else {
+			if (val = aValue) {
+				return, key, ErrorLevel := 0
+			}
+		}
+    return, false, errorlevel := 1
+}
+
 stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 /*	modified version: searches from BS to "   "
 	h = Haystack
