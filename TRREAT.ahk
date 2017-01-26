@@ -765,8 +765,7 @@ strVal(hay,n1,n2,BO:="",ByRef N:="") {
 	return trim(res[1]," :`n")
 }
 
-rxFix(hay,req,spc:="")
-{
+rxFix(hay,req,spc:="") {
 /*	Adds required options to regex string, pad whitespace with "\s+"
 	hay = haystack baseline regex string
 	req = required option codes to insert
