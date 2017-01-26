@@ -135,8 +135,11 @@ MDTpmParse:
 		tbl := substr(leads,n)
 		fieldvals(parseTable(tbl,1),2,"leads")
 		
-		thresh := strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18)
-		MsgBox % onecol(thresh)
+		thresh := onecol(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
+		fields[3] := ["Strength Duration","Ventricular Sensing Threshold",">>>end"]
+		labels[3] := ["cap","sense","end"]
+		fieldvals(thresh,3,"thresh")
+		;~ MsgBox % fldval["thresh-sense"]
 	}
 	if instr(fintxt,"Permanent Parameters") {
 		MsgBox % fintxt1
