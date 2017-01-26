@@ -135,8 +135,8 @@ MDTpmParse:
 		tbl := substr(leads,n)
 		fieldvals(parseTable(tbl,1),2,"leads")
 		
-		thresh := parseTable(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
-		MsgBox % thresh
+		thresh := strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18)
+		MsgBox % onecol(thresh)
 	}
 	if instr(fintxt,"Permanent Parameters") {
 		MsgBox % fintxt1
@@ -186,9 +186,22 @@ parseTable(txt,title:="") {
 return result
 }
 
-oneCol() {
-	
-	return
+oneCol(txt,cols:=2) {
+/*	Break text block into a single column 
+	based on logical break points
+*/
+	Loop, parse, txt, `n,`r
+	{
+		pos := RegExMatch(A_LoopField "  "										; Add "  " to end of scan string
+						,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"					; Search "  text  " as each column 
+						,col)													; search position at next column
+		
+		maxpos := (maxpos>pos)?maxpos:pos										; maxpos furthest right for this column
+		
+		col1 .= substr(A_LoopField,1,maxpos-1) "`n"								; field name
+		col2 .= substr(A_LoopField,maxpos) "`n"
+	}
+	return col1 . col2
 }
 
 PaceArt:
