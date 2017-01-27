@@ -36,10 +36,6 @@ user := A_UserName
 Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
 Gui, Add, Button, Disabled w600 h50 , Reload
 Gui, Show
-blocks := Object()
-fields := Object()
-labels := Object()
-fldval := Object()
 newTxt := Object()
 blk := Object()
 blk2 := Object()
@@ -48,6 +44,10 @@ docs := {"Chun, Terrence":"783118","Salerno, Jack":"343079","Seslar, Stephen":"3
 
 Loop, *.pdf
 { 
+	blocks := Object()
+	fields := Object()
+	labels := Object()
+	fldval := Object()
 	summBl := summ := ""
 	fileIn := A_LoopFileName
 	SplitPath, fileIn,,,,fileOut
