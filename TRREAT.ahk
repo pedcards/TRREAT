@@ -144,11 +144,12 @@ MDTpmParse:
 	if instr(fintxt,"Permanent Parameters") {
 		fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
 		Clipboard := fintxt
-		fields[1] := ["Mode ","Lower Rate","Upper Rate","Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
+		fields[1] := ["Mode","Lower Rate","Upper Rate","Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
 					, "Pace Polarity","Sense Polarity","Capture Management"]
 		labels[1] := ["Mode","LRL","URL","PVARP","Amp","PW","Sens"
 					, "Pol_pace","Pol_sens","Cap_Mgt"]
-		getParams(fintxt,1,"param")
+		scanParams(fintxt,1,"par")
+		MsgBox % fldval["par1-Mode"]
 	}
 Return	
 }
@@ -213,17 +214,28 @@ oneCol(txt,cols:=2) {
 	return col1 . col2 . ">>>end"
 }
 
-getParams(txt,blk,pre:="param") {
+scanParams(txt,blk,pre:="par") {
 	global fields, labels, fldval
-	
+	colstr = (?<=(\s{2}))(\>\s*)?[^\s].*?(?=(\s{2}))
 	Loop, parse, txt, `n,`r
 	{
-		i := A_LoopField
-		val := trim(strX(i,"",1,0,"  ",1,2))
-		RegExMatch(i "  "														; Add "  " to end of scan string
-				,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"							; Search "  text  " as each column 
+		i := A_LoopField "  "
+		set := trim(strX(i,"",1,0,"  ",1,2))									; Get leftmost column to first "  "
+		val := objHasValue(fields[blk],set)
+		if !(val) {
+			continue
+		}
+		
+		RegExMatch(i															; Add "  " to end of scan string
+				,"O)" colstr													; Search "  text  " as each column 
 				,col1)															; return result in var "col1"
-		MsgBox % "'" col1.value() "'"
+		RegExMatch(i
+				,"O)" colstr
+				,col2
+				,col1.pos()+1)
+				
+		fldval[pre "1-" labels[blk,val]] := col1.value()
+		fldval[pre "2-" labels[blk,val]] := col2.value()
 	}
 	return
 }
