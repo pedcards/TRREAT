@@ -103,6 +103,9 @@ MDTpm:
 			gosub MDTpmParse
 		}
 	}
+	gosub pmPrint
+	clipboard := rtfBody
+	
 return	
 }
 MDTpmParse:
