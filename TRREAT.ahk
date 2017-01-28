@@ -52,14 +52,16 @@ Loop, *.pdf
 	fileIn := A_LoopFileName
 	SplitPath, fileIn,,,,fileOut
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
+	RunWait, pdftotext.exe -raw "%fileIn%" tempraw.txt , , hide
 	FileRead, maintxt, temp.txt
+	FileRead, mainraw, tempraw.txt
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {
 		if (instr(maintxt,"Pacemaker Model")) {
 			gosub MDTpm
 		}
 		if (instr(maintxt,"Defibrillation")) {
-			MsgBox icd
+			MsgBox MDT icd
 		}
 		ExitApp
 	}
