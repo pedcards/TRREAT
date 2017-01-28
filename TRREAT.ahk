@@ -256,11 +256,11 @@ pmPrint:
 		. "Generator cell voltage " (instr(tmp:=fldval["dev-Voltage"],"(ERT = V )") ? tmp : substr(tmp,1,instr(tmp,"(ERT")-2)) ". "
 		. ((pm_bat:=fldval["dev-Battery_stat"]) ? "Battery status is " pm_bat ", with r" : "R") "emaining longevity " fldval["dev-IPG_Longevity"] ". `n"
 		. "Brady programming mode is " fldval["par2-Mode"] " with lower rate " fldval["par2-LRL"]
-		. ((pm_URL:=fldval["par2-URL"])="bpm" ? "" : ", upper tracking rate " pm_URL)
-		. ((pm_USR:=blk["Upper Sensor"])="bpm" ? "" : ", upper sensor rate " pm_USR) . ". `n"
+		. ((pm_URL:=fldval["par2-URL"]) ? ", upper tracking rate " pm_URL : "")
+		. ((pm_USR:=blk["Upper Sensor"]) ? ", upper sensor rate " pm_USR : "") . ". `n"
 		. ((pm_ADL:=fldval["par2-ADL"])="bpm" ? "" : "ADL rate is " pm_ADL ". ")
 		. ((pm_adap:=fldval["par2-Cap_Mgt"]) ? "Adaptive mode is " pm_adap ". " : "")
-		. (((pm_PAV:=blk["Paced"])="ms" or (pm_SAV:=blk["Sensed"])="ms") ? "" : "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. `n")
+		. (((pm_PAV:=blk["Paced"])||(pm_SAV:=blk["Sensed"])) ? "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. " : "") "`n"
 		. ((pm_RA:=blk["RA"])="%" ? "" : "RA pacing " pm_RA ". ") . ((pm_RV:=blk["RV"])="%" ? "" : "RV Pacing " pm_RV ". ")
 		. ((pm_ASVS:=blk["AS-VS"])="%" ? "" : "AS-VS " pm_ASVS " ") . ((pm_ASVP:=blk["AS-VP"])="%" ? "" : "AS-VP " pm_ASVP " ")
 		. ((pm_APVS:=blk["AP-VS"])="%" ? "" : "AP-VS " pm_APVS " ") . ((pm_APVP:=blk["AP-VP"])="%" ? "" : "AP-VP " pm_APVP) . "\par`n"
