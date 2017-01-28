@@ -121,13 +121,13 @@ MDTpmParse:
 					, "Pacemaker Status", "Estimated remaining longevity"
 					, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
 		labels[1] := ["Name", "DOB", "MRN", "Physician"
-					, "IPG", "IPG_impl"
+					, "IPG0", "IPG_impl"
 					, "Alead", "Alead_impl"
 					, "Vlead", "Vlead_impl"
 					, "IPG_stat", "IPG_longevity"
 					, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
 		fieldvals(dev,1,"dev")
-		;~ MsgBox % fldval["dev-Vlead"]
+		;~ MsgBox % fldval["dev-Alead"]
 		
 		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
 		fields[2] := ["Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
