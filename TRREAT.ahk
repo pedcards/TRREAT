@@ -108,6 +108,11 @@ return
 MDTpmParse:
 {
 	if instr(fintxt,"Pacemaker Status") {
+		dev := strX(fintxt,"Final Report",1,0,"Patient Name",1,0)
+		fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","Patient Name"]
+		labels[1] := ["IPG","IPG_SN","Encounter","Name"]
+		fieldvals(dev,1,"dev")
+		
 		dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
 		fields[1] := ["Patient Name", "DOB", "ID", "Physician"
 					, "Pacemaker Model", "Implanted"
