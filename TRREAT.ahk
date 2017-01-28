@@ -149,12 +149,12 @@ MDTpmParse:
 	if instr(fintxt,"Permanent Parameters") {
 		fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
 		Clipboard := fintxt
-		fields[1] := ["Mode","Lower Rate","Upper Rate","Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
+		fields[1] := ["Mode","Lower Rate","Upper Rate","ADL Rate","Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
 					, "Pace Polarity","Sense Polarity","Capture Management"]
-		labels[1] := ["Mode","LRL","URL","PVARP","Amp","PW","Sens"
+		labels[1] := ["Mode","LRL","URL","ADL","PVARP","Amp","PW","Sens"
 					, "Pol_pace","Pol_sens","Cap_Mgt"]
 		scanParams(fintxt,1,"par")
-		MsgBox % fldval["par1-Mode"]
+		;~ MsgBox % fldval["par1-Mode"]
 	}
 Return	
 }
