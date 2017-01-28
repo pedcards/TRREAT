@@ -775,7 +775,7 @@ columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
 	col3 := RegExReplace(col3,"\s+","\s+")
 	col4 := RegExReplace(col4,"\s+","\s+")
 	
-	txt := stRegX(x,blk1,1,(excl) ? blo1.len : 0,blk2,blo2.len)					; get string between blk1 and blk2
+	txt := stRegX(x,blk1,1,(excl) ? blo1.len() : 0,blk2)						; get string between blk1 and blk2
 	;~ MsgBox % txt
 	
 	loop, parse, txt, `n,`r														; find position of columns 2, 3, and 4
