@@ -245,6 +245,34 @@ scanParams(txt,blk,pre:="par") {
 	return
 }
 
+pmPrint:
+{
+			rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n"
+		. "\fs18 " fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
+		. ((pm_imp:=fldval["dev-IPG_impl"]) ? ", implanted " pm_imp ((pm_impMD:=fldval["dev-Physician"]) ? " by " pm_impMD : "") : "") ". `n"
+		. "Generator cell voltage " (instr(tmp:=fldval["dev-Voltage"],"(ERT = V )") ? tmp : substr(tmp,1,instr(tmp,"(ERT")-2)) ". "
+		. ((pm_bat:=fldval["dev-Battery_stat"]) ? "Battery status is " pm_bat ", with r" : "R") "emaining longevity " fldval["dev-IPG_Longevity"] ". `n"
+		. "Brady programming mode is " fldval["par2-Mode"] " with lower rate " fldval["par2-LRL"]
+		. ((pm_URL:=fldval["par2-URL"])="bpm" ? "" : ", upper tracking rate " pm_URL)
+		. ((pm_USR:=blk["Upper Sensor"])="bpm" ? "" : ", upper sensor rate " pm_USR) . ". `n"
+		. ((pm_ADL:=fldval["par2-ADL"])="bpm" ? "" : "ADL rate is " pm_ADL ". ")
+		. ((pm_adap:=fldval["par2-Cap_Mgt"]) ? "Adaptive mode is " pm_adap ". " : "")
+		. (((pm_PAV:=blk["Paced"])="ms" or (pm_SAV:=blk["Sensed"])="ms") ? "" : "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. `n")
+		. ((pm_RA:=blk["RA"])="%" ? "" : "RA pacing " pm_RA ". ") . ((pm_RV:=blk["RV"])="%" ? "" : "RV Pacing " pm_RV ". ")
+		. ((pm_ASVS:=blk["AS-VS"])="%" ? "" : "AS-VS " pm_ASVS " ") . ((pm_ASVP:=blk["AS-VP"])="%" ? "" : "AS-VP " pm_ASVP " ")
+		. ((pm_APVS:=blk["AP-VS"])="%" ? "" : "AP-VS " pm_APVS " ") . ((pm_APVP:=blk["AP-VP"])="%" ? "" : "AP-VP " pm_APVP) . "\par`n"
+		. "\fs22\par`n"
+		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
+		for k in leads
+		{
+			if (leads[pmlead:=leads[k],"model"]) {
+				gosub PaceArtLeads
+			}
+		}
+
+Return
+}
+
 PaceArt:
 {
 	fileNum += 1
