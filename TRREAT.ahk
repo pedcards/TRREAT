@@ -95,7 +95,12 @@ MDTpm:
 	LV_Add("", fileIN)
 	LV_Modify(fileNum,"col3","PM")
 	Gui, Show
-	;demog := columns(newtxt,"Initial Interrogation Report","Heart Rate Data",,"Reading Physician")
+	
+	iniRep := columns(mainraw,"Initial Interrogation","Pacemaker Status")
+	fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","Physician","Patient Name","History"]
+	labels[1] := ["IPG","IPG_SN","Encounter","Physician","end","History"]
+	fieldvals(iniRep,1,"dev")
+	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
 	Loop, % fin.length()
@@ -113,11 +118,6 @@ return
 MDTpmParse:
 {
 	if instr(fintxt,"Pacemaker Status") {
-		dev := strX(fintxt,"Final Report",1,0,"Patient Name",1,0)
-		fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","Patient Name"]
-		labels[1] := ["IPG","IPG_SN","Encounter","Name"]
-		fieldvals(dev,1,"dev")
-		
 		dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
 		fields[1] := ["Patient Name", "DOB", "ID", "Physician"
 					, "Pacemaker Model", "Implanted"
