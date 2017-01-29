@@ -1256,7 +1256,8 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	/*	Final position is start of ePat match + modifier
 		If (ET), add nothing, else add ePat.len()
 	*/
-	return substr(h,pos0+((BT)?(bPat.len()):0),N-pos0)
+	bmod := (BT) ? bPat.len() :0
+	return substr(h,pos0+bmod,pos1-pos0-bmod)
 	/*	Start at pos0
 		If (BT), add bPat.len(), else stay at pos0 (will include BS in result)
 		substr length is position of N (either pos1 or include ePat) less starting pos0
