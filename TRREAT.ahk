@@ -101,6 +101,12 @@ MDTpm:
 	labels[1] := ["IPG","IPG_SN","Encounter","Physician","null","History"]
 	fieldvals(iniRep,1,"dev")
 	
+	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
+	iniRep := strX(iniRep,"Pacing",1,0)
+	fields[2] := ["Sensed","Paced"]
+	labels[2] := ["Sensed","Paced"]
+	scanParams(iniRep,2,"dev")
+	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
 	Loop, % fin.length()
