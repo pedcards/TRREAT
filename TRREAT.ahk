@@ -1256,12 +1256,13 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 		Resturn result in "ePat" (ending pattern) object
 		Begin search after bPat result (pos0+bPat.len())
 	*/
-	N := pos1+((ET)?0:ePat.len())
+	bmod := (BT) ? bPat.len() : 0
+	emod := (ET) ? 0 : ePat.len()
+	N := pos1+emod
 	/*	Final position is start of ePat match + modifier
 		If (ET), add nothing, else add ePat.len()
 	*/
-	bmod := (BT) ? bPat.len() :0
-	return substr(h,pos0+bmod,pos1-pos0-bmod)
+	return substr(h,pos0+bmod,(pos1+emod)-(pos0+bmod))
 	/*	Start at pos0
 		If (BT), add bPat.len(), else stay at pos0 (will include BS in result)
 		substr length is position of N (either pos1 or include ePat) less starting pos0
