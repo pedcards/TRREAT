@@ -828,8 +828,9 @@ strVal(hay,n1,n2,BO:="",ByRef N:="") {
 	N	= return end position
 */
 	;~ opt := "Oi" ((span) ? "s" : "") ")"
-	opt := "Oi)"
-	RegExMatch(hay,opt . n1 ":?(.*?)" n2 ":?",res,(BO)?BO:1)
+	opt := "Oim)"
+	RegExMatch(hay,opt . n1 "(.*?)" n2 ,res,(BO)?BO:1)
+	;~ MsgBox % hay "`n" n1 "`n" n2 "`n" BO "`n" n
 	;~ MsgBox % trim(res[1]," `n") "`nPOS = " res.pos(1) "`nLEN = " res.len(1) "`n" res.value() "`n" res.len()
 	N := res.pos()+res.len(1)
 
