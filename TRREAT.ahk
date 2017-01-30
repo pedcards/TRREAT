@@ -54,7 +54,7 @@ Loop, *.pdf
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
 	FileRead, maintxt, temp.txt
-	FileRead, mainraw, tempraw.txt
+	;~ FileRead, mainraw, tempraw.txt
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {
 		if (instr(maintxt,"Pacemaker Model")) {
