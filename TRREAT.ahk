@@ -996,7 +996,7 @@ cellvals(x,blk1:="",blk2:="",type:="") {
 	return cells
 }
 
-fieldvals(x,bl,bl2:="",per:="") {
+fieldvals(x,bl,pre:="",per:="") {
 /*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
 	x	= input text
 	bl	= which FIELD number to use
@@ -1006,19 +1006,16 @@ fieldvals(x,bl,bl2:="",per:="") {
 	
 	for k, i in fields[bl]
 	{
-		pre := bl2
 		j := fields[bl][k+1]
 		m := (j) ?	strVal(x,i,j,n,n)			;trim(stRegX(x,i,n,1,j,1,n), " `n")
 				:	trim(strX(SubStr(x,n),":",1,1,"",0)," `n")
+		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		lbl := labels[bl][A_index]
-		;~ if (lbl~="^\w{3}:") {											; has prefix e.g. "dem:"
-			;~ pre := substr(lbl,1,3)
-			;~ lbl := substr(lbl,5)
-		;~ }
+		
 		cleanSpace(m)
 		cleanColon(m)
 		fldval[pre "-" lbl] := m
-		;~ MsgBox % pre "-" lbl "`n" m
+		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		;~ formatField(pre,lbl,m)
 	}
 }
