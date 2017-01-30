@@ -96,9 +96,9 @@ MDTpm:
 	LV_Modify(fileNum,"col3","PM")
 	Gui, Show
 	
-	iniRep := columns(mainraw,"Initial Interrogation","Pacemaker Status")
+	iniRep := stregX(maintxt,"Initial Interrogation",1,0,"Pacemaker Status",1)
 	fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","Physician","Patient Name","History"]
-	labels[1] := ["IPG","IPG_SN","Encounter","Physician","end","History"]
+	labels[1] := ["IPG","IPG_SN","Encounter","Physician","null","History"]
 	fieldvals(iniRep,1,"dev")
 	
 	splTxt := "Final Report"
