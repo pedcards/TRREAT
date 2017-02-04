@@ -248,7 +248,7 @@ scanParams(txt,blk,pre:="par",rx:="") {
 	Loop, parse, txt, `n,`r
 	{
 		i := A_LoopField "  "
-		set := trim(strX(i,"",1,0,"  ",1,2))									; Get leftmost column to first "  "
+		set := trim(strX(i,"",1,0,"  ",1,2)," :")									; Get leftmost column to first "  "
 		val := objHasValue(fields[blk],set,rx)
 		if !(val) {
 			continue
