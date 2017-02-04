@@ -63,7 +63,6 @@ Loop, *.pdf
 		if (instr(maintxt,"Defibrillation")) {
 			MsgBox MDT icd
 		}
-		ExitApp
 	}
 	if (maintxt~="Boston Scientific Corporation") {
 		if (instr(maintxt,"Shock")) {
@@ -278,8 +277,8 @@ pmPrint:
 		. printQ(fldval["par2-Cap_Mgt"],"Adaptive mode is ###. ") . "`n"
 		;~ . (((pm_PAV:=blk["Paced"])||(pm_SAV:=blk["Sensed"])) ? "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. " : "") "`n"
 		. printQ(fldval["dev1-Sensed"],"Sensed ###. ") . printQ(fldval["dev1-Paced"],"Paced ###. ")
-		;~ . ((pm_ASVS:=blk["AS-VS"])="%" ? "" : "AS-VS " pm_ASVS " ") . ((pm_ASVP:=blk["AS-VP"])="%" ? "" : "AS-VP " pm_ASVP " ")
-		;~ . ((pm_APVS:=blk["AP-VS"])="%" ? "" : "AP-VS " pm_APVS " ") . ((pm_APVP:=blk["AP-VP"])="%" ? "" : "AP-VP " pm_APVP) . "\par`n"
+		. printQ(fldval["dev1-AsVs"],"AS-VS ### ") . printQ(fldval["dev1-AsVp"],"AS-VP ### ")
+		. printQ(fldval["dev1-ApVs"],"AP-VS ### ") . printQ(fldval["dev1-ApVp"],"AP-VP ### ") . "\par`n"
 		. "\fs22\par`n"
 		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 		for k in leads
