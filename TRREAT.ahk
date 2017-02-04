@@ -240,7 +240,7 @@ oneCol(txt,cols:=2) {
 						,"O)(?<=(\s{2}))[^\s].*"								; Search "  text  " as each column 
 						,col)													; search position at next column
 		
-		maxpos := (maxpos>pos)?maxpos:pos										; maxpos furthest right for this column
+		maxpos := (pos>maxpos)?pos:maxpos										; maxpos furthest right for this column
 		
 		col1 .= substr(A_LoopField,1,maxpos-1) "`n"								; field name
 		col2 .= substr(A_LoopField,maxpos) "`n"
