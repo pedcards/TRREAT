@@ -254,9 +254,9 @@ scanParams(txt,blk,pre:="par",rx:="") {
 				,"O)" colstr
 				,col2
 				,col1.pos()+1)
-				
+		
 		fldval[pre "1-" labels[blk,val]] := col1.value()
-		fldval[pre "2-" labels[blk,val]] := col2.value()
+		fldval[pre "2-" labels[blk,val]] := RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])","changed to ")
 	}
 	return
 }
