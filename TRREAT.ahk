@@ -242,8 +242,8 @@ oneCol(txt,cols:=2) {
 		
 		maxpos := (pos>maxpos)?pos:maxpos										; maxpos furthest right for this column
 		
-		col1 .= substr(A_LoopField,1,maxpos-1) "`n"								; field name
-		col2 .= substr(A_LoopField,maxpos) "`n"
+		col1 .= rtrim(substr(A_LoopField,1,maxpos-1)) "`n"								; field name
+		col2 .= rtrim(substr(A_LoopField,maxpos)) "`n"
 	}
 	return col1 . col2 . ">>>end"
 }
