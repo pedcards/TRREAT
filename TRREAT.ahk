@@ -103,11 +103,16 @@ MDTpm:
 	
 	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
-	MsgBox % iniRep
-	
-	fields[2] := ["Sensed","Paced"]
-	labels[2] := ["Sensed","Paced"]
+	if instr(iniRep,"Sensed") {
+		fields[2] := ["Sensed","Paced"]
+		labels[2] := ["Sensed","Paced"]
+	} else {
+		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
+		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
+		MsgBox here
+	}
 	scanParams(iniRep,2,"dev")
+	MsgBox % fldval["dev1-AsVs"]
 	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
