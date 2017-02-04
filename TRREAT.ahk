@@ -143,7 +143,10 @@ MDTpmParse:
 					, "IPG_stat", "IPG_longevity"
 					, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
 		fieldvals(dev,1,"dev")
-		;~ MsgBox % fldval["dev-Alead"]
+		if !instr(fldval["dev-Physician"],"Dr.") {
+			fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
+		}
+		;~ MsgBox % fldval["dev-Physician"]
 		
 		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
 		fields[2] := ["Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
