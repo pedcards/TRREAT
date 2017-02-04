@@ -103,6 +103,9 @@ MDTpm:
 	
 	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
 	iniRep := strX(iniRep,"Pacing",1,0)
+	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
+	MsgBox % iniRep
+	
 	fields[2] := ["Sensed","Paced"]
 	labels[2] := ["Sensed","Paced"]
 	scanParams(iniRep,2,"dev")
