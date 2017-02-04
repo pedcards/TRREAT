@@ -235,14 +235,14 @@ oneCol(txt,cols:=2) {
 	return col1 . col2 . ">>>end"
 }
 
-scanParams(txt,blk,pre:="par") {
+scanParams(txt,blk,pre:="par",rx:="") {
 	global fields, labels, fldval
 	colstr = (?<=(\s{2}))(\>\s*)?[^\s].*?(?=(\s{2}))
 	Loop, parse, txt, `n,`r
 	{
 		i := A_LoopField "  "
 		set := trim(strX(i,"",1,0,"  ",1,2))									; Get leftmost column to first "  "
-		val := objHasValue(fields[blk],set,1)
+		val := objHasValue(fields[blk],set,rx)
 		if !(val) {
 			continue
 		}
