@@ -710,9 +710,9 @@ PaceArtLINQ:
 	; Get the EPISODES and DETECTIONS block
 	epdet := columns(newtxtL,blocks[4],blocks[5],,"Detection")
 	epBlk := columns(epdet,"","Detection",,"Asystole:")
-	fieldvals(epBlk,3,,"ep")
+	fieldvals(epBlk,3,"ep")
 	detBlk := strX(epdet,"Detection",1,0)
-	fieldvals(detBlk,4,,"det")
+	fieldvals(detBlk,4,"det")
 
 	; ENCOUNTER SUMMARY block
 	summBl := trim(columns(newtxtL,blocks[5],blocks[6])," `n")
