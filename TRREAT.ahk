@@ -52,8 +52,8 @@ Loop, *.pdf
 	fileIn := A_LoopFileName
 	SplitPath, fileIn,,,,fileOut
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
-	RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
 	FileRead, maintxt, temp.txt
+	;~ RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
 	;~ FileRead, mainraw, tempraw.txt
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {
