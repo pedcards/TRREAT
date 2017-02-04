@@ -109,10 +109,8 @@ MDTpm:
 	} else {
 		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
 		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
-		MsgBox here
 	}
 	scanParams(iniRep,2,"dev")
-	MsgBox % fldval["dev1-AsVs"]
 	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
