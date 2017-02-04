@@ -193,13 +193,14 @@ parseStrDur(txt) {
 		return Error
 	}
 	n := 1
+	txt := stregX(txt,"Strength Duration",1,1,">>>end",1)
 	loop
 	{
 		RegExMatch(txt,"O)\d+[.]\d+ V(.*?)\d+[.]\d+ ms",val,n)					; find "0.50 V @ 0.4 ms"
-		res .= ((res) ? " and " : "") . val.value()								; append to RES (if RES already exists, prepend "and")
+		res := ((res) ? res " and " : "") . val.value()							; append to RES (if RES already exists, prepend "and")
 		n+=val.Len()															; starting point for next instance
-	} 
-	until (A_index > val.count())												; instances of val.count()
+	} until (A_index > val.count())
+	
 return res
 }
 
