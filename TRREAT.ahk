@@ -116,8 +116,56 @@ MDTpm:
 	Loop, % fin.length()
 	{
 		fintxt := fin[A_index]
-		if instr(fintxt,splTxt) {
-			gosub MDTpmParse
+		if (fintxt~=splTxt ".*Pacemaker Status") {
+			dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
+			fields[1] := ["Patient Name", "DOB", "ID", "Physician"
+						, "Pacemaker Model", "Implanted"
+						, "Atrial Lead", "Implanted"
+						, "Ventricular Lead", "Implanted"
+						, "Pacemaker Status", "Estimated remaining longevity"
+						, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
+			labels[1] := ["Name", "DOB", "MRN", "Physician"
+						, "IPG0", "IPG_impl"
+						, "Alead", "Alead_impl"
+						, "Vlead", "Vlead_impl"
+						, "IPG_stat", "IPG_longevity"
+						, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
+			fieldvals(dev,1,"dev")
+			if !instr(fldval["dev-Physician"],"Dr.") {
+				fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
+			}
+			;~ MsgBox % fldval["dev-Physician"]
+			
+			leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
+						, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
+						, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
+						, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
+			labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
+						, "V_output","V_curr","V_imp","V_pol","null"]
+			fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
+			tbl := substr(leads,n)
+			scanParams(parseTable(tbl,1),2,"leads")
+			;~ MsgBox % fldval["leads1-A_output"]
+			;~ MsgBox % fldval["leads1-V_output"]
+			
+			thresh := onecol(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
+			fields[3] := ["Strength Duration","Ventricular Sensing Threshold",">>>end"]
+			labels[3] := ["cap","sense","end"]
+			fieldvals(thresh,3,"thresh")
+			;~ MsgBox % fldval["thresh-sense"]
+		}
+		if (fintxt~=splTxt ".*Permanent Parameters") {
+			fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
+			Clipboard := oneCol(fintxt)
+			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","ADL Rate","Paced AV","Sensed AV"
+						,"Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
+						, "Pace Polarity","Sense Polarity","Capture Management"]
+			labels[1] := ["Mode","LRL","URL","ADL","PAV","SAV"
+						,"PVARP","Amp","PW","Sens"
+						, "Pol_pace","Pol_sens","Cap_Mgt"]
+			scanParams(fintxt,1,"par")
+			;~ MsgBox % fldval["par1-Mode"]
 		}
 	}
 	gosub pmPrint
@@ -125,61 +173,6 @@ MDTpm:
 	MsgBox % rtfBody
 	
 return	
-}
-MDTpmParse:
-{
-	if instr(fintxt,"Pacemaker Status") {
-		dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
-		fields[1] := ["Patient Name", "DOB", "ID", "Physician"
-					, "Pacemaker Model", "Implanted"
-					, "Atrial Lead", "Implanted"
-					, "Ventricular Lead", "Implanted"
-					, "Pacemaker Status", "Estimated remaining longevity"
-					, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
-		labels[1] := ["Name", "DOB", "MRN", "Physician"
-					, "IPG0", "IPG_impl"
-					, "Alead", "Alead_impl"
-					, "Vlead", "Vlead_impl"
-					, "IPG_stat", "IPG_longevity"
-					, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
-		fieldvals(dev,1,"dev")
-		if !instr(fldval["dev-Physician"],"Dr.") {
-			fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
-		}
-		;~ MsgBox % fldval["dev-Physician"]
-		
-		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-		fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
-					, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
-					, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
-					, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
-		labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
-					, "V_output","V_curr","V_imp","V_pol","null"]
-		fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
-		tbl := substr(leads,n)
-		scanParams(parseTable(tbl,1),2,"leads")
-		;~ MsgBox % fldval["leads1-A_output"]
-		;~ MsgBox % fldval["leads1-V_output"]
-		
-		thresh := onecol(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
-		fields[3] := ["Strength Duration","Ventricular Sensing Threshold",">>>end"]
-		labels[3] := ["cap","sense","end"]
-		fieldvals(thresh,3,"thresh")
-		;~ MsgBox % fldval["thresh-sense"]
-	}
-	if instr(fintxt,"Permanent Parameters") {
-		fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
-		Clipboard := oneCol(fintxt)
-		fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","ADL Rate","Paced AV","Sensed AV"
-					,"Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
-					, "Pace Polarity","Sense Polarity","Capture Management"]
-		labels[1] := ["Mode","LRL","URL","ADL","PAV","SAV"
-					,"PVARP","Amp","PW","Sens"
-					, "Pol_pace","Pol_sens","Cap_Mgt"]
-		scanParams(fintxt,1,"par")
-		;~ MsgBox % fldval["par1-Mode"]
-	}
-Return	
 }
 
 parseTable(txt,title:="") {
