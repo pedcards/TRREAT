@@ -263,7 +263,7 @@ scanParams(txt,blk,pre:="par") {
 
 pmPrint:
 {
-			rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n"
+		rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n"
 		. "\fs18 Device: " fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 		. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
 		. printQ(fldval["dev-Voltage"],"Generator cell voltage ###. ")
