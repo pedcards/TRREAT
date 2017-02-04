@@ -161,7 +161,9 @@ mdtAdapta:
 			;~ MsgBox % fldval["leads1-A_output"]
 			;~ MsgBox % fldval["leads1-V_output"]
 			
-			thresh := onecol(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
+			thresh := oneCol(stregX(fintxt,"Threshold Test Results",1,1,"Medtronic Software",1))
+			clipboard := thresh
+			MsgBox % thresh
 			fields[3] := ["Strength Duration","Ventricular Sensing Threshold",">>>end"]
 			labels[3] := ["cap","sense","end"]
 			fieldvals(thresh,3,"thresh")
