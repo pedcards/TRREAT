@@ -110,7 +110,7 @@ MDTpm:
 		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
 		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
 	}
-	scanParams(iniRep,2,"dev")
+	scanParams(iniRep,2,"dev",1)
 	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
