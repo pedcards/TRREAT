@@ -1024,11 +1024,11 @@ cellvals(x,blk1:="",blk2:="",type:="") {
 	return cells
 }
 
-fieldvals(x,bl,pre:="",per:="") {
+fieldvals(x,bl,pre:="") {
 /*	Matches field values and results. Gets text between FIELDS[k] to FIELDS[k+1]. Excess whitespace removed. Returns results in array BLK[].
 	x	= input text
 	bl	= which FIELD number to use
-	bl2	= label prefix
+	pre	= label prefix
 */
 	global fields, labels, fldval
 	
