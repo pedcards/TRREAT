@@ -149,12 +149,12 @@ MDTpmParse:
 		;~ MsgBox % fldval["dev-Physician"]
 		
 		leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-		fields[2] := ["Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
-					, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"
-					, "Atrial lead-Output Energy","Atrial Lead-Measured Current"
-					, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"]
-		labels[2] := ["V_output","V_curr","V_imp","V_pol"
-					, "A_output","A_curr","A_imp","A_pol"]
+		fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
+					, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
+					, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
+					, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
+		labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
+					, "V_output","V_curr","V_imp","V_pol","null"]
 		fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
 		tbl := substr(leads,n)
 		fieldvals(parseTable(tbl,1),2,"leads")
