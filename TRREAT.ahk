@@ -95,6 +95,18 @@ MDTpm:
 	LV_Modify(fileNum,"col3","PM")
 	Gui, Show
 	
+	if (maintxt~="Adapta") {
+		gosub mdtAdapta
+	}
+	gosub pmPrint
+	;~ clipboard := rtfBody
+	MsgBox % rtfBody
+	
+return	
+}
+
+mdtAdapta:
+{
 	iniRep := stregX(maintxt,"Initial Interrogation",1,0,"Pacemaker Status",1)
 	fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","Physician","Patient Name","History"]
 	labels[1] := ["IPG","IPG_SN","Encounter","Physician","null","History"]
@@ -168,11 +180,7 @@ MDTpm:
 			;~ MsgBox % fldval["par1-Mode"]
 		}
 	}
-	gosub pmPrint
-	;~ clipboard := rtfBody
-	MsgBox % rtfBody
-	
-return	
+return
 }
 
 parseTable(txt,title:="") {
