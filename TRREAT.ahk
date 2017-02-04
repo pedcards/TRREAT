@@ -101,8 +101,7 @@ MDTpm:
 	labels[1] := ["IPG","IPG_SN","Encounter","Physician","null","History"]
 	fieldvals(iniRep,1,"dev")
 	
-	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
-	iniRep := strX(iniRep,"Pacing",1,0)
+	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	MsgBox % iniRep
 	
