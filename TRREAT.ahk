@@ -244,7 +244,7 @@ scanParams(txt,blk,pre:="par") {
 	{
 		i := A_LoopField "  "
 		set := trim(strX(i,"",1,0,"  ",1,2))									; Get leftmost column to first "  "
-		val := objHasValue(fields[blk],set)
+		val := objHasValue(fields[blk],set,1)
 		if !(val) {
 			continue
 		}
