@@ -157,7 +157,9 @@ MDTpmParse:
 					, "V_output","V_curr","V_imp","V_pol","null"]
 		fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
 		tbl := substr(leads,n)
-		fieldvals(parseTable(tbl,1),2,"leads")
+		scanParams(parseTable(tbl,1),2,"leads")
+		;~ MsgBox % fldval["leads1-A_output"]
+		;~ MsgBox % fldval["leads1-V_output"]
 		
 		thresh := onecol(strX(fintxt,"Threshold Test Results",1,22,"Medtronic Software",1,18))
 		fields[3] := ["Strength Duration","Ventricular Sensing Threshold",">>>end"]
