@@ -162,12 +162,10 @@ mdtAdapta:
 			;~ MsgBox % fldval["leads1-V_output"]
 			
 			thresh := oneCol(stregX(fintxt,"Threshold Test Results",1,1,"Medtronic Software",1))
-			clipboard := thresh
-			MsgBox % thresh
-			fields[3] := ["Strength Duration","Ventricular Sensing Threshold",">>>end"]
-			labels[3] := ["cap","sense","end"]
-			fieldvals(thresh,3,"thresh")
-			;~ MsgBox % fldval["thresh-sense"]
+			fldval["AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
+			fldval["VP_thr"] := parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
+			fldval["AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
+			fldval["AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
 			fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
