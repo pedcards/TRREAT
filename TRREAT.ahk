@@ -121,7 +121,7 @@ MDTpm:
 		}
 	}
 	gosub pmPrint
-	clipboard := rtfBody
+	;~ clipboard := rtfBody
 	MsgBox % rtfBody
 	
 return	
@@ -285,7 +285,7 @@ pmPrint:
 		. printQ(fldval["par2-USR"],", upper sensor rate ###")
 		. printQ(fldval["par2-ADL"],", ADL rate ###") . ". `n"
 		. printQ(fldval["par2-Cap_Mgt"],"Adaptive mode is ###. ") . "`n"
-		;~ . (((pm_PAV:=blk["Paced"])||(pm_SAV:=blk["Sensed"])) ? "Paced and sensed AV delays are " pm_PAV " and " pm_SAV ", respectively. " : "") "`n"
+		. printQ(fldval["par2-PAV"]&&fldval["par2-SAV"],"Paced and sensed AV delays are " fldval["par2-PAV"] " and " fldval["par2-SAV"] ", respectively. `n")
 		. printQ(fldval["dev1-Sensed"],"Sensed ###. ") . printQ(fldval["dev1-Paced"],"Paced ###. ")
 		. printQ(fldval["dev1-AsVs"],"AS-VS ###  ") . printQ(fldval["dev1-AsVp"],"AS-VP ###  ")
 		. printQ(fldval["dev1-ApVs"],"AP-VS ###  ") . printQ(fldval["dev1-ApVp"],"AP-VP ###  ") . "\par`n"
