@@ -224,7 +224,7 @@ parseTable(txt,title:="") {
 		}
 		result .= "endcolumn`n"
 		maxpos += 1																; start next search 1 space over
-		MsgBox % result
+		;~ MsgBox % result
 	}
 return result
 }
