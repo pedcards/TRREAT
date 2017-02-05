@@ -329,29 +329,29 @@ scanParams(txt,blk,pre:="par",rx:="") {
 
 pmPrint:
 {
-		rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n"
-		. "\fs18 Device: " fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
-		. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
-		. printQ(fldval["dev-Voltage"],"Generator cell voltage ###. ")
-		. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
-		. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
-		. printQ(fldval["par-URL"],", upper tracking rate ###")
-		. printQ(fldval["par-USR"],", upper sensor rate ###")
-		. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
-		. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
-		. printQ(fldval["par-PAV"]&&fldval["par-SAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
-		. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
-		. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
-		. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ") . "\par`n"
-		. "\fs22\par`n"
-		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
-		
-		for k in leads
-		{
-			if (leads[pmlead:=leads[k],"model"]) {
-				gosub PaceArtLeads
-			}
-		}
+	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n"
+	. "\fs18 Device: " fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
+	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
+	. printQ(fldval["dev-Voltage"],"Generator cell voltage ###. ")
+	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
+	. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
+	. printQ(fldval["par-URL"],", upper tracking rate ###")
+	. printQ(fldval["par-USR"],", upper sensor rate ###")
+	. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
+	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
+	. printQ(fldval["par-PAV"]&&fldval["par-SAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
+	. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
+	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
+	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ") . "\par`n"
+	. "\fs22\par`n"
+	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
+	
+	for k in leads
+	{
+		printLead(k)
+	}
+	
+	gosub PrintOut
 
 Return
 }
