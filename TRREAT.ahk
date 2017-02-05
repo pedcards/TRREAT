@@ -369,7 +369,7 @@ printQ(var1,txt) {
 
 printLead(lead) {
 	global rtfBody, leads
-	rtfBody .= "\b " lead " lead model/ser: \b0 " leads[lead,"model"] ", implanted " leads[lead,"date"] ". "
+	rtfBody .= "\b " lead " lead: \b0 " leads[lead,"model"] ", implanted " leads[lead,"date"] ". "
 	. printQ(leads[lead,"imp"],"Lead impedance ###. ")
 	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
 	. printQ(leads[lead,"output"],"Pacing output ###. ")
