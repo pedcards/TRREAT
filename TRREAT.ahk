@@ -148,8 +148,6 @@ mdtAdapta:
 				fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
 			}
 			;~ MsgBox % fldval["dev-Alead_impl"]
-			;~ dev := stregX(dev,"Pacemaker Model",1,0,"Pacemaker Status",1)
-			;~ MsgBox % cleanspace(dev)
 			;~ MsgBox % fldval["dev-Physician"]
 			
 			finleads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
@@ -266,10 +264,6 @@ parseTable(txt,title:="") {
 				pre := col.value()												; result is column name
 				continue														; and move to next iteration
 			}
-			
-			;~ if !(fld) {															; blank field, probably end
-				;~ break															; skip to next iteration
-			;~ }
 			
 			result .= pre "-" fld ":  " col.value() "`n"						; used as start to find next column
 		}
