@@ -192,6 +192,26 @@ mdtAdapta:
 			;~ MsgBox % param_V
 			;~ MsgBox % fldval["par1-Mode"]
 		}
+		
+		if (fldval["Alead_impl"]) {
+			pmlead := "RA"
+			leads[pmlead,"model"] 	:= fldval["dev-Alead"]
+			leads[pmlead,"date"]	:= fldval["dev-Alead_impl"]
+			leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
+			leads[pmlead,"cap"]  	:= fldval["leads-AP_thr"]
+			leads[pmlead,"sens"]	:= fldval["leads-AS_thr"]
+		}
+			
+	;~ rtfBody .= "\b " pmlead " lead: \b0 " leads[pmlead,"model"] 
+	;~ . ((tmp:=leads[pmlead,"serial"]) ? ", serial number " tmp : "")
+	;~ . ((tmp:=leads[pmlead,"date"]) ? ", implanted " tmp : "") ". `n"
+	;~ . ((tmp:=thr["pacing impedance",pmlead]) ? "Lead impedance " tmp " ohms. " : "")
+	;~ . ((tmp:=thr["capture amplitude",pmlead]) ? "Capture threshold " tmp " V at " thr["capture duration",pmlead] " ms. " : "")
+	;~ . ((tmp:=thr["sensing amplitude",pmlead]) ? ((pmlead="RA") ? "P wave " : "R wave ") "sensing " tmp " mV. " : "")
+	;~ . ((tmp:=outputs["amplitude",pmlead]) ? "Pacing output " tmp " V at " outputs["pulse width",pmlead] " ms" ((tmp:=outputs["pace polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
+	;~ . ((tmp:=outputs["sensitivity",pmlead]) ? "Sensitivity " tmp " mV" ((tmp:=outputs["sense polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
+	;~ . "\par`n"
+
 	}
 return
 }
@@ -326,6 +346,7 @@ pmPrint:
 		. printQ(fldval["dev1-ApVs"],"AP-VS ###  ") . printQ(fldval["dev1-ApVp"],"AP-VP ###  ") . "\par`n"
 		. "\fs22\par`n"
 		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
+		
 		for k in leads
 		{
 			if (leads[pmlead:=leads[k],"model"]) {
@@ -345,6 +366,21 @@ printQ(var1,txt) {
 		return error
 	}
 	return RegExReplace(txt,"###",var1)
+}
+
+printLead(lead) {
+	rtfBody .= "\b " pmlead " lead: \b0 " leads[pmlead,"model"] 
+	. ((tmp:=leads[pmlead,"serial"]) ? ", serial number " tmp : "")
+	. ((tmp:=leads[pmlead,"date"]) ? ", implanted " tmp : "") ". `n"
+	. ((tmp:=thr["pacing impedance",pmlead]) ? "Lead impedance " tmp " ohms. " : "")
+	. ((tmp:=thr["capture amplitude",pmlead]) ? "Capture threshold " tmp " V at " thr["capture duration",pmlead] " ms. " : "")
+	. ((tmp:=thr["sensing amplitude",pmlead]) ? ((pmlead="RA") ? "P wave " : "R wave ") "sensing " tmp " mV. " : "")
+	. ((tmp:=outputs["amplitude",pmlead]) ? "Pacing output " tmp " V at " outputs["pulse width",pmlead] " ms" ((tmp:=outputs["pace polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
+	. ((tmp:=outputs["sensitivity",pmlead]) ? "Sensitivity " tmp " mV" ((tmp:=outputs["sense polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
+	. "\par`n"
+
+
+
 }
 
 PaceArt:
