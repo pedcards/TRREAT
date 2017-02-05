@@ -166,15 +166,15 @@ mdtAdapta:
 			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
 			fldval["leads-VP_thr"] := parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
 			fldval["leads-AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
-			fldval["leads-AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
+			fldval["leads-VS_thr"] := trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n")
 			
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
 			perm := oneCol(strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
 			;~ Clipboard := oneCol(fintxt)
-			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","ADL Rate","Paced AV","Sensed AV"]
-			labels[1] := ["Mode","LRL","URL","ADL","PAV","SAV"]
+			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
+			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
 			;~ MsgBox % fldval["par-LRL"]
 			
@@ -197,6 +197,7 @@ mdtAdapta:
 			leads[pmlead,"date"]	:= fldval["dev-Alead_impl"]
 			leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
 			leads[pmlead,"cap"]  	:= fldval["leads-AP_thr"]
+			leads[pmlead,"output"]	:= (fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
 			leads[pmlead,"pace pol"] := fldval["Alead-Pol_pace"]
 			leads[pmlead,"sens"]	:= fldval["leads-AS_thr"]
 			leads[pmlead,"sensitivity"] := fldval["Alead-Sens"]
@@ -206,8 +207,9 @@ mdtAdapta:
 			pmlead := "RV"
 			leads[pmlead,"model"] 	:= fldval["dev-Vlead"]
 			leads[pmlead,"date"]	:= fldval["dev-Vlead_impl"]
-			leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
+			leads[pmlead,"imp"]  	:= fldval["leads-V_imp"]
 			leads[pmlead,"cap"]  	:= fldval["leads-VP_thr"]
+			leads[pmlead,"output"]	:= (fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
 			leads[pmlead,"pace pol"] := fldval["Vlead-Pol_pace"]
 			leads[pmlead,"sens"]	:= fldval["leads-VS_thr"]
 			leads[pmlead,"sensitivity"] := fldval["Vlead-Sens"]
