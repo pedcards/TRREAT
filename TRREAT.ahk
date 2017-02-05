@@ -171,15 +171,25 @@ mdtAdapta:
 			
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
-			fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
-			Clipboard := oneCol(fintxt)
-			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","ADL Rate","Paced AV","Sensed AV"
-						,"Ventricular Refractory","Amplitude","Pulse Width","Sensitivity"
-						, "Pace Polarity","Sense Polarity","Capture Management"]
-			labels[1] := ["Mode","LRL","URL","ADL","PAV","SAV"
-						,"PVARP","Amp","PW","Sens"
-						, "Pol_pace","Pol_sens","Cap_Mgt"]
+			perm := oneCol(strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0))
+			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
+			;~ Clipboard := oneCol(fintxt)
+			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","ADL Rate","Paced AV","Sensed AV"]
+			labels[1] := ["Mode","LRL","URL","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
+			
+			param_A := stregX(perm,"Atrial Lead",1,0,"Ventricular Lead",1)
+			fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
+			labels[2] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
+			scanParams(param_A,2,"Alead")
+			;~ MsgBox % fldval["Alead2-PW"]
+			
+			param_V := stregX(perm,"Ventricular Lead",1,0,">>>end",1)
+			fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
+			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
+			scanParams(param_V,3,"Vlead")
+			MsgBox % fldval["Vlead2-Amp"]
+			;~ MsgBox % param_V
 			;~ MsgBox % fldval["par1-Mode"]
 		}
 	}
