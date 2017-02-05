@@ -319,7 +319,7 @@ scanParams(txt,blk,pre:="par",rx:="") {
 				,col1.pos()+1)
 		
 		res :=	(col2.value()~="^(\>\s*)(?=[^\s])")
-			?	col1.value() . RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])"," changed to ")
+			?	RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])") " (changed from " col1.value() ")"
 			:	col1.value()
 			
 		fldval[pre "-" labels[blk,val]] := res
