@@ -368,18 +368,74 @@ printQ(var1,txt) {
 }
 
 printLead(lead) {
-	rtfBody .= "\b " pmlead " lead: \b0 " leads[pmlead,"model"] 
-	. ((tmp:=leads[pmlead,"serial"]) ? ", serial number " tmp : "")
-	. ((tmp:=leads[pmlead,"date"]) ? ", implanted " tmp : "") ". `n"
-	. ((tmp:=thr["pacing impedance",pmlead]) ? "Lead impedance " tmp " ohms. " : "")
-	. ((tmp:=thr["capture amplitude",pmlead]) ? "Capture threshold " tmp " V at " thr["capture duration",pmlead] " ms. " : "")
-	. ((tmp:=thr["sensing amplitude",pmlead]) ? ((pmlead="RA") ? "P wave " : "R wave ") "sensing " tmp " mV. " : "")
-	. ((tmp:=outputs["amplitude",pmlead]) ? "Pacing output " tmp " V at " outputs["pulse width",pmlead] " ms" ((tmp:=outputs["pace polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
-	. ((tmp:=outputs["sensitivity",pmlead]) ? "Sensitivity " tmp " mV" ((tmp:=outputs["sense polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
+	global rtfBody, leads
+	rtfBody .= "\b " lead " lead model/ser: \b0 " leads[lead,"model"] ", implanted " leads[lead,"date"] ". "
+	. printQ(leads[lead,"imp"],"Lead impedance ###. ")
+	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
+	. printQ(leads[lead,"output"],"Pacing output ###. ")
+	. printQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
+	. printQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing ###. ")
+	. printQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
+	. printQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
+	. "\par`n"
+}
+
+PrintOut:
+{
+	;~ if (RegExMatch(summ,"\<\d*\>")) {
+		;~ enc_FIN:=strX(summ,"<",1,1,">",1,1,nn)
+		;~ summ := trim(substr(summ,nn+1))
+	;~ } else {
+		;~ InputBox , enc_FIN, % blk["Patient Name"] " - " enc_date, REQUIRED:`n`nEncounter number`n(8 digits)
+	;~ }
+
+	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
+	
+	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
+	. "{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\lang9\margl1440\margr1440\margt1440\margb1440`n"
+	. "{\pard\f0\fs22`n"
+	. "{\tx2160`n"
+	. "Transcriptionist\tab "	"<TrID:crd> \par`n"
+	. "Document Type\tab "		"<7:Q8> \par`n"
+	. "Clinic Title code\tab "	"<1035:PACE> \par`n"
+	. "Medical Record #\tab "	"<1:" blk["Patient ID"] ">\par`n"
+	. "Patient Name\tab "		"<2:" blk["Patient Name"] ">\par`n"
+	. "CIS Encounter #\tab "	"<3: " substr("0000" . enc_FIN, -11) " >\par`n"
+	. "Dictating Phy #\tab "	"<8:" enc_MD ">\par`n"
+	. "Dictation Date\tab "		"<13:" enc_signed ">\par`n"
+	. "Job #\tab "				"<15:e> \par`n"
+	. "Service Date\tab "		"<31:" enc_date ">\par`n"
+	. "Surgery Date\tab "		"<6:" enc_date "> \par`n"
+	. "Attending Phy #\tab "	"<9:" enc_MD "> \par`n"
+	. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par`n"
+	. "<EndOfHeader>\par}`n"
 	. "\par`n"
 
+	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 
+	rtfBody := "\tx1620\tx5220\tx7040" . rtfBody . "\fs22\par`n" 
+	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18`n"
+	. summ . "\par\par{\tx2700\tx5220\tx7040`n"
+	. "\b Electronically Signed By:\b0\tab " blk["Electronically Signed By"] "\tab\b Encounter Type:\b0\tab " blk["Encounter Type"] "\par`n"
+	. "\b Signed Date:\b0\tab " blk["Signed Date"] "\tab\b Encounter Date:\b0\tab " blk["Encounter Date"] "\par}`n"
 
+	rtfOut := rtfHdr . rtfBody . rtfFtr
+
+	LV_Modify(filenum,"col4","YES")
+	Gui, Show
+	FileDelete, %fileOut%.rtf
+	FileAppend, %rtfOut%, %fileOut%.rtf
+	outDir := (isAdmin) 
+		? ".\completed\"
+		: ".\test\"
+;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
+
+	FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1			; copy to the final directory
+	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1			; store in Completed, is this necessary?
+	;FileMove, %fileIn%, archive\%fileout%-done.pdf, 1			; archive the PDF. Comment out if don't want to keep moving test PDF.
+	
+	
+	
 }
 
 PaceArt:
