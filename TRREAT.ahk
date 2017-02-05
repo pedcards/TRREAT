@@ -272,7 +272,7 @@ scanParams(txt,blk,pre:="par",rx:="") {
 	Loop, parse, txt, `n,`r
 	{
 		i := A_LoopField "  "
-		set := trim(strX(i,"",1,0,"  ",1,2)," :")									; Get leftmost column to first "  "
+		set := trim(strX(i,"",1,0,"  ",1,2)," :")								; Get leftmost column to first "  "
 		val := objHasValue(fields[blk],set,rx)
 		if !(val) {
 			continue
@@ -286,8 +286,11 @@ scanParams(txt,blk,pre:="par",rx:="") {
 				,col2
 				,col1.pos()+1)
 		
-		fldval[pre "1-" labels[blk,val]] := col1.value()
-		fldval[pre "2-" labels[blk,val]] := RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])","changed to ")
+		res :=	(col2.value()~="^(\>\s*)(?=[^\s])")
+			?	col1.value() . RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])"," changed to ")
+			:	col1.value()
+			
+		fldval[pre "-" labels[blk,val]] := res
 	}
 	return
 }
