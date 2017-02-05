@@ -58,11 +58,12 @@ Loop, *.pdf
 	;~ FileRead, mainraw, tempraw.txt
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {
-		if (instr(maintxt,"Pacemaker Model")) {
-			gosub MDTpm
-		}
-		if (instr(maintxt,"Defibrillation")) {
+		if (instr(maintxt,"Defibrillation")) {									; All ICD reports will have this text
 			MsgBox MDT icd
+		}
+		;~ if (instr(maintxt,"Pacemaker Model")) {
+		else {																	; Can't find PM specific text, other than not being an ICD
+			gosub MDTpm
 		}
 	}
 	if (maintxt~="Boston Scientific Corporation") {
