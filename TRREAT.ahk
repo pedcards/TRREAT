@@ -146,6 +146,8 @@ mdtAdapta:
 			if !instr(fldval["dev-Physician"],"Dr.") {
 				fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
 			}
+			;~ dev := stregX(dev,"Pacemaker Model",1,0,"Pacemaker Status",1)
+			;~ MsgBox % cleanspace(dev)
 			;~ MsgBox % fldval["dev-Physician"]
 			
 			leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
@@ -162,10 +164,11 @@ mdtAdapta:
 			;~ MsgBox % fldval["leads1-V_output"]
 			
 			thresh := oneCol(stregX(fintxt,"Threshold Test Results",1,1,"Medtronic Software",1))
-			fldval["AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
-			fldval["VP_thr"] := parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
-			fldval["AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
-			fldval["AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
+			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
+			fldval["leads-VP_thr"] := parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
+			fldval["leads-AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
+			fldval["leads-AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
+			
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
 			fintxt := strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0)
