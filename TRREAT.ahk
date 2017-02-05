@@ -48,6 +48,7 @@ Loop, *.pdf
 	fields := Object()
 	labels := Object()
 	fldval := Object()
+	leads := Object()
 	summBl := summ := ""
 	fileIn := A_LoopFileName
 	SplitPath, fileIn,,,,fileOut
@@ -146,22 +147,22 @@ mdtAdapta:
 			if !instr(fldval["dev-Physician"],"Dr.") {
 				fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
 			}
+			;~ MsgBox % fldval["dev-Alead_impl"]
 			;~ dev := stregX(dev,"Pacemaker Model",1,0,"Pacemaker Status",1)
 			;~ MsgBox % cleanspace(dev)
 			;~ MsgBox % fldval["dev-Physician"]
 			
-			leads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+			finleads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
 			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
 						, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
 						, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
 						, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
 			labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
 						, "V_output","V_curr","V_imp","V_pol","null"]
-			fldval["leads-date"] := strX(leads,"Lead Status: ",1,13,"`n",1,0,n)
-			tbl := substr(leads,n)
+			fldval["leads-date"] := strX(finleads,"Lead Status: ",1,13,"`n",1,0,n)
+			tbl := substr(finleads,n)
 			scanParams(parseTable(tbl,1),2,"leads")
-			;~ MsgBox % fldval["leads1-A_output"]
-			;~ MsgBox % fldval["leads1-V_output"]
+			;~ MsgBox % fldval["leads-V_output"]
 			
 			thresh := oneCol(stregX(fintxt,"Threshold Test Results",1,1,"Medtronic Software",1))
 			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
@@ -177,6 +178,7 @@ mdtAdapta:
 			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
+			;~ MsgBox % fldval["par-LRL"]
 			
 			param_A := stregX(perm,"Atrial Lead",1,0,"Ventricular Lead",1)
 			fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
@@ -188,30 +190,31 @@ mdtAdapta:
 			fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_V,3,"Vlead")
-			MsgBox % fldval["Vlead2-Amp"]
-			;~ MsgBox % param_V
-			;~ MsgBox % fldval["par1-Mode"]
+			;~ MsgBox % fldval["Vlead-Sens"]
 		}
 		
-		if (fldval["Alead_impl"]) {
+		if (fldval["dev-Alead_impl"]) {
 			pmlead := "RA"
 			leads[pmlead,"model"] 	:= fldval["dev-Alead"]
 			leads[pmlead,"date"]	:= fldval["dev-Alead_impl"]
 			leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
 			leads[pmlead,"cap"]  	:= fldval["leads-AP_thr"]
+			leads[pmlead,"pace pol"] := fldval["Alead-Pol_pace"]
 			leads[pmlead,"sens"]	:= fldval["leads-AS_thr"]
+			leads[pmlead,"sensitivity"] := fldval["Alead-Sens"]
+			leads[pmlead,"sens pol"] := fldval["Alead-Pol_sens"]
 		}
-			
-	;~ rtfBody .= "\b " pmlead " lead: \b0 " leads[pmlead,"model"] 
-	;~ . ((tmp:=leads[pmlead,"serial"]) ? ", serial number " tmp : "")
-	;~ . ((tmp:=leads[pmlead,"date"]) ? ", implanted " tmp : "") ". `n"
-	;~ . ((tmp:=thr["pacing impedance",pmlead]) ? "Lead impedance " tmp " ohms. " : "")
-	;~ . ((tmp:=thr["capture amplitude",pmlead]) ? "Capture threshold " tmp " V at " thr["capture duration",pmlead] " ms. " : "")
-	;~ . ((tmp:=thr["sensing amplitude",pmlead]) ? ((pmlead="RA") ? "P wave " : "R wave ") "sensing " tmp " mV. " : "")
-	;~ . ((tmp:=outputs["amplitude",pmlead]) ? "Pacing output " tmp " V at " outputs["pulse width",pmlead] " ms" ((tmp:=outputs["pace polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
-	;~ . ((tmp:=outputs["sensitivity",pmlead]) ? "Sensitivity " tmp " mV" ((tmp:=outputs["sense polarity",pmlead]) ? " (" tmp "). " : ". ") : "")
-	;~ . "\par`n"
-
+		if (fldval["dev-Vlead_impl"]) {
+			pmlead := "RV"
+			leads[pmlead,"model"] 	:= fldval["dev-Vlead"]
+			leads[pmlead,"date"]	:= fldval["dev-Vlead_impl"]
+			leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
+			leads[pmlead,"cap"]  	:= fldval["leads-VP_thr"]
+			leads[pmlead,"pace pol"] := fldval["Vlead-Pol_pace"]
+			leads[pmlead,"sens"]	:= fldval["leads-VS_thr"]
+			leads[pmlead,"sensitivity"] := fldval["Vlead-Sens"]
+			leads[pmlead,"sens pol"] := fldval["Vlead-Pol_sens"]
+		}
 	}
 return
 }
@@ -335,15 +338,15 @@ pmPrint:
 		. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
 		. printQ(fldval["dev-Voltage"],"Generator cell voltage ###. ")
 		. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
-		. printQ(fldval["par2-Mode"],"Brady programming mode is ### with lower rate " fldval["par2-LRL"])
-		. printQ(fldval["par2-URL"],", upper tracking rate ###")
-		. printQ(fldval["par2-USR"],", upper sensor rate ###")
-		. printQ(fldval["par2-ADL"],", ADL rate ###") . ". `n"
-		. printQ(fldval["par2-Cap_Mgt"],"Adaptive mode is ###. ") . "`n"
-		. printQ(fldval["par2-PAV"]&&fldval["par2-SAV"],"Paced and sensed AV delays are " fldval["par2-PAV"] " and " fldval["par2-SAV"] ", respectively. `n")
-		. printQ(fldval["dev1-Sensed"],"Sensed ###. ") . printQ(fldval["dev1-Paced"],"Paced ###. ")
-		. printQ(fldval["dev1-AsVs"],"AS-VS ###  ") . printQ(fldval["dev1-AsVp"],"AS-VP ###  ")
-		. printQ(fldval["dev1-ApVs"],"AP-VS ###  ") . printQ(fldval["dev1-ApVp"],"AP-VP ###  ") . "\par`n"
+		. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
+		. printQ(fldval["par-URL"],", upper tracking rate ###")
+		. printQ(fldval["par-USR"],", upper sensor rate ###")
+		. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
+		. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
+		. printQ(fldval["par-PAV"]&&fldval["par-SAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
+		. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
+		. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
+		. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ") . "\par`n"
 		. "\fs22\par`n"
 		. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 		
