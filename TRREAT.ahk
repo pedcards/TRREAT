@@ -277,7 +277,7 @@ mdtAdapta:
 			scanParams(parseTable(tbl,1),2,"leads")
 			;~ MsgBox % fldval["leads-V_output"]
 			
-			thresh := oneCol(stregX(fintxt,"Threshold Test Results",1,1,"Medtronic Software",1))
+			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
 			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
 			fldval["leads-VP_thr"] := parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
 			fldval["leads-AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
