@@ -421,11 +421,12 @@ oneCol(txt) {
 			
 			str := rtrim(substr(i,lastpos,len))									; string to return
 			
-			if (str) {															; as long as not blank,
-				result .= str "`n"												; add to result
-			}
+			result .= str "`n"													; add to result
 		}
 		if (max) {																; break out when hit last column
+			break
+		}
+		if !(trim(result)," `n") {															; break out if result is empty
 			break
 		}
 		lastpos := nextpos														; starting point is result from last scan
