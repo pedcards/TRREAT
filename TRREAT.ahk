@@ -181,17 +181,16 @@ mdtQuickLookII:
 	labels[1] := ["Mode","Mode Switch","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]
 	scanParams(onecol(param),1,"par",1)
 	
-	param_A := stregX(perm,"Atrial Lead",1,0,"Ventricular Lead",1)
-	fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
-	labels[2] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
-	scanParams(param_A,2,"Alead")
-	;~ MsgBox % fldval["Alead2-PW"]
-	
-	param_V := stregX(perm,"Ventricular Lead",1,0,">>>end",1)
-	fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
-	labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
-	scanParams(param_V,3,"Vlead")
-	;~ MsgBox % fldval["Vlead-Sens"]
+	par := parsetable(stregx(fintxt,"Pacing Details",1,0,"AV Therapies",1),1)
+	fields[2] := ["Atrial.*-Capture Management","Atrial.*-Pace Polarity","Atrial.*-Sense Polarity"
+				, "RV.*-Capture Management","RV.*-Pace Polarity","RV.*-Sense Polarity"
+				, "LV.*-Capture Management","LV.*-Pace Polarity","LV.*-Sense Polarity"]
+	labels[2] := ["A_Cap_Mgt","A_Pol_pace","A_Pol_Sens"
+				, "RV_Cap_Mgt","RV_Pol_pace","RV_Pol_sens"
+				, "LV_Cap_Mgt","LV_Pol_pace","LV_Pol_sens"]
+	scanParams(par,2,"leads",1)
+	MsgBox % par
+	ExitApp
 	
 	if (fldval["dev-Alead_impl"]) {
 		pmlead := "RA"
