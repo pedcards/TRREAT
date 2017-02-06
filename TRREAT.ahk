@@ -132,6 +132,8 @@ mdtQuickLookII:
 	}
 	scanParams(iniRep,2,"dev",1)
 	
+	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
+	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
 	Loop, % fin.length()
