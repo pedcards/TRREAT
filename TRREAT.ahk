@@ -63,7 +63,7 @@ Loop, *.pdf
 		}
 		;~ if (instr(maintxt,"Pacemaker Model")) {
 		else {																	; Can't find PM specific text, other than not being an ICD
-			gosub MDTpm
+			gosub MDTpm															; maybe use an array of Brady devices?
 		}
 	}
 	if (maintxt~="Boston Scientific Corporation") {
@@ -114,9 +114,12 @@ return
 mdtQuickLookII:
 {
 	iniRep := stregX(maintxt,"Initial Interrogation",1,0,"Device Status",1)
-	fields[1] := ["Device","Serial Number","Date of Visit","Patient","ID","Physician","History"]
-	labels[1] := ["IPG","IPG_SN","Encounter","Name","ID","Physician","History"]
+	fields[1] := ["Device","Serial Number","Date of Visit","Patient","ID","Physician","`n","History"]
+	labels[1] := ["IPG","IPG_SN","Encounter","Name","ID","Physician","null","History"]
 	fieldvals(iniRep,1,"dev")
+	if !instr(fldval["dev-Physician"],"Dr.") {
+		fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
+	}
 	
 	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
