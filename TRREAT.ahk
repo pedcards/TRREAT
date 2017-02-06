@@ -177,10 +177,9 @@ mdtQuickLookII:
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1)
-	fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
-	labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
-	scanParams(fintxt,1,"par")
-	;~ MsgBox % fldval["par-LRL"]
+	fields[1] := ["Mode","Mode Switch","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV"]
+	labels[1] := ["Mode","Mode Switch","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]
+	scanParams(onecol(param),1,"par",1)
 	
 	param_A := stregX(perm,"Atrial Lead",1,0,"Ventricular Lead",1)
 	fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
