@@ -148,12 +148,32 @@ mdtQuickLookII:
 	fieldvals(dev,1,"dev")
 	
 	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
-	fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
-				, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
-				, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
-				, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
-	labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
-				, "V_output","V_curr","V_imp","V_pol","null"]
+	fields[2] := ["Atrial.*-Lead Impedance"
+				, "Atrial.*-Capture Threshold"
+				, "Atrial.*-Measured On"
+				, "Atrial.*-In-Office Threshold"
+				, "Atrial.*-Programmed Amplitude"
+				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-Programmed Sensitivity"
+			, "RV.*-Lead Impedance"
+				, "RV.*-Capture Threshold"
+				, "RV.*-Measured On"
+				, "RV.*-In-Office Threshold"
+				, "RV.*-Programmed Amplitude"
+				, "RV.*-Measured .*Wave"
+				, "RV.*-Programmed Sensitivity"
+			, "LV.*-Lead Impedance"
+				, "LV.*-Capture Threshold"
+				, "LV.*-Measured On"
+				, "LV.*-In-Office Threshold"
+				, "LV.*-Programmed Amplitude"
+				, "LV.*-Measured .*Wave"
+				, "LV.*-Programmed Sensitivity"]
+	labels[2] := ["A_imp","A_cap","A_date","A_thr","A_output","A_sens","A_sensitivity"
+				, "RV_imp","RV_cap","RV_date","RV_thr","RV_output","RV_sens","RV_sensitivity"
+				, "LV_imp","LV_cap","LV_date","LV_thr","LV_output","LV_sens","LV_sensitivity"]
+	scanParams(parseTable(fintbl,1),2,"leads",1)
+	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
 	Loop, % fin.length()
