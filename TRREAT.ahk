@@ -400,7 +400,7 @@ parseTable(txt,title:="") {
 			maxpos := (pos>maxpos)?pos:maxpos									; maxpos furthest right for this column
 			
 			if !(pos) {															; break if no matches
-				break
+				continue
 			}
 			
 			fld := strX(A_LoopField,"",1,0,"  ",1,2)							; field name
@@ -418,8 +418,8 @@ parseTable(txt,title:="") {
 		}
 		result .= "endcolumn`n"
 		maxpos += 1																; start next search 1 space over
-		;~ MsgBox % result
 	}
+	;~ MsgBox % result
 return result
 }
 
