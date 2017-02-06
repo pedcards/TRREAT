@@ -134,7 +134,7 @@ mdtQuickLookII:
 	
 	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
 	
-	dev := stregX(fintxt,"Device Information",1,1,"Initial Interrogation\)",0)
+	dev := stregX(fintxt,"Device Information",1,1,"initial interrogation\)",0,n)
 	fields[1] := ["Device", "Implanted","`n"
 				, "Atrial", "Implanted","`n"
 				, "RV", "Implanted","`n"
@@ -147,6 +147,13 @@ mdtQuickLookII:
 				, "IPG_stat", "IPG_voltage","Longevity","null"]
 	fieldvals(dev,1,"dev")
 	
+	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
+	fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
+				, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
+				, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
+				, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
+	labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
+				, "V_output","V_curr","V_imp","V_pol","null"]
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
 	Loop, % fin.length()
