@@ -443,22 +443,43 @@ parseTable(txt,title:="") {
 return result
 }
 
-oneCol(txt,cols:=2) {
+oneCol(txt) {
 /*	Break text block into a single column 
-	based on logical break points
+	based on logical break points in title (first) row
 */
-	Loop, parse, txt, `n,`r
+	nextpos := 1
+	lastpos := 1
+	Loop
 	{
-		pos := RegExMatch(A_LoopField "  "										; Add "  " to end of scan string
-						,"O)(?<=(\s{2}))[^\s].*"								; Search "  text  " as each column 
-						,col)													; search position at next column
-		
-		maxpos := (pos>maxpos)?pos:maxpos										; maxpos furthest right for this column
-		
-		col1 .= rtrim(substr(A_LoopField,1,maxpos-1)) "`n"								; field name
-		col2 .= rtrim(substr(A_LoopField,maxpos)) "`n"
+		Loop, parse, txt, `n,`r
+		{
+			i := A_LoopField
+			
+			if (A_index=1) {
+				pos := RegExMatch(i	"  #"										; Add "  #" to end of scan string
+								,"O)(?<=(\s{2}))[^\s]"							; Search "  text" as each column 
+								,col
+								,nextpos)										; search position at next column
+				nextpos := (pos>nextpos)?pos:nextpos							; nextpos furthest right for this column
+				if (nextpos > strlen(i)) {
+					max := true													; last column triggers max
+				}
+			}
+			len := (max) ? strlen(i)-lastpos+1 : nextpos-lastpos				; length of string to return (max gets to end of line)
+			
+			str := rtrim(substr(i,lastpos,len))									; string to return
+			
+			if (str) {															; as long as not blank,
+				result .= str "`n"												; add to result
+			}
+		}
+		if (max) {																; break out when hit last column
+			break
+		}
+		lastpos := nextpos														; starting point is result from last scan
+		nextpos += 1															; new starting point is 1 over, to find next string
 	}
-	return col1 . col2 . ">>>end"
+	return result . ">>>end"
 }
 
 scanParams(txt,blk,pre:="par",rx:="") {
