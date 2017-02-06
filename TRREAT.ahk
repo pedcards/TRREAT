@@ -169,9 +169,9 @@ mdtQuickLookII:
 				, "LV.*-Programmed Amplitude"
 				, "LV.*-Measured .*Wave"
 				, "LV.*-Programmed Sensitivity"]
-	labels[2] := ["A_imp","A_cap","A_date","A_thr","A_output","A_sens","A_sensitivity"
-				, "RV_imp","RV_cap","RV_date","RV_thr","RV_output","RV_sens","RV_sensitivity"
-				, "LV_imp","LV_cap","LV_date","LV_thr","LV_output","LV_sens","LV_sensitivity"]
+	labels[2] := ["A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
+				, "LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
 	scanParams(parseTable(fintbl,1),2,"leads",1)
 	
 	splTxt := "Final Report"
