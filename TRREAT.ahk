@@ -113,14 +113,6 @@ return
 
 mdtQuickLookII:
 {
-	iniRep := stregX(maintxt,"Initial Interrogation",1,0,"Device Status",1)
-	fields[1] := ["Device","Serial Number","Date of Visit","Patient","ID","Physician","`n","History"]
-	labels[1] := ["IPG","IPG_SN","Encounter","Name","ID","Physician","null","History"]
-	fieldvals(iniRep,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp)
-	}
-	
 	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	if instr(iniRep,"Sensed") {
@@ -134,18 +126,27 @@ mdtQuickLookII:
 	
 	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
 	
-	dev := stregX(fintxt,"Device Information",1,1,"initial interrogation\)",0,n)
-	fields[1] := ["Device", "Implanted","`n"
+	dev := stregX(fintxt,"Session Summary",1,1,"initial interrogation\)",0,n)
+	fields[1] := ["Device","Serial Number","Date of Visit"
+				, "Patient","ID","Physician","`n"
+				, "Device Information","`n"
+				, "Device", "Implanted","`n"
 				, "Atrial", "Implanted","`n"
 				, "RV", "Implanted","`n"
 				, "LV", "Implanted","`n"
 				, "Device Status", "Battery Voltage","Remaining Longevity","`n"]
-	labels[1] := ["IPG0", "IPG_impl","null"
+	labels[1] := ["IPG","IPG_SN","Encounter"
+				, "Name","ID","Physician","null"
+				, "null","null"
+				, "IPG0", "IPG_impl","null"
 				, "Alead", "Alead_impl","null"
 				, "RVlead", "RVlead_impl","null"
 				, "LVlead", "LVlead_impl","null"
 				, "IPG_stat", "IPG_voltage","Longevity","null"]
 	fieldvals(dev,1,"dev")
+	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
+		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
+	}
 	
 	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
