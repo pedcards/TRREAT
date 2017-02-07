@@ -357,6 +357,30 @@ parseStrDur(txt) {
 return res
 }
 
+normLead(lead				; RA, RV, LV
+		,model				; Model name/ser
+		,date				; Date implanted
+		,P_imp				; Pacing impedance
+		,P_thr				; Pacing capture threshold
+		,P_out				; Pacing programmed output
+		,P_pol				; Pacing polarity
+		,S_thr				; Sensing threshold
+		,S_sens				; Sensing programmed sensitivity
+		,S_pol)				; Sensing polarity
+{
+	global leads, fldval
+	leads[lead,"model"] 	:= model
+	leads[lead,"date"]		:= date
+	leads[lead,"imp"]  		:= P_imp
+	leads[lead,"cap"]  		:= P_thr
+	leads[lead,"output"]	:= P_out
+	leads[lead,"pace pol"] 	:= P_pol
+	leads[lead,"sens"]		:= S_thr
+	leads[lead,"sensitivity"] := S_sens
+	leads[lead,"sens pol"] 	:= S_pol
+return
+}
+
 parseTable(txt,title:="") {
 /*	Analyze text block for vertical table format
 	If "title" not null or if first row begins with spaces, consider top row as title row
