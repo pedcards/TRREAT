@@ -231,11 +231,6 @@ return
 
 mdtAdapta:
 {
-	iniRep := stregX(maintxt,"Initial Interrogation",1,0,"Pacemaker Status",1)
-	fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","Physician","Patient Name","History"]
-	labels[1] := ["IPG","IPG_SN","Encounter","Physician","null","History"]
-	fieldvals(iniRep,1,"dev")
-	
 	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	if instr(iniRep,"Sensed") {
@@ -253,25 +248,25 @@ mdtAdapta:
 	{
 		fintxt := fin[A_index]
 		if (fintxt~=splTxt ".*Pacemaker Status") {
-			dev := strX(fintxt,"Patient Name:",1,0,"Lead Status:",1,0)
-			fields[1] := ["Patient Name", "DOB", "ID", "Physician"
+			dev := strX(fintxt,"Final Report",1,0,"Lead Status:",1,0)
+			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit"
+						, "Patient Name", "DOB", "ID", "Physician","`n"
 						, "Pacemaker Model", "Implanted"
 						, "Atrial Lead", "Implanted"
 						, "Ventricular Lead", "Implanted"
 						, "Pacemaker Status", "Estimated remaining longevity"
 						, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
-			labels[1] := ["Name", "DOB", "MRN", "Physician"
+			labels[1] := ["IPG","IPG_SN","Encounter"
+						,"Name", "DOB", "MRN", "Physician","null"
 						, "IPG0", "IPG_impl"
 						, "Alead", "Alead_impl"
 						, "Vlead", "Vlead_impl"
 						, "IPG_stat", "IPG_longevity"
 						, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
 			fieldvals(dev,1,"dev")
-			if !instr(fldval["dev-Physician"],"Dr.") {
-				fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
+			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
+				fldval["dev-Physician"] := "Dr. " . trim(tmp)
 			}
-			;~ MsgBox % fldval["dev-Alead_impl"]
-			;~ MsgBox % fldval["dev-Physician"]
 			
 			finleads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
 			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
