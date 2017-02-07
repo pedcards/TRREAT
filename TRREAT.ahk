@@ -117,8 +117,8 @@ mdtQuickLookII:
 	fields[1] := ["Device","Serial Number","Date of Visit","Patient","ID","Physician","`n","History"]
 	labels[1] := ["IPG","IPG_SN","Encounter","Name","ID","Physician","null","History"]
 	fieldvals(iniRep,1,"dev")
-	if !instr(fldval["dev-Physician"],"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . fldval["dev-Physician"]
+	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
+		fldval["dev-Physician"] := "Dr. " . trim(tmp)
 	}
 	
 	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
