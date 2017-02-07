@@ -190,7 +190,7 @@ mdtQuickLookII:
 				, "LV_Cap_Mgt","LV_Pol_pace","LV_Pol_sens"]
 	scanParams(par,2,"leads",1)
 	
-	if (fldval["dev-Alead_impl"]) {
+	if (fldval["dev-Alead"]) {
 		pmlead := "RA"
 		leads[pmlead,"model"] 	:= fldval["dev-Alead"]
 		leads[pmlead,"date"]	:= fldval["dev-Alead_impl"]
@@ -202,7 +202,7 @@ mdtQuickLookII:
 		leads[pmlead,"sensitivity"] := fldval["leads-A_Sensitivity"]
 		leads[pmlead,"sens pol"] := fldval["leads-A_Pol_sens"]
 	}
-	if (fldval["dev-RVlead_impl"]) {
+	if (fldval["dev-RVlead"]) {
 		pmlead := "RV"
 		leads[pmlead,"model"] 	:= fldval["dev-RVlead"]
 		leads[pmlead,"date"]	:= fldval["dev-RVlead_impl"]
@@ -214,7 +214,7 @@ mdtQuickLookII:
 		leads[pmlead,"sensitivity"] := fldval["leads-RV_Sensitivity"]
 		leads[pmlead,"sens pol"] := fldval["leads-RV_Pol_sens"]
 	}
-	if (fldval["dev-LVlead_impl"]) {
+	if (fldval["dev-LVlead"]) {
 		pmlead := "LV"
 		leads[pmlead,"model"] 	:= fldval["dev-LVlead"]
 		leads[pmlead,"date"]	:= fldval["dev-LVlead_impl"]
