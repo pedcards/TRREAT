@@ -192,40 +192,22 @@ mdtQuickLookII:
 	scanParams(par,2,"leads",1)
 	
 	if (fldval["dev-Alead"]) {
-		pmlead := "RA"
-		leads[pmlead,"model"] 	:= fldval["dev-Alead"]
-		leads[pmlead,"date"]	:= fldval["dev-Alead_impl"]
-		leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
-		leads[pmlead,"cap"]  	:= fldval["leads-A_Pthr"]
-		leads[pmlead,"output"]	:= fldval["leads-A_output"] ;(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-		leads[pmlead,"pace pol"] := fldval["leads-A_Pol_pace"]
-		leads[pmlead,"sens"]	:= fldval["leads-A_Sthr"]
-		leads[pmlead,"sensitivity"] := fldval["leads-A_Sensitivity"]
-		leads[pmlead,"sens pol"] := fldval["leads-A_Pol_sens"]
+		normLead("RA"
+				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+				,fldval["leads-A_imp"],fldval["leads-A_Pthr"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
+				,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
 	}
 	if (fldval["dev-RVlead"]) {
-		pmlead := "RV"
-		leads[pmlead,"model"] 	:= fldval["dev-RVlead"]
-		leads[pmlead,"date"]	:= fldval["dev-RVlead_impl"]
-		leads[pmlead,"imp"]  	:= fldval["leads-RV_imp"]
-		leads[pmlead,"cap"]  	:= fldval["leads-RV Pthr"]
-		leads[pmlead,"output"]	:= fldval["leads-RV_output"] ;(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-		leads[pmlead,"pace pol"] := fldval["leads-RV_Pol_pace"]
-		leads[pmlead,"sens"]	:= fldval["leads-RV_Sthr"]
-		leads[pmlead,"sensitivity"] := fldval["leads-RV_Sensitivity"]
-		leads[pmlead,"sens pol"] := fldval["leads-RV_Pol_sens"]
+		normLead("RV"
+				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
+				,fldval["leads-RV_imp"],fldval["leads-RV_Pthr"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
+				,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
 	}
 	if (fldval["dev-LVlead"]) {
-		pmlead := "LV"
-		leads[pmlead,"model"] 	:= fldval["dev-LVlead"]
-		leads[pmlead,"date"]	:= fldval["dev-LVlead_impl"]
-		leads[pmlead,"imp"]  	:= fldval["leads-LV_imp"]
-		leads[pmlead,"cap"]  	:= fldval["leads-LV Pthr"]
-		leads[pmlead,"output"]	:= fldval["leads-LV_output"] ;(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-		leads[pmlead,"pace pol"] := fldval["leads-LV_Pol_pace"]
-		leads[pmlead,"sens"]	:= fldval["leads-LV_Sthr"]
-		leads[pmlead,"sensitivity"] := fldval["leads-LV_Sensitivity"]
-		leads[pmlead,"sens pol"] := fldval["leads-LV_Pol_sens"]
+		normLead("LV"
+				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
+				,fldval["leads-LV_imp"],fldval["leads-LV_Pthr"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+				,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
 	}
 return
 }
