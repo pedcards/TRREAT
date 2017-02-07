@@ -176,9 +176,9 @@ mdtQuickLookII:
 	
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
-	param := stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1)
-	fields[1] := ["Mode","Mode Switch","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV"]
-	labels[1] := ["Mode","Mode Switch","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]
+	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
+	fields[1] := ["Mode Switch","Mode","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV"]
+	labels[1] := ["Mode Switch","Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
 	scanParams(onecol(param),1,"par",1)
 	
 	par := parsetable(stregx(fintxt,"Pacing Details",1,0,"AV Therapies",1),1)
