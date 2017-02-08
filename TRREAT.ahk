@@ -387,38 +387,34 @@ oneCol(txt) {
 /*	Break text block into a single column 
 	based on logical break points in title (first) row
 */
-	nextpos := 1
 	lastpos := 1
-	Loop
+	Loop																		; Iterate each column
 	{
-		Loop, parse, txt, `n,`r
+		Loop, parse, txt, `n,`r													; Read through text block
 		{
 			i := A_LoopField
 			
 			if (A_index=1) {
-				pos := RegExMatch(i	"  #"										; Add "  #" to end of scan string
+				pos := RegExMatch(i	"  "										; Add "  " to end of scan string
 								,"O)(?<=(\s{2}))[^\s]"							; Search "  text" as each column 
 								,col
-								,nextpos)										; search position at next column
-				nextpos := (pos>nextpos)?pos:nextpos							; nextpos furthest right for this column
-				if (nextpos > strlen(i)) {
-					max := true													; last column triggers max
+								,lastpos+1)										; search position to find next "  "
+				
+				if !(pos) {														; no match beyond, have hit max column
+					max := true
 				}
 			}
-			len := (max) ? strlen(i)-lastpos+1 : nextpos-lastpos				; length of string to return (max gets to end of line)
 			
-			str := rtrim(substr(i,lastpos,len))									; string to return
+			len := (max) ? strlen(i) : pos-lastpos								; length of string to return (max gets to end of line)
+			
+			str := substr(i,lastpos,len)										; string to return
 			
 			result .= str "`n"													; add to result
 		}
-		if (max) {																; break out when hit last column
+		if (max) {																; break out if at max column
 			break
 		}
-		if !(trim(result)," `n") {															; break out if result is empty
-			break
-		}
-		lastpos := nextpos														; starting point is result from last scan
-		nextpos += 1															; new starting point is 1 over, to find next string
+		lastpos := pos															; set next start point
 	}
 	return result . ">>>end"
 }
