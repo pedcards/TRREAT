@@ -261,7 +261,6 @@ mdtAdapta:
 			fldval["leads-date"] := strX(finleads,"Lead Status: ",1,13,"`n",1,0,n)
 			tbl := substr(finleads,n)
 			scanParams(parseTable(tbl,1),2,"leads")
-			;~ MsgBox % fldval["leads-V_output"]
 			
 			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
 			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
@@ -273,23 +272,19 @@ mdtAdapta:
 		if (fintxt~=splTxt ".*Permanent Parameters") {
 			perm := oneCol(strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
-			;~ Clipboard := oneCol(fintxt)
 			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
-			;~ MsgBox % fldval["par-LRL"]
 			
 			param_A := stregX(perm,"Atrial Lead",1,0,"Ventricular Lead",1)
 			fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[2] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_A,2,"Alead")
-			;~ MsgBox % fldval["Alead2-PW"]
 			
 			param_V := stregX(perm,"Ventricular Lead",1,0,">>>end",1)
 			fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_V,3,"Vlead")
-			;~ MsgBox % fldval["Vlead-Sens"]
 		}
 		
 		if (fldval["dev-Alead_impl"]) {
