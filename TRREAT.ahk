@@ -176,7 +176,7 @@ mdtQuickLookII:
 	labels[2] := ["A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_sensitivity"
 				, "RV_imp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
 				, "LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
-	scanParams(parseTable(fintbl,1),2,"leads",1)
+	scanParams(parseTable(fintbl),2,"leads",1)
 	
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
@@ -185,7 +185,7 @@ mdtQuickLookII:
 	labels[1] := ["Mode Switch","Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
 	scanParams(onecol(param),1,"par",1)
 	
-	par := parsetable(stregx(fintxt,"Pacing Details",1,0,"AV Therapies",1),1)
+	par := parsetable(stregx(fintxt,"Pacing Details",1,0,"AV Therapies",1))
 	fields[2] := ["Atrial.*-Capture Management","Atrial.*-Pace Polarity","Atrial.*-Sense Polarity"
 				, "RV.*-Capture Management","RV.*-Pace Polarity","RV.*-Sense Polarity"
 				, "LV.*-Capture Management","LV.*-Pace Polarity","LV.*-Sense Polarity"]
@@ -265,7 +265,7 @@ mdtAdapta:
 						, "V_output","V_curr","V_imp","V_pol","null"]
 			fldval["leads-date"] := strX(finleads,"Lead Status: ",1,13,"`n",1,0,n)
 			tbl := substr(finleads,n)
-			scanParams(parseTable(tbl,1),2,"leads")
+			scanParams(parseTable(tbl),2,"leads")
 			
 			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
 			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
