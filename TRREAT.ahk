@@ -154,6 +154,7 @@ mdtQuickLookII:
 	
 	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
+				, "Atrial.*-Pacing Impedance"
 				, "Atrial.*-Capture Threshold"
 				, "Atrial.*-Measured On"
 				, "Atrial.*-In-Office Threshold"
@@ -161,6 +162,8 @@ mdtQuickLookII:
 				, "Atrial.*-Measured .*Wave"
 				, "Atrial.*-Programmed Sensitivity"
 			, "RV.*-Lead Impedance"
+				, "RV.*-Pacing Impedance"
+				, "RV.*-Defibrillation Impedance"
 				, "RV.*-Capture Threshold"
 				, "RV.*-Measured On"
 				, "RV.*-In-Office Threshold"
@@ -168,15 +171,16 @@ mdtQuickLookII:
 				, "RV.*-Measured .*Wave"
 				, "RV.*-Programmed Sensitivity"
 			, "LV.*-Lead Impedance"
+				, "LV.*-Pacing Impedance"
 				, "LV.*-Capture Threshold"
 				, "LV.*-Measured On"
 				, "LV.*-In-Office Threshold"
 				, "LV.*-Programmed Amplitude"
 				, "LV.*-Measured .*Wave"
 				, "LV.*-Programmed Sensitivity"]
-	labels[2] := ["A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_sensitivity"
-				, "RV_imp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
-				, "LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
+				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
 	scanParams(parseTable(fintbl),2,"leads",1)
 	
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
