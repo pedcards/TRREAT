@@ -575,7 +575,7 @@ PrintOut:
 	;FileMove, %fileIn%, archive\%fileout%-done.pdf, 1			; archive the PDF. Comment out if don't want to keep moving test PDF.
 	
 	
-	
+	return
 }
 
 PaceArt:
