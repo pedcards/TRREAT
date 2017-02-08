@@ -80,7 +80,7 @@ Loop, *.pdf
 MsgBox Directory scan complete.
 GuiControl, Enable, Reload
 
-Exit
+ExitApp
 
 
 ButtonReload:
