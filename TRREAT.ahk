@@ -59,7 +59,8 @@ Loop, *.pdf
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {
 		if (instr(maintxt,"Defibrillation")) {									; All ICD reports will have this text
-			MsgBox MDT icd
+			;~ MsgBox MDT icd
+			gosub MDTpm
 		}
 		;~ if (instr(maintxt,"Pacemaker Model")) {
 		else {																	; Can't find PM specific text, other than not being an ICD
