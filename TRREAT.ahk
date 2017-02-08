@@ -197,19 +197,19 @@ mdtQuickLookII:
 	if (fldval["dev-Alead"]) {
 		normLead("RA"
 				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-				,fldval["leads-A_imp"],fldval["leads-A_Pthr"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
+				,fldval["leads-A_imp"],fldval["leads-A_cap"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
 				,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
 	}
 	if (fldval["dev-RVlead"]) {
 		normLead("RV"
 				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
-				,fldval["leads-RV_imp"],fldval["leads-RV_Pthr"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
+				,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
 				,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
 	}
 	if (fldval["dev-LVlead"]) {
 		normLead("LV"
 				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
-				,fldval["leads-LV_imp"],fldval["leads-LV_Pthr"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+				,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
 				,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
 	}
 return
