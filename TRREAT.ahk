@@ -331,7 +331,7 @@ parseStrDur(txt) {
 return res
 }
 
-parseTable(txt,title:="") {
+parseTable(txt) {
 /*	Analyze text block for vertical table format
 	If "title" not null or if first row begins with spaces, consider top row as title row
 */
