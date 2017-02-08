@@ -335,39 +335,40 @@ parseTable(txt,title:="") {
 /*	Analyze text block for vertical table format
 	If "title" not null or if first row begins with spaces, consider top row as title row
 */
-	maxpos := 1
+	nextpos := 1
 	Loop																		; Iterate for each column found
 	{
 		Loop, parse, txt, `n,`r													; Read through text block
 		{
-			if !(A_LoopField) {
+			i := A_LoopField
+			if !(i) {															; OK to skip entirely blank lines
 				continue
 			}
-			pos := RegExMatch(A_LoopField "  "									; Add "  " to end of scan string
-							,"O)(?<=(\s{2}))[^\s].*?(?=(\s{2}))"				; Search "  text  " as each column 
+			
+			pos := RegExMatch(i "  "											; Add "  " to end of scan string
+							,"O)(?<=(\s{2}))[^\s](.*?)(?=(\s{2}))"				; Search "  text  " as each column 
 							,col												; return result in var "col"
-							,maxpos)											; search position at next column
-			maxpos := (pos>maxpos)?pos:maxpos									; maxpos furthest right for this column
-			
+							,nextpos)											; search position at next column
+			nextpos := (pos>nextpos)?pos:nextpos									; maxpos furthest right for this column
 			if !(pos) {															; break if no matches
+				break
+			}
+			if (A_Index=1) {
+				pre := col.value()								; result is column name
 				continue
-			}
+			} 
+			fld := strX(i,"",1,0,"  ",1,2)							; field name
 			
-			fld := strX(A_LoopField,"",1,0,"  ",1,2)							; field name
+			str := strX(substr(i,nextpos),"",1,0,"  ",1)
 			
-			if ((A_index = 1)&&(title)) {										; first row blank field or "title" flag set
-				pre := col.value()												; result is column name
-				continue														; and move to next iteration
-			}
-			
-			result .= pre "-" fld ":  " col.value() "`n"						; used as start to find next column
+			result .= pre "-" fld ":  " str "`n"						; used as start to find next column
 		}
 		
 		if !(pos) {																; break when no more hits
 			break
 		}
 		result .= "endcolumn`n"
-		maxpos += 1																; start next search 1 space over
+		nextpos += 1																; start next search 1 space over
 	}
 	;~ MsgBox % result
 return result
