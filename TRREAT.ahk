@@ -142,11 +142,14 @@ mdtQuickLookII:
 				, "Alead", "Alead_impl","null"
 				, "RVlead", "RVlead_impl","null"
 				, "LVlead", "LVlead_impl","null"
-				, "IPG_stat", "IPG_voltage","Longevity","null"]
+				, "IPG_stat", "IPG_voltage","IPG_longevity","null"]
 	fieldvals(dev,1,"dev")
 	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
 	}
+	fldval["dev-Alead"] := RegExReplace(fldval["dev-Alead"],"---")
+	fldval["dev-RVlead"] := RegExReplace(fldval["dev-RVlead"],"---")
+	fldval["dev-LVlead"] := RegExReplace(fldval["dev-LVlead"],"---")
 	
 	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
@@ -245,11 +248,13 @@ mdtAdapta:
 						, "Alead", "Alead_impl"
 						, "Vlead", "Vlead_impl"
 						, "IPG_stat", "IPG_longevity"
-						, "Battery_stat", "Voltage", "Current", "Impedance", "null"]
+						, "Battery_stat", "IPG_voltage", "Current", "Impedance", "null"]
 			fieldvals(dev,1,"dev")
 			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 				fldval["dev-Physician"] := "Dr. " . trim(tmp)
 			}
+			fldval["dev-Alead"] := RegExReplace(fldval["dev-Alead"],"---")
+			fldval["dev-RVlead"] := RegExReplace(fldval["dev-RVlead"],"---")
 			
 			finleads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
 			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
@@ -442,7 +447,7 @@ pmPrint:
 	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n\fs18"
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
-	. printQ(fldval["dev-Voltage"],"Generator cell voltage ###. ")
+	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
 	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
 	. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
 	. printQ(fldval["par-URL"],", upper tracking rate ###")
