@@ -106,7 +106,7 @@ MDTpm:
 	
 	gosub pmPrint
 	;~ clipboard := rtfBody
-	MsgBox % rtfBody
+	;~ MsgBox % rtfBody
 	
 return	
 }
