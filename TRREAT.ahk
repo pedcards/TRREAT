@@ -293,28 +293,30 @@ mdtAdapta:
 		}
 		
 		if (fldval["dev-Alead_impl"]) {
-			pmlead := "RA"
-			leads[pmlead,"model"] 	:= fldval["dev-Alead"]
-			leads[pmlead,"date"]	:= fldval["dev-Alead_impl"]
-			leads[pmlead,"imp"]  	:= fldval["leads-A_imp"]
-			leads[pmlead,"cap"]  	:= fldval["leads-AP_thr"]
-			leads[pmlead,"output"]	:= (fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-			leads[pmlead,"pace pol"] := fldval["Alead-Pol_pace"]
-			leads[pmlead,"sens"]	:= fldval["leads-AS_thr"]
-			leads[pmlead,"sensitivity"] := fldval["Alead-Sens"]
-			leads[pmlead,"sens pol"] := fldval["Alead-Pol_sens"]
+			normLead("RA"
+					,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+					,fldval["leads-A_imp"],fldval["leads-AP_thr"]
+					,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
+					,fldval["Alead-Pol_pace"]
+					,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
 		}
 		if (fldval["dev-Vlead_impl"]) {
-			pmlead := "RV"
-			leads[pmlead,"model"] 	:= fldval["dev-Vlead"]
-			leads[pmlead,"date"]	:= fldval["dev-Vlead_impl"]
-			leads[pmlead,"imp"]  	:= fldval["leads-V_imp"]
-			leads[pmlead,"cap"]  	:= fldval["leads-VP_thr"]
-			leads[pmlead,"output"]	:= (fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
-			leads[pmlead,"pace pol"] := fldval["Vlead-Pol_pace"]
-			leads[pmlead,"sens"]	:= fldval["leads-VS_thr"]
-			leads[pmlead,"sensitivity"] := fldval["Vlead-Sens"]
-			leads[pmlead,"sens pol"] := fldval["Vlead-Pol_sens"]
+			;~ pmlead := "RV"
+			;~ leads[pmlead,"model"] 	:= fldval["dev-Vlead"]
+			;~ leads[pmlead,"date"]	:= fldval["dev-Vlead_impl"]
+			;~ leads[pmlead,"imp"]  	:= fldval["leads-V_imp"]
+			;~ leads[pmlead,"cap"]  	:= fldval["leads-VP_thr"]
+			;~ leads[pmlead,"output"]	:= (fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
+			;~ leads[pmlead,"pace pol"] := fldval["Vlead-Pol_pace"]
+			;~ leads[pmlead,"sens"]	:= fldval["leads-VS_thr"]
+			;~ leads[pmlead,"sensitivity"] := fldval["Vlead-Sens"]
+			;~ leads[pmlead,"sens pol"] := fldval["Vlead-Pol_sens"]
+			normLead("RV"
+					,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
+					,fldval["leads-V_imp"],fldval["leads-VP_thr"]
+					,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
+					,fldval["Vlead-Pol_pace"]
+					,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
 		}
 	}
 return
