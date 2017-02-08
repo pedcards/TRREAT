@@ -338,7 +338,8 @@ return res
 
 parseTable(txt) {
 /*	Analyze text block for vertical table format
-	If "title" not null or if first row begins with spaces, consider top row as title row
+	Top row must be title row
+	First column beginning row2 are parameters
 */
 	nextpos := 1
 	Loop																		; Iterate for each column found
@@ -350,30 +351,33 @@ parseTable(txt) {
 				continue
 			}
 			
-			pos := RegExMatch(i "  "											; Add "  " to end of scan string
-							,"O)(?<=(\s{2}))[^\s](.*?)(?=(\s{2}))"				; Search "  text  " as each column 
-							,col												; return result in var "col"
-							,nextpos)											; search position at next column
-			nextpos := (pos>nextpos)?pos:nextpos									; maxpos furthest right for this column
-			if !(pos) {															; break if no matches
-				break
-			}
 			if (A_Index=1) {
-				pre := col.value()								; result is column name
-				continue
+				pos := RegExMatch(i "  "										; Add "  " to end of scan string
+								,"O)(?<=(\s{2}))[^\s](.*?)(?=(\s{2}))"			; Search "  text  " as each column 
+								,col											; return result in var "col"
+								,nextpos)										; search position at next column
+								
+				pre := col.value()												; result is column name
+				
+				if !(pos) {														; break if no more matches
+					break
+				}
+				continue														; pre header is set, move to next row
 			} 
-			fld := strX(i,"",1,0,"  ",1,2)							; field name
 			
-			str := strX(substr(i,nextpos),"",1,0,"  ",1)
+			fld := strX(i,"",1,0,"  ",1,2)										; field name is first column
 			
-			result .= pre "-" fld ":  " str "`n"						; used as start to find next column
+			str := strX(substr(i,pos),"",1,0,"  ",1)							; result is substr from pos of header column to "  "
+			
+			result .= pre "-" fld ":  " str "`n"								; concat results into a single column
 		}
 		
 		if !(pos) {																; break when no more hits
 			break
 		}
-		result .= "endcolumn`n"
-		nextpos += 1																; start next search 1 space over
+		
+		result .= "endcolumn`n"													; not sure if need "endcolumn" delimiter any more
+		nextpos := pos+1														; start next search 1 space over from last result
 	}
 	;~ MsgBox % result
 return result
