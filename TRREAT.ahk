@@ -301,16 +301,6 @@ mdtAdapta:
 					,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
 		}
 		if (fldval["dev-Vlead_impl"]) {
-			;~ pmlead := "RV"
-			;~ leads[pmlead,"model"] 	:= fldval["dev-Vlead"]
-			;~ leads[pmlead,"date"]	:= fldval["dev-Vlead_impl"]
-			;~ leads[pmlead,"imp"]  	:= fldval["leads-V_imp"]
-			;~ leads[pmlead,"cap"]  	:= fldval["leads-VP_thr"]
-			;~ leads[pmlead,"output"]	:= (fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
-			;~ leads[pmlead,"pace pol"] := fldval["Vlead-Pol_pace"]
-			;~ leads[pmlead,"sens"]	:= fldval["leads-VS_thr"]
-			;~ leads[pmlead,"sensitivity"] := fldval["Vlead-Sens"]
-			;~ leads[pmlead,"sens pol"] := fldval["Vlead-Pol_sens"]
 			normLead("RV"
 					,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
 					,fldval["leads-V_imp"],fldval["leads-VP_thr"]
