@@ -553,11 +553,12 @@ PrintOut:
 
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 
-	rtfBody := "\tx1620\tx5220\tx7040" . rtfBody . "\fs22\par`n" 
+	rtfBody := "\tx1620\tx5220\tx7040" 
+	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18`n"
+	. fldval["dev-Encounter"] "\par\par\fs22`n"
+	. rtfBody . "\fs22\par`n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18`n"
 	. summ . "\par\par{\tx2700\tx5220\tx7040`n"
-	. "\b Electronically Signed By:\b0\tab " blk["Electronically Signed By"] "\tab\b Encounter Type:\b0\tab " blk["Encounter Type"] "\par`n"
-	. "\b Signed Date:\b0\tab " blk["Signed Date"] "\tab\b Encounter Date:\b0\tab " blk["Encounter Date"] "\par}`n"
 
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 
