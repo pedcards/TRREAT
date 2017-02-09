@@ -410,8 +410,9 @@ oneCol(txt) {
 			str := substr(i,lastpos,len)										; string to return
 			
 			result .= str "`n"													; add to result
+			;~ MsgBox % result
 		}
-		if (max) {																; break out if at max column
+		if !(pos) {																; break out if at max column
 			break
 		}
 		lastpos := pos															; set next start point
