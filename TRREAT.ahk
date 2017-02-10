@@ -424,17 +424,17 @@ parseTable2(txt) {
 		for k in col															; iterate each column
 		{
 			p1 := col[k]														; pos 1 is start of col
-			p2 := (col[k+1]) ? col[k+1] : strlen(i)								; pos 2 is start of next col, or last pos in row
+			p2 := (col[k+1]) ? col[k+1] : strlen(i)+1							; pos 2 is start of next col, or last pos in row
 			
 			if !(p1) {															; null p1 means no more cols
 				break
 			}			
-			res[k] .= pre[k] "-" fld ":  " trim(substr(i,col[k],p2-p1)) "`n"	; concat res[] for each column
+			res[k] .= pre[k] "-" fld ":  " substr(i,col[k],p2-p1) "`n"			; concat res[] for each column
 		}
 	}																			; All cols done
 	for k in col																; iterate each column
 	{
-		result .= res[k]														; concat result of each res[] column
+		result .= res[k] . "endcolumn`n"											; concat result of each res[] column
 	}
 Return result
 }
