@@ -338,7 +338,7 @@ parseStrDur(txt) {
 return res
 }
 
-parseTable(txt) {
+parseTable0(txt) {
 /*	Analyze text block for vertical table format
 	Top row must be title row
 	First column beginning row2 are parameters
@@ -385,7 +385,7 @@ parseTable(txt) {
 return result
 }
 
-parseTable2(txt) {
+parseTable(txt) {
 /*	2nd version
 	First scans title row for header positions
 	Then reads result of each column in each row into res arrays
