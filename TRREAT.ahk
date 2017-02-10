@@ -443,6 +443,11 @@ parseTable(txt) {
 		}
 		result .= res[k] . "endcolumn`n"											; concat result of each res[] column
 	}
+	tmp := parseTable0(txt)
+	Clipboard := tmp
+	MsgBox,,Orig ver, % parsetable0(txt)
+	Clipboard := result
+	MsgBox,,New ver, % result
 Return result
 }
 
