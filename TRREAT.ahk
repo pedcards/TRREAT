@@ -262,8 +262,8 @@ mdtAdapta:
 			fldval["dev-Alead"] := RegExReplace(fldval["dev-Alead"],"---")
 			fldval["dev-RVlead"] := RegExReplace(fldval["dev-RVlead"],"---")
 			
-			finleads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-			MsgBox % finleads
+			finleads := stregX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+			finleads := columns(finleads,"Lead Status:","In-Office Threshold",0,"Sensing Assurance")
 			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
 						, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
 						, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
