@@ -427,12 +427,20 @@ parseTable(txt) {
 			
 			if !(p1) {															; null p1 means no more cols
 				break
-			}			
-			res[k] .= pre[k] "-" fld ":  " substr(i,col[k],p2-p1) "`n"			; concat res[] for each column
+			}
+			if !(trim(fld)) {													; null fld means no value
+				break
+			}
+			
+			res[k] .= pre[k] "-" trim(fld) ":  " 								; concat res[] for each column
+					. trim(substr(i,col[k],p2-p1)) "`n"
 		}
 	}																			; All cols done
 	for k in col																; iterate each column
 	{
+		if !(col[k]) {
+			break
+		}
 		result .= res[k] . "endcolumn`n"											; concat result of each res[] column
 	}
 Return result
