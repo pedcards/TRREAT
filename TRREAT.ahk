@@ -116,8 +116,6 @@ mdtQuickLookII:
 {
 	;~ iniRep := strX(columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\("),"",1,0,"Pacing",1,0)
 	inirep := columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\(")
-	;~ MsgBox % inirep
-	;~ ExitApp
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	if instr(iniRep,"Sensed") {
 		fields[2] := ["Sensed","Paced"]
@@ -265,6 +263,7 @@ mdtAdapta:
 			fldval["dev-RVlead"] := RegExReplace(fldval["dev-RVlead"],"---")
 			
 			finleads := strX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+			MsgBox % finleads
 			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
 						, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
 						, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
