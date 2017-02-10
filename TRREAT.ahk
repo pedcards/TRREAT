@@ -385,6 +385,60 @@ parseTable(txt) {
 return result
 }
 
+parseTable2(txt) {
+/*	2nd version
+	First scans title row for header positions
+	Then reads result of each column in each row into res arrays
+	Consider flag for fuzzy start of columns?
+*/
+	col := {}																	; col[] = column position
+	pre := {}																	; pre[] = header prefix
+	res := {}																	; res[] = result of each column
+	lastpos := 1																; necessary for first pos
+	Loop, parse, txt, `n`r
+	{
+		i := A_LoopField
+		if !(trim(i)) {															; completely blank line (no field, no values)
+			break																; is end of table
+		}
+		
+		if (A_index=1) {														; parse header row
+			loop
+			{
+				pos := RegExMatch(i "  ","(?<=(\s{2}))[^\s]",,lastpos)			; get position of next column from lastpos
+				
+				col.Push(pos)													; add position to col[] array (0 when no more matches)
+				pre.Push(strX(substr(i,pos),"",1,0,"  ",1,2))					; add header value
+				
+				if !(pos) {														; break out when no more headers
+					break
+				}
+				
+				lastpos := pos+1												; new starting pos for next search
+			}
+			continue															; move to next line in txt
+		}
+		
+		fld := strX(i,"",1,0,"  ",1,2,n)										; field name is first column
+		
+		for k in col															; iterate each column
+		{
+			p1 := col[k]														; pos 1 is start of col
+			p2 := (col[k+1]) ? col[k+1] : strlen(i)								; pos 2 is start of next col, or last pos in row
+			
+			if !(p1) {															; null p1 means no more cols
+				break
+			}			
+			res[k] .= pre[k] "-" fld ":  " trim(substr(i,col[k],p2-p1)) "`n"	; concat res[] for each column
+		}
+	}																			; All cols done
+	for k in col																; iterate each column
+	{
+		result .= res[k]														; concat result of each res[] column
+	}
+Return result
+}
+
 oneCol(txt) {
 /*	Break text block into a single column 
 	based on logical break points in title (first) row
