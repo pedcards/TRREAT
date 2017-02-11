@@ -259,8 +259,8 @@ mdtAdapta:
 			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 				fldval["dev-Physician"] := "Dr. " . trim(tmp)
 			}
-			fldval["dev-Alead"] := RegExReplace(fldval["dev-Alead"],"---")
-			fldval["dev-RVlead"] := RegExReplace(fldval["dev-RVlead"],"---")
+			fldfill("dev-Alead",RegExReplace(fldval["dev-Alead"],"---"))
+			fldfill("dev-RVlead",RegExReplace(fldval["dev-RVlead"],"---"))
 			
 			finleads := stregX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
 			finleads := columns(finleads,"Lead Status:","In-Office Threshold",0,"Sensing Assurance")
@@ -270,15 +270,15 @@ mdtAdapta:
 						, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
 			labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
 						, "V_output","V_curr","V_imp","V_pol","null"]
-			fldval["leads-date"] := strX(finleads,"Lead Status: ",1,13,"`n",1,0,n)
+			fldfill("leads-date",strX(finleads,"Lead Status: ",1,13,"`n",1,0,n))
 			tbl := stregX(substr(finleads,n),"",1,0,"In-Office Threshold",1)
 			scanParams(parseTable(tbl),2,"leads")
 			
 			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
-			fldval["leads-AP_thr"] := parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
-			fldval["leads-VP_thr"] := parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
-			fldval["leads-AS_thr"] := trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n")
-			fldval["leads-VS_thr"] := trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n")
+			fldfill("leads-AP_thr",parseStrDur(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
+			fldfill("leads-VP_thr",parseStrDur(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
+			fldfill("leads-AS_thr",trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n"))
+			fldfill("leads-VS_thr",trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n"))
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
 			perm := oneCol(stregX(fintxt,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
