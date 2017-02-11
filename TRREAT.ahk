@@ -271,7 +271,7 @@ mdtAdapta:
 			labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
 						, "V_output","V_curr","V_imp","V_pol","null"]
 			fldval["leads-date"] := strX(finleads,"Lead Status: ",1,13,"`n",1,0,n)
-			tbl := substr(finleads,n)
+			tbl := stregX(substr(finleads,n),"",1,0,"In-Office Threshold",1)
 			scanParams(parseTable(tbl),2,"leads")
 			
 			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
@@ -281,18 +281,21 @@ mdtAdapta:
 			fldval["leads-VS_thr"] := trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n")
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
-			perm := oneCol(strX(fintxt,"Permanent Parameters",1,0,"Medtronic Software",1,0))
+			perm := oneCol(stregX(fintxt,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
+			;~ MsgBox % perm
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
 			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
 			
-			param_A := stregX(perm,"Atrial Lead",1,0,"Ventricular Lead",1)
+			param_A := stregX(perm,"Atrial Lead",1,0,"(Ventricular Lead)|(Additional/Interventions)|(Additional Features)",1)
+			;~ MsgBox % param_A
 			fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[2] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_A,2,"Alead")
 			
-			param_V := stregX(perm,"Ventricular Lead",1,0,">>>end",1)
+			param_V := stregX(perm,"Ventricular Lead",1,0,"(Additional/Interventions)|(Additional Features)|(>>>end)",1)
+			;~ MsgBox % param_V
 			fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_V,3,"Vlead")
@@ -443,11 +446,11 @@ parseTable(txt) {
 		}
 		result .= res[k] . "endcolumn`n"											; concat result of each res[] column
 	}
-	tmp := parseTable0(txt)
-	Clipboard := tmp
-	MsgBox,,Orig ver, % parsetable0(txt)
-	Clipboard := result
-	MsgBox,,New ver, % result
+	;~ tmp := parseTable0(txt)
+	;~ Clipboard := tmp
+	;~ MsgBox,,Orig ver, % parsetable0(txt)
+	;~ Clipboard := result
+	;~ MsgBox,,New ver, % result
 Return result
 }
 
