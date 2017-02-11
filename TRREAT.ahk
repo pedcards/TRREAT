@@ -275,27 +275,24 @@ mdtAdapta:
 			scanParams(parseTable(tbl),2,"leads")
 			
 			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
-			fldfill("leads-AP_thr",parseStrDur(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0)))
-			fldfill("leads-VP_thr",parseStrDur(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0)))
+			fldfill("leads-AP_thr",parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0))))
+			fldfill("leads-VP_thr",parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0))))
 			fldfill("leads-AS_thr",trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n"))
 			fldfill("leads-VS_thr",trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n"))
 		}
 		if (fintxt~=splTxt ".*Permanent Parameters") {
 			perm := oneCol(stregX(fintxt,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
-			;~ MsgBox % perm
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
 			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
 			
 			param_A := stregX(perm,"Atrial Lead",1,0,"(Ventricular Lead)|(Additional/Interventions)|(Additional Features)",1)
-			;~ MsgBox % param_A
 			fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[2] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_A,2,"Alead")
 			
 			param_V := stregX(perm,"Ventricular Lead",1,0,"(Additional/Interventions)|(Additional Features)|(>>>end)",1)
-			;~ MsgBox % param_V
 			fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
 			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_V,3,"Vlead")
