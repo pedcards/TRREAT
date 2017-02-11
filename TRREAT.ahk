@@ -321,6 +321,22 @@ mdtAdapta:
 return
 }
 
+fldfill(var,val) {
+/*	Nondestructively fill fields
+	If val is empty, return
+	Otherwise populate with new value
+*/
+	global fldval
+	
+	if !(val) {																	; val is null
+		return																	; do nothing
+	}
+	
+	fldval[var] := val															; set var as val
+	
+return
+}
+
 parseStrDur(txt) {
 /*	Parse a block of text for Strength Duration values
 	and return as a formatted string
@@ -446,11 +462,6 @@ parseTable(txt) {
 		}
 		result .= res[k] . "endcolumn`n"											; concat result of each res[] column
 	}
-	;~ tmp := parseTable0(txt)
-	;~ Clipboard := tmp
-	;~ MsgBox,,Orig ver, % parsetable0(txt)
-	;~ Clipboard := result
-	;~ MsgBox,,New ver, % result
 Return result
 }
 
