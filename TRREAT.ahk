@@ -116,6 +116,13 @@ mdtQuickLookII:
 {
 	;~ iniRep := strX(columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\("),"",1,0,"Pacing",1,0)
 	inirep := columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\(")
+	
+	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
+				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
+	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
+				, "A_Paced","A_Shocked","A_Total","A_Aborted"]
+	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"ther",1)
+	
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	if instr(iniRep,"Sensed") {
 		fields[2] := ["Sensed","Paced"]
