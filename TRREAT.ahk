@@ -149,9 +149,9 @@ mdtQuickLookII:
 	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
 	}
-	fldval["dev-Alead"] := RegExReplace(fldval["dev-Alead"],"---")
-	fldval["dev-RVlead"] := RegExReplace(fldval["dev-RVlead"],"---")
-	fldval["dev-LVlead"] := RegExReplace(fldval["dev-LVlead"],"---")
+	fldfill("dev-Alead", RegExReplace(fldval["dev-Alead"],"---"))
+	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
+	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
 	
 	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
