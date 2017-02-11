@@ -332,7 +332,7 @@ fldfill(var,val) {
 */
 	global fldval
 	
-	if !(val) {																	; val is null
+	if (val=="") {																	; val is null
 		return																	; do nothing
 	}
 	
@@ -530,7 +530,6 @@ scanParams(txt,blk,pre:="par",rx:="") {
 			?	RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])") " (changed from " col1.value() ")"
 			:	col1.value()
 			
-		;~ fldval[pre "-" labels[blk,val]] := res
 		fldfill(pre "-" labels[blk,val], res)
 	}
 	return
