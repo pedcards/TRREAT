@@ -526,7 +526,8 @@ scanParams(txt,blk,pre:="par",rx:="") {
 			?	RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])") " (changed from " col1.value() ")"
 			:	col1.value()
 			
-		fldval[pre "-" labels[blk,val]] := res
+		;~ fldval[pre "-" labels[blk,val]] := res
+		fldfill(pre "-" labels[blk,val], res)
 	}
 	return
 }
@@ -918,7 +919,8 @@ fieldvals(x,bl,pre:="") {
 		
 		cleanSpace(m)
 		cleanColon(m)
-		fldval[pre "-" lbl] := m
+		;~ fldval[pre "-" lbl] := m
+		fldfill(pre "-" lbl, m)
 		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		;~ formatField(pre,lbl,m)
 	}
