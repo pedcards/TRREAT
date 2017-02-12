@@ -347,13 +347,10 @@ return
 bsciZoomView:
 {
 	txt := onecol(stregX(maintxt,"",1,0,"My Alerts",1))
-	fields[1] := ["Combined.*Report","Date of Birth","Device","Report Created","Last Office Interrogation","Implant Date",">>>end"]
-	labels[1] := ["Name","DOB","IPG","Date","Last_ck","IPG_impl"]
+	fields[1] := ["Combined.*Report","Date of Birth","Device","/","Report Created","Last Office Interrogation","Implant Date",">>>end"]
+	labels[1] := ["Name","DOB","IPG","IPG_SN","Date","Last_ck","IPG_impl"]
 	fieldvals(txt,1,"dev")
-	RegExMatch(fldval["dev-IPG"],"O)(?<=/)(.*)",sn)
-	fldfill("dev-IPG",RegExReplace(fldval["dev-IPG"],"/.*"))
-	fldfill("dev-IPG_SN",sn.value())
-	fldfill("dev-IPG",RegExReplace(fldval["dev-IPG"],"Tachy.*"))
+	fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
 	
 	txt := stregX(maintxt,"My Alerts",1,0,"Leads Data",1)
 	fields[1] := ["Battery","Approximate.*Explant:","`n"]
