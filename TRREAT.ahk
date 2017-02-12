@@ -627,11 +627,24 @@ printLead(lead) {
 	. "\par`n"
 }
 
-PrintEvents()
+printEvents()
 {
 	global rtfBody, fldval
-	ATAF := fldval["ther-A_Total"]
-	VTVF := fldval["ther-V_Total"]
+	txt := ""
+	. printQ(fldval["event-AHR"],"There were ### Atrial High Rate episodes. ")
+	. printQ(fldval["event-VHR"],"There were ### Ventricular High Rate episodes. ")
+	. printQ(fldval["event-VF"],"### VF episodes detected. ")
+	. printQ(fldval["event-VT"],"### VT episodes detected. ")
+	. printQ(fldval["event-VTNS"],"### NS-VT episodes detected. ")
+	. printQ(fldval["event-ATAF"],"### AT/AF episodes detected. ")
+	. printQ(fldval["event-V_Paced"],"### VT episodes pace-terminated. ")
+	. printQ(fldval["event-V_Shocked"],"### VT/VF episodes shock-terminated. ")
+	. printQ(fldval["event-V_Aborted"],"### VT/VF episodes aborted. ")
+	. printQ(fldval["event-A_Paced"],"### AT episodes pace-terminated. ")
+	. printQ(fldval["event-A_Shocked"],"### AT/AF episodes shock-terminated. ")
+	. printQ(fldval["event-A_Aborted"],"### AT/AF episodes aborted. ")
+	
+	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18`n###\par`n") 
 return	
 }
 
