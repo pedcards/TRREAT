@@ -115,6 +115,13 @@ return
 mdtQuickLookII:
 {
 	;~ iniRep := strX(columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\("),"",1,0,"Pacing",1,0)
+	inirep := columns(maintxt,"Clinical Status(.*?)`n","Therapy Summary",1,"Cardiac Compass")
+	
+	inirep := 
+	fields[1] := ["VF.*","VT.*","VT-NS","AT/AF.*"]
+	labels[1] := ["VF","VT","VTNS","ATAF"]
+	scanParams(stregX(inirep,"Monitored",1,0,"Therapy",1),1,"event",1)
+	
 	inirep := columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\(")
 	
 	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
