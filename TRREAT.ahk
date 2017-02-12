@@ -230,7 +230,11 @@ return
 
 mdtAdapta:
 {
-	iniRep := strX(columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \("),"Pacing",1,0)
+	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
+	fields[1] := ["Atrial High Rate.*","Ventricular High Rate.*"]
+	labels[1] := ["AHR","VHR"]
+	scanParams(RegExReplace(inirep,"Episodes: ","Episodes:  "),1,"event",1)
+	
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	if instr(iniRep,"Sensed") {
 		fields[2] := ["Sensed","Paced"]
