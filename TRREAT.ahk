@@ -115,20 +115,18 @@ return
 mdtQuickLookII:
 {
 	;~ iniRep := strX(columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\("),"",1,0,"Pacing",1,0)
-	inirep := columns(maintxt,"Clinical Status(.*?)`n","Therapy Summary",1,"Cardiac Compass")
+	inirep := columns(maintxt,"Clinical Status","Therapy Summary",0,"Cardiac Compass")
 	
-	inirep := 
-	fields[1] := ["VF.*","VT.*","VT-NS","AT/AF.*"]
-	labels[1] := ["VF","VT","VTNS","ATAF"]
+	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
+	labels[1] := ["VF","VTNS","VT","ATAF"]
 	scanParams(stregX(inirep,"Monitored",1,0,"Therapy",1),1,"event",1)
 	
 	inirep := columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\(")
-	
 	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
 				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
 	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
 				, "A_Paced","A_Shocked","A_Total","A_Aborted"]
-	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"ther",1)
+	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"event",1)
 	
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
 	if instr(iniRep,"Sensed") {
@@ -167,7 +165,7 @@ mdtQuickLookII:
 	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
 	
-	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1)
+	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1,n)
 	fields[2] := ["Atrial.*-Lead Impedance"
 				, "Atrial.*-Pacing Impedance"
 				, "Atrial.*-Capture Threshold"
@@ -197,6 +195,13 @@ mdtQuickLookII:
 				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
 				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
 	scanParams(parseTable(fintbl),2,"leads",1)
+	
+	fintbl := stregX(fintxt,"Detection",1,0,"(Changes)|(Enhancement)|(Clinical Status)",1)
+	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
+				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
+	labels[2] := ["AT/AF","VF","FVT","VT"
+				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	scanParams(parseTable(fintbl),2,"detect",1)
 	
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
