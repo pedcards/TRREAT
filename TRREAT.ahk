@@ -344,6 +344,17 @@ BSCI:
 return	
 }
 
+bsciZoomView:
+{
+	txt := onecol(stregX(maintxt,"",1,0,"My Alerts",1))
+	fields[1] := ["Combined.*Report","Date of Birth","Device","Report Created","Last Office Interrogation","Implant Date",">>>end"]
+	labels[1] := ["Name","DOB","IPG","Date","Last_ck","IPG_impl"]
+	fieldvals(txt,1,"dev")
+	
+	return
+}
+
+
 fldfill(var,val) {
 /*	Nondestructively fill fields
 	If val is empty, return
