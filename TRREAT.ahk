@@ -328,6 +328,22 @@ mdtAdapta:
 return
 }
 
+BSCI:
+{
+	fileNum += 1
+	LV_Add("", fileIN)
+	LV_Modify(fileNum,"col3","PM")
+	Gui, Show
+	
+	gosub bsciZoomView
+	
+	gosub pmPrint
+	;~ clipboard := rtfBody
+	;~ MsgBox % rtfBody
+	
+return	
+}
+
 fldfill(var,val) {
 /*	Nondestructively fill fields
 	If val is empty, return
