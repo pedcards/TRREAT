@@ -570,6 +570,8 @@ pmPrint:
 		printLead(k)
 	}
 	
+	printEvents()
+	
 	gosub PrintOut
 
 Return
@@ -623,6 +625,14 @@ printLead(lead) {
 	. printQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
 	. printQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
 	. "\par`n"
+}
+
+PrintEvents()
+{
+	global rtfBody, fldval
+	ATAF := fldval["ther-A_Total"]
+	VTVF := fldval["ther-V_Total"]
+return	
 }
 
 PrintOut:
