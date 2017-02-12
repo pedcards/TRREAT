@@ -78,7 +78,7 @@ Return
 GuiClose:
 ExitApp
 
-MDTpm:
+Medtronic:
 {
 	fileNum += 1
 	LV_Add("", fileIN)
