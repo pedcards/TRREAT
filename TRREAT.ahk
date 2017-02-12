@@ -350,6 +350,9 @@ bsciZoomView:
 	fields[1] := ["Combined.*Report","Date of Birth","Device","Report Created","Last Office Interrogation","Implant Date",">>>end"]
 	labels[1] := ["Name","DOB","IPG","Date","Last_ck","IPG_impl"]
 	fieldvals(txt,1,"dev")
+	RegExMatch(fldval["dev-IPG"],"O)(?<=/)(.*)",sn)
+	fldfill("dev-IPG",RegExReplace(fldval["dev-IPG"],"/.*"))
+	fldfill("dev-IPG_SN",sn.value())
 	fldfill("dev-IPG",RegExReplace(fldval["dev-IPG"],"Tachy.*"))
 	
 	return
