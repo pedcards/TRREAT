@@ -525,9 +525,9 @@ scanParams(txt,blk,pre:="par",rx:="") {
 		i := A_LoopField "  "
 		set := trim(strX(i,"",1,0,"  ",1,2)," :")								; Get leftmost column to first "  "
 		val := objHasValue(fields[blk],set,rx)
-		if !(val) {
-			continue
-		}
+		;~ if !(val) {
+			;~ continue
+		;~ }
 		
 		RegExMatch(i															; Add "  " to end of scan string
 				,"O)" colstr													; Search "  text  " as each column 
@@ -541,6 +541,7 @@ scanParams(txt,blk,pre:="par",rx:="") {
 			?	RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])") " (changed from " col1.value() ")"
 			:	col1.value()
 			
+		;~ MsgBox % pre "-" labels[blk,val] ": " res
 		fldfill(pre "-" labels[blk,val], res)
 	}
 	return
