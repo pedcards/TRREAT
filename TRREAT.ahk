@@ -57,24 +57,11 @@ Loop, *.pdf
 	;~ RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
 	;~ FileRead, mainraw, tempraw.txt
 	cleanlines(maintxt)
-	if (maintxt~="Medtronic,\s+Inc") {
-		if (instr(maintxt,"Defibrillation")) {									; All ICD reports will have this text
-			;~ MsgBox MDT icd
-			gosub MDTpm
-		}
-		;~ if (instr(maintxt,"Pacemaker Model")) {
-		else {																	; Can't find PM specific text, other than not being an ICD
-			gosub MDTpm															; maybe use an array of Brady devices?
-		}
+	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+		gosub Medtronic
 	}
 	if (maintxt~="Boston Scientific Corporation") {
-		if (instr(maintxt,"Shock")) {
-			MsgBox BSCI icd
-		}
-		else {
-			MsgBox BSCI pm
-		}
-		ExitApp
+		gosub BSCI
 	}
 }
 
