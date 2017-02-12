@@ -355,6 +355,11 @@ bsciZoomView:
 	fldfill("dev-IPG_SN",sn.value())
 	fldfill("dev-IPG",RegExReplace(fldval["dev-IPG"],"Tachy.*"))
 	
+	txt := stregX(maintxt,"My Alerts",1,0,"Leads Data",1)
+	fields[1] := ["Battery","Approximate.*Explant:","`n"]
+	labels[1] := ["Batt_stat","ERI","null"]
+	fieldvals(txt,1,"dev")
+	
 	return
 }
 
