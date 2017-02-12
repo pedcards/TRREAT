@@ -357,6 +357,18 @@ bsciZoomView:
 	labels[1] := ["Batt_stat","ERI","null"]
 	fieldvals(txt,1,"dev")
 	
+	txt := stregX(maintxt,"Leads Data",1,0,"Settings",1)
+	hdr := strX(txt,"",1,0,"`n",1)
+	fields[1] := ["Most Recent-Intrinsic Amplitude","Most Recent-Pace Impedance","Most Recent-Pace Threshold"]
+	labels[1] := ["sensing","imp","cap"]
+	if instr(txt,"Ventricular") {
+		scanParams(parseTable(hdr . stregX(txt,"Atrial",1,1,"Ventricular",1)),1,"Alead")
+		scanParams(parseTable(hdr . stregX(txt ">>>","Ventricular",1,1,">>>",1)),1,"Vlead")
+	} else {
+		scanParams(parseTable(hdr . stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,"Vlead")
+		MsgBox % parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1))
+	}
+		
 	return
 }
 
