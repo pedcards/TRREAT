@@ -468,7 +468,7 @@ parseTable(txt) {
 			p2 := (col[k+1]) ? col[k+1] : strlen(i)+1							; pos 2 is start of next col, or last pos in row
 			
 			res[k] .= pre[k] "-" trim(fld) ":  " 								; concat res[] for each column
-					. trim(substr(i,p1,p2-p1)) "`n"
+					. cleanSpace(substr(i,p1,p2-p1)) "`n"
 		}
 	}																			; All cols done
 	for k in col																; iterate each column
