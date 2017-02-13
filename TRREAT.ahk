@@ -451,28 +451,31 @@ parseTable(txt) {
 		
 		fld := strX(i,"",1,0,"  ",1,2,n)										; field name is first column
 		
+		if !(trim(fld)) {														; null fld means no value
+			continue
+		}
+			
 		for k in col															; iterate each column
 		{
 			p1 := col[k]														; pos 1 is start of col
+			while !(substr(i,p1-2,2)="  ") {									; check that there are no non-space chars before p1
+				p1 := p1-1														; back p1 up a space
+				if (p1<n) {														; will run into fld if results line is blank
+					break
+				}
+			}
 			p2 := (col[k+1]) ? col[k+1] : strlen(i)+1							; pos 2 is start of next col, or last pos in row
 			
-			if !(p1) {															; null p1 means no more cols
-				break
-			}
-			if !(trim(fld)) {													; null fld means no value
-				break
-			}
-			
 			res[k] .= pre[k] "-" trim(fld) ":  " 								; concat res[] for each column
-					. trim(substr(i,col[k],p2-p1)) "`n"
+					. trim(substr(i,p1,p2-p1)) "`n"
 		}
 	}																			; All cols done
 	for k in col																; iterate each column
 	{
-		if !(col[k]) {
+		if !(col[k]) {															; quit if last col
 			break
 		}
-		result .= res[k] . "endcolumn`n"											; concat result of each res[] column
+		result .= res[k] . "endcolumn`n"										; concat result of each res[] column
 	}
 Return result
 }
