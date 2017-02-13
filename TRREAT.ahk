@@ -373,7 +373,8 @@ bsciZoomView:
 		txt := columns(txt "endcolumn","","endcolumn",0,"Atrial Tachy")
 	}
 	fields[1] := ["VF","VT","Detection Rate"]
-	labels[1] := ["
+	labels[1] := ["VF","VHR","VHR"]
+	scanParams(txt,1,"tachy")
 	;~ MsgBox % txt
 	
 	return
