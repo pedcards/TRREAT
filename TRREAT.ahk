@@ -538,9 +538,13 @@ scanParams(txt,blk,pre:="par",rx:="") {
 				,col2
 				,col1.pos()+1)
 		
-		res :=	(col2.value()~="^(\>\s*)(?=[^\s])")
-			?	RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])") " (changed from " col1.value() ")"
-			:	col1.value()
+		res := col1.value()
+		if (col2.value()~="^(\>\s*)(?=[^\s])") {
+			res := RegExReplace(col2.value(),"^(\>\s*)(?=[^\s])") " (changed from " col1.value() ")"
+		}
+		if (col2.value()~="(Monitor.*)|(\d{2}J.*)") {
+			res .= ", Rx " cleanSpace(col2.value())
+		}
 			
 		;~ MsgBox % pre "-" labels[blk,val] ": " res
 		fldfill(pre "-" labels[blk,val], res)
