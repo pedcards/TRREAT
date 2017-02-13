@@ -365,8 +365,7 @@ bsciZoomView:
 		scanParams(parseTable(hdr . stregX(txt,"Atrial",1,1,"Ventricular",1)),1,"Alead")
 		scanParams(parseTable(hdr . stregX(txt ">>>","Ventricular",1,1,">>>",1)),1,"Vlead")
 	} else {
-		scanParams(parseTable(hdr . stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,"Vlead")
-		MsgBox % parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1))
+		scanParams(parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,"Vlead")
 	}
 		
 	return
