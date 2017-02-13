@@ -367,7 +367,15 @@ bsciZoomView:
 	} else {
 		scanParams(parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,"Vlead")
 	}
-		
+	
+	txt := stregX(maintxt,"(Ventricular )?Tachy Settings",1,0,"Brady Settings",1)
+	if instr(txt,"Atrial Tachy") {
+		txt := columns(txt "endcolumn","","endcolumn",0,"Atrial Tachy")
+	}
+	fields[1] := ["VF","VT","Detection Rate"]
+	labels[1] := ["
+	;~ MsgBox % txt
+	
 	return
 }
 
