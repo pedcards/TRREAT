@@ -402,6 +402,15 @@ bsciZoomView:
 	} else {
 		fldfill("leads-VS_thr",fldval["par-outp0"])
 	}
+	if (fldval["par-pol0"]~="(Atrial|Ventricular)") {
+		fields[2] := ["Atrial","Ventricular"]
+		labels[2] := ["A_Pol_pace","RV_Pol_pace"]
+		scanParams(RegExReplace(fldval["par-pol0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
+	} else {
+		fldfill("leads-RV_Pol_pace",fldval["par-pol0"])
+	}
+	
+	
 	return
 }
 
