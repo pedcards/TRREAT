@@ -375,7 +375,13 @@ bsciZoomView:
 	fields[1] := ["VF","VT","Detection Rate"]
 	labels[1] := ["VF","VHR","VHR"]
 	scanParams(txt,1,"tachy")
-	;~ MsgBox % txt
+	
+	;~ txt := stregX(maintxt,"Brady Settings",1,0,"(.*?)Software Version",0)
+	txt := columns(maintxt,"Brady Settings","(.*?)Software Version",0,"Pacing Output")
+	txt := RegExReplace(txt,"(?<=\d)\s+(ppm|ms|mV)"," $1")
+	fields[1] := ["Mode","Lower Rate Limit","Maximum Tracking Rate","Maximum Sensor Rate"
+				, "Paced AV Delay","Sensed AV Delay"]
+	MsgBox % txt
 	
 	return
 }
