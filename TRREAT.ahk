@@ -381,7 +381,8 @@ bsciZoomView:
 	txt := RegExReplace(txt,"(?<=\d)\s+(ppm|ms|mV)"," $1")
 	fields[1] := ["Mode","Lower Rate Limit","Maximum Tracking Rate","Maximum Sensor Rate"
 				, "Paced AV Delay","Sensed AV Delay"]
-	MsgBox % txt
+	labels[1] := ["Mode","LRL","URL","USR","PAV","SAV"]
+	scanParams(txt,1,"par")
 	
 	return
 }
