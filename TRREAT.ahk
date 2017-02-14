@@ -400,7 +400,7 @@ bsciZoomView:
 		labels[2] := ["AS_thr","VS_thr"]
 		scanParams(RegExReplace(fldval["par-sens0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
 	} else {
-		fldfill("leads-VS_thr",fldval["par-outp0"])
+		fldfill("leads-VS_thr",fldval["par-sens0"])
 	}
 	if (fldval["par-pol0"]~="(Atrial|Ventricular)") {
 		fields[2] := ["Atrial","Ventricular"]
