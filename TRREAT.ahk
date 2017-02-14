@@ -410,6 +410,11 @@ bsciZoomView:
 		fldfill("leads-RV_Pol_pace",fldval["par-pol0"])
 	}
 	
+	ctr := stregX(maintxt,"(Ventricular )?Tachy Counters",1,0,"$",0)
+	ctrT := stregX(ctr,"(Ventricular )?Episode Counters",1,0,"Brady Counters",1)
+	fields[1] := ["Total Episodes","Nonsustained Episodes","ATP Delivered","Shocks Delivered","Shocks Diverted"]
+	labels[1] := ["VTVF","NS-VT","ATP","Shock","Aborted"]
+	scanParams(ctrT,1,"episodes",1)
 	
 	return
 }
