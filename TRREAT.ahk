@@ -395,6 +395,13 @@ bsciZoomView:
 	} else {
 		fldfill("leads-VP_thr",fldval["par-outp0"])
 	}
+	if (fldval["par-sens0"]~="(Atrial|Ventricular)") {
+		fields[2] := ["Atrial","Ventricular"]
+		labels[2] := ["AS_thr","VS_thr"]
+		scanParams(RegExReplace(fldval["par-sens0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
+	} else {
+		fldfill("leads-VS_thr",fldval["par-outp0"])
+	}
 	return
 }
 
