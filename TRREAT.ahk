@@ -384,6 +384,17 @@ bsciZoomView:
 	labels[1] := ["Mode","LRL","URL","USR","PAV","SAV"]
 	scanParams(txt,1,"par")
 	
+	txt := strX(txt,"Pacing Output",1,0) "endcolumn"
+	fields[1] := ["Pacing Output","Sensitivity","Leads Configuration \(Pace/Sense\)","(Rate Adaptive Pacing|Sensors)","endcolumn"]
+	labels[1] := ["outp0","sens0","pol0","adaptive","null"]
+	fieldvals(txt,1,"par")
+	if (fldval["par-outp0"]~="(Atrial|Ventricular)") {
+		fields[2] := ["Atrial","Ventricular"]
+		labels[2] := ["AP_thr","VP_thr"]
+		scanParams(RegExReplace(fldval["par-outp0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
+	} else {
+		fldfill("leads-VP_thr",fldval["par-outp0"])
+	}
 	return
 }
 
