@@ -413,10 +413,10 @@ bsciZoomView:
 	
 	ctr := stregX(maintxt,"(Ventricular )?Tachy Counters",1,0,"$",0)
 	ctrT := stregX(ctr,"(Ventricular )?Episode Counters",1,0,"Brady Counters",1)
-	fields[1] := ["Total Episodes","Nonsustained Episodes","ATP Delivered","Shocks Delivered","Shocks Diverted"]
-	labels[1] := ["VTVF","NS-VT","ATP","Shock","Aborted"]
-	scanParams(ctrT,1,"episodes",1)
-	
+	fields[1] := ["Total Episodes","Nonsustained Episodes","ATP Delivered","Shocks Delivered","Shocks Diverted","SVT Episodes.*"]
+	labels[1] := ["VHR","VTNS","V_Paced","V_Shocked","V_Aborted","AHR"]
+	scanParams(ctrT,1,"event",1)
+
 	ctrB := stregX(ctr,"Brady Counters",1,0,"$",0)
 	fields[1] := ["% A Paced","% (V )?Paced"]
 	labels[1] := ["AP","VP"]
