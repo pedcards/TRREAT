@@ -354,7 +354,7 @@ bsciZoomView:
 	
 	txt := stregX(maintxt,"My Alerts",1,0,"Leads Data",1)
 	fields[1] := ["Battery","Approximate.*Explant:","`n"]
-	labels[1] := ["Batt_stat","ERI","null"]
+	labels[1] := ["Batt_stat","IPG_voltage","null"]
 	fieldvals(txt,1,"dev")
 	
 	txt := stregX(maintxt,"Leads Data",1,0,"Settings",1)
@@ -367,6 +367,7 @@ bsciZoomView:
 	} else {
 		scanParams(parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,"Vlead")
 	}
+	fldfill("leads-RV_HVimp",fldval["Vlead-HVimp"])
 	
 	txt := stregX(maintxt,"(Ventricular )?Tachy Settings",1,0,"Brady Settings",1)
 	if instr(txt,"Atrial Tachy") {
