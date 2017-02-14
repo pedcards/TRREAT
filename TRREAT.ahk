@@ -421,6 +421,25 @@ bsciZoomView:
 	labels[1] := ["AP","VP"]
 	scanParams(ctrB,1,"dev",1)
 	
+		if (fldval["Alead-imp"]||fldval["Alead-cap"]||fldval["Alead-sensing"]) {
+		normLead("RA"
+				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+				,fldval["Alead-imp"],fldval["Alead-cap"],fldval["leads-AP_thr"],fldval["leads-A_Pol_pace"]
+				,fldval["Alead-sensing"],fldval["leads-AS_thr"],fldval["leads-A_Pol_sens"])
+	}
+	if (fldval["Vlead-imp"]||fldval["Vlead-cap"]||fldval["Vlead-sensing"]) {
+		normLead("RV"
+				,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
+				,fldval["Vlead-imp"],fldval["Vlead-cap"],fldval["leads-VP_thr"],fldval["leads-RV_Pol_pace"]
+				,fldval["Vlead-sensing"],fldval["leads-VS_thr"],fldval["leads-RV_Pol_sens"])
+	}
+	if (fldval["leads-LV_imp"]||fldval["leads-LV_cap"]||fldval["leads-LV_Sthr"]) {
+		normLead("LV"
+				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
+				,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+				,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
+	}
+
 	return
 }
 
