@@ -416,6 +416,11 @@ bsciZoomView:
 	labels[1] := ["VTVF","NS-VT","ATP","Shock","Aborted"]
 	scanParams(ctrT,1,"episodes",1)
 	
+	ctrB := stregX(ctr,"Brady Counters",1,0,"$",0)
+	fields[1] := ["% A Paced","% (V )?Paced"]
+	labels[1] := ["AP","VP"]
+	scanParams(ctrB,1,"dev",1)
+	
 	return
 }
 
