@@ -1103,6 +1103,16 @@ eventlog(event) {
 ;	FileAppend, % timenow " ["  user "/" comp "] " event "`n", % "logs/" . sessdate . ".log"
 }
 
+FilePrepend( Text, Filename ) { 
+/*	from haichen http://www.autohotkey.com/board/topic/80342-fileprependa-insert-text-at-begin-of-file-ansi-text/?p=510640
+*/
+    file:= FileOpen(Filename, "rw")
+    text .= File.Read()
+    file.pos:=0
+    File.Write(text)
+    File.Close()
+}
+
 stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 /*	modified version: searches from BS to "   "
 	h = Haystack
