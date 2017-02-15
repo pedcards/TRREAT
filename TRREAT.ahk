@@ -1092,6 +1092,63 @@ ObjHasValue(aObj, aValue, rx:="") {
     return, false, errorlevel := 1
 }
 
+mouseGrab(x,y) {
+/*	Double click mouse coordinates x,y to grab cell contents
+	Process through parseClip to validate
+	Return the value portion of parseClip
+*/
+	BlockInput, On																		; Prevent extraneous input
+	MouseMove, %x%, %y%, 0																; Goto coordinates
+	Click 2																				; Double-click
+	BlockInput, Off																		; Permit input again
+	sleep 100
+	ClipWait																			; sometimes there is delay for clipboard to populate
+	clk := parseClip(clipboard)															; get available values out of clipboard
+	return clk																			; Redundant? since this is what parseClip() returns
+}
+
+parseClip(clip) {
+/*	If clip matches "val1:val2" format, and val1 in demVals[], return field:val
+	If clip contains proper Encounter Type ("Outpatient", "Inpatient", "Observation", etc), return Type, Date, Time
+*/
+	global demVals
+	
+	StringSplit, val, clip, :															; break field into val1:val2
+	if (ObjHasValue(demVals, val1)) {													; field name in demVals, e.g. "MRN","Account Number","DOB","Sex","Loc","Provider"
+		return {"field":val1
+				, "value":val2}
+	}
+	
+	dt := strX(clip," [",1,2, "]",1,1)													; get date
+	dd := parseDate(dt).YYYY . parseDate(dt).MM . parseDate(dt).DD
+	if (clip~="Outpatient\s\[") {														; Outpatient type
+		return {"field":"Type"
+				, "value":"Outpatient"
+				, "loc":"Outpatient"
+				, "date":dt
+				, "time":parseDate(dt).time}
+	}
+	if (clip~="Inpatient|Observation\s\[") {											; Inpatient types
+		return {"field":"Type"
+				, "value":"Inpatient"
+				, "loc":"Inpatient"
+				, "date":""}															; can span many days, return blank
+	}
+	if (clip~="Day Surg.*\s\[") {														; Day Surg type
+		return {"field":"Type"
+				, "value":"Day Surg"
+				, "loc":"SurgCntr"
+				, "date":dt}
+	}
+	if (clip~="Emergency") {															; Emergency type
+		return {"field":"Type"
+				, "value":"Emergency"
+				, "loc":"Emergency"
+				, "date":dt}
+	}
+	return Error																		; Anything else returns Error
+}
+
 eventlog(event) {
 	global user
 	comp := A_ComputerName
