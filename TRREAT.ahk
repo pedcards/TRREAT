@@ -137,7 +137,7 @@ mdtQuickLookII:
 				, "LV", "Implanted","`n"
 				, "Device Status", "Battery Voltage","Remaining Longevity","`n"]
 	labels[1] := ["IPG","IPG_SN","Encounter"
-				, "Name","ID","Physician","null"
+				, "Name","MRN","Physician","null"
 				, "null","null"
 				, "IPG0", "IPG_impl","null"
 				, "Alead", "Alead_impl","null"
@@ -348,7 +348,7 @@ bsciZoomView:
 {
 	txt := onecol(stregX(maintxt,"",1,0,"My Alerts",1))
 	fields[1] := ["Combined.*Report","Date of Birth","Device","/","Report Created","Last Office Interrogation","Implant Date",">>>end"]
-	labels[1] := ["Name","DOB","IPG","IPG_SN","Date","Last_ck","IPG_impl"]
+	labels[1] := ["Name","DOB","IPG","IPG_SN","Encounter","Last_ck","IPG_impl"]
 	fieldvals(txt,1,"dev")
 	fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
 	
