@@ -1113,6 +1113,26 @@ FilePrepend( Text, Filename ) {
     File.Close()
 }
 
+parseDate(x) {
+; Disassembles "2/9/2015" or "2/9/2015 8:31" into Yr=2015 Mo=02 Da=09 Hr=08 Min=31
+	StringSplit, DT, x, %A_Space%
+	StringSplit, DY, DT1, /
+	StringSplit, DHM, DT2, :
+	return {"MM":zDigit(DY1), "DD":zDigit(DY2), "YYYY":DY3, "hr":zDigit(DHM1), "min":zDigit(DHM2), "Date":DT1, "Time":DT2}
+}
+
+niceDate(x) {
+	if !(x)
+		return error
+	FormatTime, x, %x%, MM/dd/yyyy
+	return x
+}
+
+zDigit(x) {
+; Add leading zero to a number
+	return SubStr("0" . x, -1)
+}
+
 stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 /*	modified version: searches from BS to "   "
 	h = Haystack
