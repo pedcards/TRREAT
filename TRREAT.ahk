@@ -733,6 +733,8 @@ PrintOut:
 	;~ }
 
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
+	FormatTime, enc_date, A_now, MM/dd/yyyy
+	dt := parseDate(fldval["dev-Encounter"])
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 	. "{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\lang9\margl1440\margr1440\margt1440\margb1440`n"
@@ -741,14 +743,14 @@ PrintOut:
 	. "Transcriptionist\tab "	"<TrID:crd> \par`n"
 	. "Document Type\tab "		"<7:Q8> \par`n"
 	. "Clinic Title code\tab "	"<1035:PACE> \par`n"
-	. "Medical Record #\tab "	"<1:" blk["Patient ID"] ">\par`n"
-	. "Patient Name\tab "		"<2:" blk["Patient Name"] ">\par`n"
+	. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par`n"
+	. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par`n"
 	. "CIS Encounter #\tab "	"<3: " substr("0000" . enc_FIN, -11) " >\par`n"
 	. "Dictating Phy #\tab "	"<8:" enc_MD ">\par`n"
-	. "Dictation Date\tab "		"<13:" enc_signed ">\par`n"
+	. "Dictation Date\tab "		"<13:" enc_date ">\par`n"
 	. "Job #\tab "				"<15:e> \par`n"
-	. "Service Date\tab "		"<31:" enc_date ">\par`n"
-	. "Surgery Date\tab "		"<6:" enc_date "> \par`n"
+	. "Service Date\tab "		"<31:" dt.MM "/" dt.DD "/" dt.YYYY ">\par`n"
+	. "Surgery Date\tab "		"<6:" dt.MM "/" dt.DD "/" dt.YYYY "> \par`n"
 	. "Attending Phy #\tab "	"<9:" enc_MD "> \par`n"
 	. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par`n"
 	. "<EndOfHeader>\par}`n"
@@ -1172,6 +1174,12 @@ FilePrepend( Text, Filename ) {
 
 parseDate(x) {
 ; Disassembles "2/9/2015" or "2/9/2015 8:31" into Yr=2015 Mo=02 Da=09 Hr=08 Min=31
+	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+	if (x~="i)(\d{1,2})[\-\s\.]|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\-\s\.](\d{2,4})") {		; 03 Jan 2016
+		StringSplit, DT, x, %A_Space%-.
+		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "YYYY":DT3}
+	}
+	
 	StringSplit, DT, x, %A_Space%
 	StringSplit, DY, DT1, /
 	StringSplit, DHM, DT2, :
