@@ -1092,6 +1092,17 @@ ObjHasValue(aObj, aValue, rx:="") {
     return, false, errorlevel := 1
 }
 
+eventlog(event) {
+	global user
+	comp := A_ComputerName
+	FormatTime, sessdate, A_Now, yyyy.MM
+	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
+	name := "logs/" . sessdate . ".log"
+	txt := now " [" user "/" comp "] " event "`n"
+	filePrepend(txt,name)
+;	FileAppend, % timenow " ["  user "/" comp "] " event "`n", % "logs/" . sessdate . ".log"
+}
+
 stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 /*	modified version: searches from BS to "   "
 	h = Haystack
