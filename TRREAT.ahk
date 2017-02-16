@@ -252,14 +252,14 @@ mdtAdapta:
 		if (fintxt~=splTxt ".*Pacemaker Status") {
 			dev := strX(fintxt,"Final Report",1,0,"Lead Status:",1,0)
 			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit"
-						, "Patient Name", "DOB", "ID", "Physician","`n"
+						, "Patient Name", "ID", "Physician","`n"
 						, "Pacemaker Model", "Implanted"
 						, "Atrial Lead", "Implanted"
 						, "Ventricular Lead", "Implanted"
 						, "Pacemaker Status", "Estimated remaining longevity"
 						, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
 			labels[1] := ["IPG","IPG_SN","Encounter"
-						,"Name", "DOB", "MRN", "Physician","null"
+						,"Name", "MRN", "Physician","null"
 						, "IPG0", "IPG_impl"
 						, "Alead", "Alead_impl"
 						, "Vlead", "Vlead_impl"
@@ -269,6 +269,7 @@ mdtAdapta:
 			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 				fldval["dev-Physician"] := "Dr. " . trim(tmp)
 			}
+			fldfill("dev-Name",RegExReplace(fldval["dev-Name"],"i)DOB.*"))
 			fldfill("dev-Alead",RegExReplace(fldval["dev-Alead"],"---"))
 			fldfill("dev-RVlead",RegExReplace(fldval["dev-RVlead"],"---"))
 			
