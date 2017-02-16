@@ -735,6 +735,7 @@ PrintOut:
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
 	FormatTime, enc_date, A_now, MM/dd/yyyy
 	dt := parseDate(fldval["dev-Encounter"])
+	enc_dt := dt.MM "/" dt.DD "/" dt.YYYY 
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 	. "{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\lang9\margl1440\margr1440\margt1440\margb1440`n"
@@ -749,8 +750,8 @@ PrintOut:
 	. "Dictating Phy #\tab "	"<8:" enc_MD ">\par`n"
 	. "Dictation Date\tab "		"<13:" enc_date ">\par`n"
 	. "Job #\tab "				"<15:e> \par`n"
-	. "Service Date\tab "		"<31:" dt.MM "/" dt.DD "/" dt.YYYY ">\par`n"
-	. "Surgery Date\tab "		"<6:" dt.MM "/" dt.DD "/" dt.YYYY "> \par`n"
+	. "Service Date\tab "		"<31:" enc_dt ">\par`n"
+	. "Surgery Date\tab "		"<6:" enc_dt "> \par`n"
 	. "Attending Phy #\tab "	"<9:" enc_MD "> \par`n"
 	. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par`n"
 	. "<EndOfHeader>\par}`n"
@@ -760,7 +761,7 @@ PrintOut:
 
 	rtfBody := "\tx1620\tx5220\tx7040" 
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18`n"
-	. fldval["dev-Encounter"] "\par\par\fs22`n"
+	. enc_dt "\par\par\fs22`n"
 	. rtfBody . "\fs22\par`n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18`n"
 	. summ . "\par\par{\tx2700\tx5220\tx7040`n"
