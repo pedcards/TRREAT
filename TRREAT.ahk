@@ -1034,6 +1034,7 @@ fieldvals(x,bl,pre:="") {
 		j := fields[bl][k+1]
 		m := (j) ?	strVal(x,i,j,n,n)			;trim(stRegX(x,i,n,1,j,1,n), " `n")
 				:	trim(strX(SubStr(x,n),":",1,1,"",0)," `n")
+		q := stregX(x,i ":?",(n)?n:1,1,j ":?",1,n)
 		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		lbl := labels[bl][A_index]
 		
@@ -1114,7 +1115,8 @@ fetchGUI:
 	fW1 := 80,	fW2 := 190									; width for title and input fields
 	fH := 20												; line heights
 	fY := 10												; y pos to start
-	EncNum := ptDem["Account Number"]						; we need these non-array variables for the Gui statements
+	EncNum := ptDem["dev-Enc"]								; we need these non-array variables for the Gui statements
+	EncMRN := fldval["dev-MRN"]
 	encDT := parseDate(ptDem.EncDate).YYYY . parseDate(ptDem.EncDate).MM . parseDate(ptDem.EncDate).DD
 	demBits := 0											; clear the error check
 	fTxt := "	Validate demographic info:`n"
@@ -1124,9 +1126,9 @@ fetchGUI:
 	Gui, fetch:+AlwaysOnTop
 	Gui, fetch:Add, Text, % "x" fX1 , % fTxt	
 	Gui, fetch:Add, Text, % "x" fX1 " y" (fY += fYd*2) " w" fW1 " h" fH " c" , MRN
-	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH " cDefault", % ptDem["nameF"]
+	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH " cDefault", % fldval["dev-MRN"]
 	Gui, fetch:Add, Text, % "x" fX1 " y" (fY += fYd) " w" fW1 " h" fH " c" , Encounter
-	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH , % ptDem["nameL"]
+	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH , % fldval["dev-Enc"]
 	Gui, fetch:Add, Button, % "x" fX1+10 " y" (fY += fYD) " h" fH+10 " w" fW1+fW2 " gfetchSubmit " ((demBits)?"Disabled":""), Submit!
 	Gui, fetch:Show, AutoSize, Enter Demographics
 	return
@@ -1194,6 +1196,12 @@ parseClip(clip) {
 				, "date":dt}
 	}
 	return Error																		; Anything else returns Error
+}
+
+fetchSubmit:
+{
+
+return
 }
 
 eventlog(event) {
