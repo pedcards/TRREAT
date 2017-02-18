@@ -92,7 +92,7 @@ Medtronic:
 		gosub mdtQuickLookII
 	}
 	
-	gosub fetchDemog
+	gosub fetchDem
 	
 	gosub pmPrint
 	;~ clipboard := rtfBody
@@ -340,7 +340,7 @@ BSCI:
 	
 	gosub bsciZoomView
 	
-	gosub fetchDemog
+	gosub fetchDem
 	
 	gosub pmPrint
 	;~ clipboard := rtfBody
@@ -1100,13 +1100,39 @@ ObjHasValue(aObj, aValue, rx:="") {
     return, false, errorlevel := 1
 }
 
-fetchDemog:
+FetchDem:
 {
-	if !(fldval["dev-MRN"]~="^\d{6,7}$") {
+	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
 	}
+	mdX := Object()										; clear Mouse Demographics X,Y coordinate arrays
+	mdY := Object()	
+	getDem := true
 	gosub fetchGUI
 	
+	while (getDem) {									; Repeat until we get tired of this
+		clipboard :=
+		ClipWait, 2
+		if !ErrorLevel {								; clipboard has data
+			clk := parseClip(clipboard)
+			if !ErrorLevel {															; parseClip {field:value} matches valid data
+				MouseGetPos, mouseXpos, mouseYpos, mouseWinID, mouseWinClass, 2			; put mouse coords into mouseXpos and mouseYpos, and associated winID
+				if (clk.field = "Account Number") {
+					fldval["dev-Enc"] := clk.value
+					eventlog("MouseGrab Account Number " clk.value ".")
+					mdX[1] := mouseXpos													; demographics grid[1,3]
+					mdY[3] := mouseYpos
+				}
+				if (clk.field = "MRN") {
+					fldval["dev-MRN"] := clk.value
+					eventlog("MouseGrab MRN " clk.value ".")
+					mdX[1] := mouseXpos													; demographics grid[1,3]
+					mdY[2] := mouseYpos
+				}
+			}
+			gosub fetchGUI							; Update GUI with new info
+		}
+	}
 	return
 }
 
