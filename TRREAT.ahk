@@ -1202,8 +1202,36 @@ parseClip(clip) {
 
 fetchSubmit:
 {
-
-return
+/* some error checking
+	Check for required elements
+	Error check and normalize Ordering MD name
+	Check for Lifewatch exe
+	Fill Lifewatch data and submit
+	The repeat the cycle
+demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
+*/
+	Gui, fetch:Submit
+	Gui, fetch:Destroy
+	
+	;~ matchProv := checkCrd(ptDem.Provider)
+	;~ if !(ptDem.Provider) {														; no provider? ask!
+		;~ gosub getMD
+		;~ eventlog("New provider field " ptDem.Provider ".")
+	;~ } else if (matchProv.fuzz > 0.10) {							; Provider not recognized
+		;~ eventlog(ptDem.Provider " not recognized (" matchProv.fuzz ").")
+		;~ if (ptDem.Type~="i)(Inpatient|Observation|Emergency|Day Surg)") {
+			;~ gosub assignMD														; Inpt, ER, DaySurg, we must find who recommended it from the Chipotle schedule
+			;~ eventlog(ptDem.Type " location. Provider assigned to " ptDem.Provider ".")
+		;~ } else {
+			;~ gosub getMD															; Otherwise, ask for it.
+			;~ eventlog("Provider set to " ptDem.Provider ".")
+		;~ }
+	;~ } else {													; Provider recognized
+		;~ eventlog(ptDem.Provider " matches " matchProv.Best " (" matchProv.fuzz ").")
+		;~ ptDem.Provider := matchProv.Best
+	;~ }
+	getDem := false
+	return
 }
 
 eventlog(event) {
