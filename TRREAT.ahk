@@ -1105,8 +1105,6 @@ FetchDem:
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
 	}
-	mdX := Object()										; clear Mouse Demographics X,Y coordinate arrays
-	mdY := Object()	
 	getDem := true
 	gosub fetchGUI
 	
@@ -1116,18 +1114,13 @@ FetchDem:
 		if !ErrorLevel {								; clipboard has data
 			clk := parseClip(clipboard)
 			if !ErrorLevel {															; parseClip {field:value} matches valid data
-				MouseGetPos, mouseXpos, mouseYpos, mouseWinID, mouseWinClass, 2			; put mouse coords into mouseXpos and mouseYpos, and associated winID
 				if (clk.field = "Account Number") {
 					fldval["dev-Enc"] := clk.value
 					eventlog("MouseGrab Account Number " clk.value ".")
-					mdX[1] := mouseXpos													; demographics grid[1,3]
-					mdY[3] := mouseYpos
 				}
 				if (clk.field = "MRN") {
 					fldval["dev-MRN"] := clk.value
 					eventlog("MouseGrab MRN " clk.value ".")
-					mdX[1] := mouseXpos													; demographics grid[1,3]
-					mdY[2] := mouseYpos
 				}
 			}
 			gosub fetchGUI							; Update GUI with new info
@@ -1164,21 +1157,6 @@ fetchGuiClose:
 	fetchQuit := true
 	eventlog("Manual [x] out of fetchDem.")
 Return
-
-mouseGrab(x,y) {
-/*	Double click mouse coordinates x,y to grab cell contents
-	Process through parseClip to validate
-	Return the value portion of parseClip
-*/
-	BlockInput, On																		; Prevent extraneous input
-	MouseMove, %x%, %y%, 0																; Goto coordinates
-	Click 2																				; Double-click
-	BlockInput, Off																		; Permit input again
-	sleep 100
-	ClipWait																			; sometimes there is delay for clipboard to populate
-	clk := parseClip(clipboard)															; get available values out of clipboard
-	return clk																			; Redundant? since this is what parseClip() returns
-}
 
 parseClip(clip) {
 /*	If clip matches "val1:val2" format, and val1 in demVals[], return field:val
