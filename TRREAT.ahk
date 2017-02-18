@@ -1112,27 +1112,27 @@ fetchDemog:
 
 fetchGUI:
 {
-	fYd := 30,	fXd := 90									; fetchGUI delta Y, X
-	fX1 := 12,	fX2 := fX1+fXd								; x pos for title and input fields
-	fW1 := 80,	fW2 := 190									; width for title and input fields
-	fH := 20												; line heights
-	fY := 10												; y pos to start
-	EncNum := ptDem["dev-Enc"]								; we need these non-array variables for the Gui statements
+	fYd := 30,	fXd := 90														; fetchGUI delta Y, X
+	fX1 := 12,	fX2 := fX1+fXd													; x pos for title and input fields
+	fW1 := 80,	fW2 := 190														; width for title and input fields
+	fH := 20																	; line heights
+	fY := 10																	; y pos to start
+	EncNum := fldval["dev-Enc"]													; we need these non-array variables for the Gui statements
 	EncMRN := fldval["dev-MRN"]
 	encDT := parseDate(ptDem.EncDate).YYYY . parseDate(ptDem.EncDate).MM . parseDate(ptDem.EncDate).DD
-	demBits := 0											; clear the error check
+	demBits := (EncNum && EncMRN)												; clear the error check
 	fTxt := "	Validate demographic info:`n"
 		.	"		1) Double-click Account Number #`n"
 		.	"		2) Double-click MRN"
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
-	Gui, fetch:Add, Text, % "x" fX1 , % fTxt	
-	Gui, fetch:Add, Text, % "x" fX1 " y" (fY += fYd*2) " w" fW1 " h" fH " c" , MRN
+	;~ Gui, fetch:Add, Text, % "x" fX1 , % fTxt	
+	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , MRN
 	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH " cDefault", % fldval["dev-MRN"]
 	Gui, fetch:Add, Text, % "x" fX1 " y" (fY += fYd) " w" fW1 " h" fH " c" , Encounter
 	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH , % fldval["dev-Enc"]
-	Gui, fetch:Add, Button, % "x" fX1+10 " y" (fY += fYD) " h" fH+10 " w" fW1+fW2 " gfetchSubmit " ((demBits)?"Disabled":""), Submit!
-	Gui, fetch:Show, AutoSize, Enter Demographics
+	Gui, fetch:Add, Button, % "x" fX1+10 " y" (fY += fYD) " h" fH+10 " w" fW1+fW2 " gfetchSubmit " ((demBits)?"":"Disabled"), Submit!
+	Gui, fetch:Show, AutoSize, Grab Demographics
 	return
 }
 
