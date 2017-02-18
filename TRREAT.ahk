@@ -1102,6 +1102,9 @@ ObjHasValue(aObj, aValue, rx:="") {
 
 fetchDemog:
 {
+	if !(fldval["dev-MRN"]~="^\d{6,7}$") {
+		fldval["dev-MRN"] := ""
+	}
 	gosub fetchGUI
 	
 	return
