@@ -1034,7 +1034,6 @@ fieldvals(x,bl,pre:="") {
 		j := fields[bl][k+1]
 		m := (j) ?	strVal(x,i,j,n,n)			;trim(stRegX(x,i,n,1,j,1,n), " `n")
 				:	trim(strX(SubStr(x,n),":",1,1,"",0)," `n")
-		q := stregX(x,i ":?",(n)?n:1,1,j ":?",1,n)
 		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		lbl := labels[bl][A_index]
 		
