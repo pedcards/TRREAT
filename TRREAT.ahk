@@ -1193,8 +1193,8 @@ parseClip(clip) {
 	
 	StringSplit, val, clip, :															; break field into val1:val2
 	if (ObjHasValue(demVals, val1)) {													; field name in demVals, e.g. "MRN","Account Number","DOB","Sex","Loc","Provider"
-		return {"field":val1
-				, "value":val2}
+		return {"field":trim(val1)
+				, "value":trim(val2)}
 	}
 	
 	return Error																		; Anything else returns Error
