@@ -1162,7 +1162,8 @@ parseClip(clip) {
 /*	If clip matches "val1:val2" format, and val1 in demVals[], return field:val
 	If clip contains proper Encounter Type ("Outpatient", "Inpatient", "Observation", etc), return Type, Date, Time
 */
-	global demVals
+	;~ global demVals
+	demVals := ["Account Number","MRN"]
 	
 	StringSplit, val, clip, :															; break field into val1:val2
 	if (ObjHasValue(demVals, val1)) {													; field name in demVals, e.g. "MRN","Account Number","DOB","Sex","Loc","Provider"
@@ -1170,33 +1171,6 @@ parseClip(clip) {
 				, "value":val2}
 	}
 	
-	dt := strX(clip," [",1,2, "]",1,1)													; get date
-	dd := parseDate(dt).YYYY . parseDate(dt).MM . parseDate(dt).DD
-	if (clip~="Outpatient\s\[") {														; Outpatient type
-		return {"field":"Type"
-				, "value":"Outpatient"
-				, "loc":"Outpatient"
-				, "date":dt
-				, "time":parseDate(dt).time}
-	}
-	if (clip~="Inpatient|Observation\s\[") {											; Inpatient types
-		return {"field":"Type"
-				, "value":"Inpatient"
-				, "loc":"Inpatient"
-				, "date":""}															; can span many days, return blank
-	}
-	if (clip~="Day Surg.*\s\[") {														; Day Surg type
-		return {"field":"Type"
-				, "value":"Day Surg"
-				, "loc":"SurgCntr"
-				, "date":dt}
-	}
-	if (clip~="Emergency") {															; Emergency type
-		return {"field":"Type"
-				, "value":"Emergency"
-				, "loc":"Emergency"
-				, "date":dt}
-	}
 	return Error																		; Anything else returns Error
 }
 
