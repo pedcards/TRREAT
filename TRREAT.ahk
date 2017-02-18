@@ -1147,18 +1147,14 @@ fetchGUI:
 	EncMRN := fldval["dev-MRN"]
 	encDT := parseDate(ptDem.EncDate).YYYY . parseDate(ptDem.EncDate).MM . parseDate(ptDem.EncDate).DD
 	demBits := (EncNum && EncMRN)												; clear the error check
-	fTxt := "	Validate demographic info:`n"
-		.	"		1) Double-click Account Number #`n"
-		.	"		2) Double-click MRN"
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
-	;~ Gui, fetch:Add, Text, % "x" fX1 , % fTxt	
 	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , MRN
 	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH " cDefault", % fldval["dev-MRN"]
 	Gui, fetch:Add, Text, % "x" fX1 " y" (fY += fYd) " w" fW1 " h" fH " c" , Encounter
 	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH , % fldval["dev-Enc"]
 	Gui, fetch:Add, Button, % "x" fX1+10 " y" (fY += fYD) " h" fH+10 " w" fW1+fW2 " gfetchSubmit " ((demBits)?"":"Disabled"), Submit!
-	Gui, fetch:Show, AutoSize, Grab Demographics
+	Gui, fetch:Show, AutoSize, % fldval["dev-Name"]
 	return
 }
 
