@@ -1227,7 +1227,8 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	}
 	/*	may need to copy WriteOut
 	*/
-		y.saveXML(chipDir "currlist.xml")
+		;~ y.saveXML(chipDir "currlist.xml")
+		writeOut(MRNstring,"prov")
 	/*
 	*/
 
@@ -1254,7 +1255,7 @@ WriteOut(path,node) {
 	node, loads a fresh currlist into Z (latest update), replaces the z.MRN node with the cloned y.MRN node,
 	saves it, then reloads this currlist into Y.
 */
-	global y
+	global y, chipDir
 	filecheck()
 	FileOpen(chipDir ".currlock", "W")													; Create lock file.
 	
@@ -1262,7 +1263,7 @@ WriteOut(path,node) {
 	locNode := locPath.selectSingleNode(node)
 	clone := locNode.cloneNode(true)											; make copy of y.node
 	
-	z := new XML(ck)															; temp Z will be most recent good currlist
+	z := y																		; temp Z will be most recent good currlist
 	
 	if !IsObject(z.selectSingleNode(path "/" node)) {
 		If instr(node,"id[@mrn") {
