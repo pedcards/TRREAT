@@ -1192,22 +1192,23 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	Gui, fetch:Submit
 	Gui, fetch:Destroy
 	
-	mrnstr := "/root/id[@mrn='" EncMRN "']"
-	
-	yCurr := new XML(chipDir "currlist.xml")
+	MRNstring := "/root/id[@mrn='" EncMRN "']"
+	SNstring := "/root/id/diagnoses/device[@SN='" EncSN "']"
+	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
-	if (yID := yCurr.selectSingleNode(mrnstr)) {
+	if (y.selectSingleNode(MRNstring)) {
 		MsgBox Exists in current list
-	} else if (yID := yArch.selectSingleNode(mrnstr)) {
-		MsgBox Found in archive
 	} else {
-		idStr := "//id[@mrn='" EncMRN "']"
-		yID := new XML("<id mrn='" EncMRN "' />")
-		yID.addElement("prov",idStr)
-		
-		MsgBox % "Not found at all`nCreating record"
+		y.addElement("id", "root", {mrn: EncMRN})									; No MRN node exists, create it.
+		y.addElement("demog", MRNstring)
+			yCurr.addElement("name_last", MRNstring "/demog", tmpNameL)
+			;~ yCurr.addElement("name_first", MRNstring "/demog", tmpNameF)
+		FetchNode("diagnoses")													; Check for existing node in Archlist,
+		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
 		
 	}
+	
+	yID := yCurr.selectSingleNode(mrnstr)
 	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {
 		yEP := cMsgBox("No EP found"
 						,"Assign a primary EP`nClose [x] if none"
