@@ -1200,7 +1200,7 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})									; No MRN node exists, create it.
 		y.addElement("demog", MRNstring)
-			yCurr.addElement("name_last", MRNstring "/demog", tmpNameL)
+			y.addElement("name_last", MRNstring "/demog", tmpNameL)
 			;~ yCurr.addElement("name_first", MRNstring "/demog", tmpNameF)
 		FetchNode("diagnoses")													; Check for existing node in Archlist,
 		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
@@ -1218,7 +1218,11 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
 		}
 	}
-	y.saveXML(chipDir "currlist.xml")
+	/*	may need to copy WriteOut
+	*/
+		y.saveXML(chipDir "currlist.xml")
+	/*
+	*/
 
 	getDem := false
 	return
