@@ -1223,14 +1223,10 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 			yID.selectSingleNode("prov").setAttribute("EP", yEP)
 			yID.selectSingleNode("prov").setAttribute("au", A_UserName)
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
-		}
+			
+			writeOut(MRNstring,"prov")
+		} 
 	}
-	/*	may need to copy WriteOut
-	*/
-		;~ y.saveXML(chipDir "currlist.xml")
-		writeOut(MRNstring,"prov")
-	/*
-	*/
 
 	getDem := false
 	return
