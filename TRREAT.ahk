@@ -1196,6 +1196,7 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	SNstring := "/root/id/diagnoses/device[@SN='" EncSN "']"
 	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
+	
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})									; No MRN node exists, create it.
 		y.addElement("demog", MRNstring)
