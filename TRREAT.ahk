@@ -1187,6 +1187,18 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	Gui, fetch:Submit
 	Gui, fetch:Destroy
 	
+	mrnstr := "/root/id[@mrn='" EncMRN "']"
+	yCurr := new XML(chipDir "currlist.xml")
+	yArch := new XML(chipDir "archlist.xml")
+	if (yID := yCurr.selectSingleNode(mrnstr)) {
+		MsgBox Exists
+	} else if (yID := yArch.selectSingleNode(mrnstr)) {
+		MsgBox Archived
+	} else {
+		MsgBox Does not exist!
+		yID := new XML("<id mrn=`"" EncMRN "`" />")
+	}
+
 	;~ matchProv := checkCrd(ptDem.Provider)
 	;~ if !(ptDem.Provider) {														; no provider? ask!
 		;~ gosub getMD
@@ -1292,3 +1304,4 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 }
 
 #Include strx.ahk
+#Include xml.ahk
