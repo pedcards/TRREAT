@@ -1247,6 +1247,63 @@ FetchNode(node) {
 	}
 }
 
+WriteOut(path,node) {
+/* 
+	Prevents concurrent writing of y.MRN data. If someone is saving data (.currlock exists), script will wait
+	approx 6 secs and check every 50 msec whether the lock file is removed. When available it creates clones the y.MRN
+	node, loads a fresh currlist into Z (latest update), replaces the z.MRN node with the cloned y.MRN node,
+	saves it, then reloads this currlist into Y.
+*/
+	global y
+	filecheck()
+	FileOpen(chipDir ".currlock", "W")													; Create lock file.
+	
+	locPath := y.selectSingleNode(path)
+	locNode := locPath.selectSingleNode(node)
+	clone := locNode.cloneNode(true)											; make copy of y.node
+	
+	z := new XML(ck)															; temp Z will be most recent good currlist
+	
+	if !IsObject(z.selectSingleNode(path "/" node)) {
+		If instr(node,"id[@mrn") {
+			z.addElement("id","root",{mrn: strX(node,"='",1,2,"']",1,2)})
+		} else {
+			z.addElement(node,path)
+		}
+	}
+	zPath := z.selectSingleNode(path)											; find same "node" in z
+	zNode := zPath.selectSingleNode(node)
+	zPath.replaceChild(clone,zNode)												; replace existing zNode with node clone
+	
+	z.save(chipDir "currlist.xml")												; write z into currlist
+	y := z																		; make Y match Z, don't need a file op
+	FileDelete, % chipDir ".currlock"											; release lock file.
+	return
+}
+
+filecheck() {
+	if FileExist(chipDir ".currlock") {
+		err=0
+		Progress, , Waiting to clear lock, File write queued...
+		loop 50 {
+			if (FileExist(chipDir ".currlock")) {
+				progress, %p%
+				Sleep 100
+				p += 2
+			} else {
+				err=1
+				break
+			}
+		}
+		if !(err) {
+			progress off
+			return error
+		}
+	} 
+	progress off
+	return
+}
+
 eventlog(event) {
 	global user
 	comp := A_ComputerName
