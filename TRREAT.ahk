@@ -1196,19 +1196,16 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	SNstring := "/root/id/diagnoses/device[@SN='" EncSN "']"
 	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
-	if (y.selectSingleNode(MRNstring)) {
-		MsgBox Exists in current list
-	} else {
+	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})									; No MRN node exists, create it.
 		y.addElement("demog", MRNstring)
 			yCurr.addElement("name_last", MRNstring "/demog", tmpNameL)
 			;~ yCurr.addElement("name_first", MRNstring "/demog", tmpNameF)
 		FetchNode("diagnoses")													; Check for existing node in Archlist,
 		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
-		
 	}
 	
-	yID := yCurr.selectSingleNode(mrnstr)
+	yID := y.selectSingleNode(MRNstring)
 	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {
 		yEP := cMsgBox("No EP found"
 						,"Assign a primary EP`nClose [x] if none"
@@ -1220,7 +1217,7 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
 		}
 	}
-	yArch.saveXML(chipDir "archlist.xml")
+	y.saveXML(chipDir "currlist.xml")
 
 	;~ matchProv := checkCrd(ptDem.Provider)
 	;~ if !(ptDem.Provider) {														; no provider? ask!
@@ -1241,6 +1238,18 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	;~ }
 	getDem := false
 	return
+}
+
+FetchNode(node) {
+	global
+	local x, clone
+	if IsObject(yArch.selectSingleNode(MRNstring "/" node)) {		; Node arch exists
+		x := yArch.selectSingleNode(MRNstring "/" node)
+		clone := x.cloneNode(true)
+		y.selectSingleNode(MRNstring).appendChild(clone)			; using appendChild as no Child exists yet.
+	} else {
+		y.addElement(node, MRNstring)								; If no node arch exists, create placeholder
+	}
 }
 
 eventlog(event) {
