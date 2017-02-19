@@ -1188,6 +1188,7 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	Gui, fetch:Destroy
 	
 	mrnstr := "/root/id[@mrn='" EncMRN "']"
+	
 	yCurr := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
 	if (yID := yCurr.selectSingleNode(mrnstr)) {
@@ -1196,7 +1197,7 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 		MsgBox Archived
 	} else {
 		MsgBox Does not exist!
-		yID := new XML("<id mrn=`"" EncMRN "`" />")
+		yID := new XML("<id mrn=""" EncMRN """ />")
 	}
 
 	;~ matchProv := checkCrd(ptDem.Provider)
