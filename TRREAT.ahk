@@ -1207,7 +1207,7 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	}
 	
 	yID := y.selectSingleNode(MRNstring)
-	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {
+	if !(yID.selectSingleNode("prov").getAttribute("EP")) {
 		yEP := cMsgBox("No EP found"
 						,"Assign a primary EP`nClose [x] if none"
 						,"T. Chun|J. Salerno|S. Seslar"
