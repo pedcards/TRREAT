@@ -1106,6 +1106,14 @@ FetchDem:
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
 	}
+	
+	/*	set test vals
+	*/
+		fldval["dev-MRN"] := 746275
+		fldval["dev-Enc"] := 98224013
+	/*
+	*/
+	
 	getDem := true
 	gosub fetchGUI
 	
