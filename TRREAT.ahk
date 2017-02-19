@@ -1189,13 +1189,29 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	yCurr := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
 	if (yID := yCurr.selectSingleNode(mrnstr)) {
-		MsgBox Exists
+		MsgBox Exists in current list
 	} else if (yID := yArch.selectSingleNode(mrnstr)) {
-		MsgBox Archived
+		MsgBox Found in archive
 	} else {
-		MsgBox Does not exist!
-		yID := new XML("<id mrn=""" EncMRN """ />")
+		idStr := "//id[@mrn='" EncMRN "']"
+		yID := new XML("<id mrn='" EncMRN "' />")
+		yID.addElement("prov",idStr)
+		
+		MsgBox % "Not found at all`nCreating record"
+		
 	}
+	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {
+		yEP := cMsgBox("No EP found"
+						,"Assign a primary EP`nClose [x] if none"
+						,"T. Chun|J. Salerno|S. Seslar"
+						,"Q","")
+		if !(yEP=="Close") {
+			yID.selectSingleNode("prov").setAttribute("EP", yEP)
+			yID.selectSingleNode("prov").setAttribute("au", A_UserName)
+			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
+		}
+	}
+	yArch.saveXML(chipDir "archlist.xml")
 
 	;~ matchProv := checkCrd(ptDem.Provider)
 	;~ if !(ptDem.Provider) {														; no provider? ask!
