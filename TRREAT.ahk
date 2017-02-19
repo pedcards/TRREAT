@@ -1192,10 +1192,17 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	Gui, fetch:Submit
 	Gui, fetch:Destroy
 	
-	MRNstring := "/root/id[@mrn='" EncMRN "']"
-	SNstring := "/root/id/diagnoses/device[@SN='" EncSN "']"
 	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
+	MRNstring := "/root/id[@mrn='" EncMRN "']"
+	SNstring := "/root/id/diagnoses/device[@SN='" fldval["dev-IPG_SN"] "']"
+	if IsObject(y.selectSingleNode(SNstring)) {
+		dx := k.parentNode
+		id := dx.parentNode
+		mrn := id.getAttribute("mrn")
+		ed_pc := k.getAttribute("ed")
+		ed_dx := id.selectSingleNode("diagnoses").getAttribute("ed")
+	}
 	
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})									; No MRN node exists, create it.
