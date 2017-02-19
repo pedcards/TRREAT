@@ -1135,6 +1135,9 @@ FetchDem:
 			gosub fetchGUI							; Update GUI with new info
 		}
 	}
+	
+	gosub checkEP
+	
 	return
 }
 
@@ -1192,12 +1195,21 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	Gui, fetch:Submit
 	Gui, fetch:Destroy
 	
+	getDem := false
+	return
+}
+
+checkEP:
+{
+/*	Find responsible EP
+	and/or assign to someone
+*/
 	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	SNstring := "/root/id/diagnoses/device[@SN='" fldval["dev-IPG_SN"] "']"
-	if IsObject(y.selectSingleNode(SNstring)) {
-		dx := k.parentNode
+	if IsObject(y.selectSingleNode(SNstring)) {									; Device SN found
+		dx := k.parentNode														; Perhaps do this earlier to match the MRN?
 		id := dx.parentNode
 		mrn := id.getAttribute("mrn")
 		ed_pc := k.getAttribute("ed")
@@ -1205,17 +1217,16 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	}
 	
 	if !IsObject(y.selectSingleNode(MRNstring)) {
-		y.addElement("id", "root", {mrn: EncMRN})									; No MRN node exists, create it.
+		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
 		y.addElement("demog", MRNstring)
-			y.addElement("name_last", MRNstring "/demog", tmpNameL)
-			;~ yCurr.addElement("name_first", MRNstring "/demog", tmpNameF)
+		FetchNode("demog")
 		FetchNode("diagnoses")													; Check for existing node in Archlist,
 		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
 	}
-	
 	yID := y.selectSingleNode(MRNstring)
-	if !(yID.selectSingleNode("prov").getAttribute("EP")) {
-		yEP := cMsgBox("No EP found"
+	
+	if !(yID.selectSingleNode("prov").getAttribute("EP")) {						; Assign a primary EP in prov if it does not exist
+		yEP := cMsgBox("No associated EP found"
 						,"Assign a primary EP`nClose [x] if none"
 						,"T. Chun|J. Salerno|S. Seslar"
 						,"Q","")
@@ -1227,9 +1238,13 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 			writeOut(MRNstring,"prov")
 		} 
 	}
-
-	getDem := false
-	return
+	
+	yEP := cMsgBox("Assign report"
+					, "Send report to:"
+					, "T. Chun|J. Salerno|S.Seslar"
+					, "Q","")
+	
+	Return
 }
 
 FetchNode(node) {
