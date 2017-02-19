@@ -19,6 +19,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
+#Include includes
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isAdmin := true
@@ -1176,12 +1177,8 @@ parseClip(clip) {
 
 fetchSubmit:
 {
-/* some error checking
+/*	some error checking
 	Check for required elements
-	Error check and normalize Ordering MD name
-	Check for Lifewatch exe
-	Fill Lifewatch data and submit
-	The repeat the cycle
 demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 */
 	Gui, fetch:Submit
@@ -1306,3 +1303,4 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 
 #Include strx.ahk
 #Include xml.ahk
+#Include CMsgBox.ahk
