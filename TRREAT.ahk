@@ -756,7 +756,7 @@ PrintOut:
 	. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par`n"
 	. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par`n"
 	. "CIS Encounter #\tab "	"<3: " substr("0000" . fldval["dev-Enc"], -11) " >\par`n"
-	. "Dictating Phy #\tab "	"<8:" enc_MD ">\par`n"
+	. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par`n"
 	. "Dictation Date\tab "		"<13:" enc_date ">\par`n"
 	. "Job #\tab "				"<15:e> \par`n"
 	. "Service Date\tab "		"<31:" enc_dt ">\par`n"
