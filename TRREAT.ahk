@@ -734,13 +734,6 @@ return
 
 PrintOut:
 {
-	;~ if (RegExMatch(summ,"\<\d*\>")) {
-		;~ enc_FIN:=strX(summ,"<",1,1,">",1,1,nn)
-		;~ summ := trim(substr(summ,nn+1))
-	;~ } else {
-		;~ InputBox , enc_FIN, % blk["Patient Name"] " - " enc_date, REQUIRED:`n`nEncounter number`n(8 digits)
-	;~ }
-
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
 	FormatTime, enc_date, A_now, MM/dd/yyyy
 	dt := parseDate(fldval["dev-Encounter"])
