@@ -772,6 +772,11 @@ PrintOut:
 
 	LV_Modify(filenum,"col4","YES")
 	Gui, Show
+	
+	nm := fldval["dev-Name"]
+	fileOut :=	enc_MD "-" encMRN " " 
+			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
+			.	dt.YYYY dt.MM dt.DD
 	FileDelete, %fileOut%.rtf
 	FileAppend, %rtfOut%, %fileOut%.rtf
 	outDir := (isAdmin) 
