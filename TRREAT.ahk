@@ -1120,8 +1120,8 @@ FetchDem:
 	
 	/*	set test vals
 	*/
-		fldval["dev-MRN"] := 746275
-		fldval["dev-Enc"] := 98224013
+		;~ fldval["dev-MRN"] := 746275
+		;~ fldval["dev-Enc"] := 98224013
 	/*
 	*/
 	
