@@ -1143,6 +1143,10 @@ FetchDem:
 			gosub fetchGUI							; Update GUI with new info
 		}
 	}
+	EncNum := fldval["dev-Enc"]
+	EncMRN := fldval["dev-MRN"]
+	
+	gosub saveChip
 	
 	gosub checkEP
 	
@@ -1207,23 +1211,9 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 	return
 }
 
-checkEP:
+saveChip:
 {
-/*	Find responsible EP
-	and/or assign to someone
-*/
-	y := new XML(chipDir "currlist.xml")
-	yArch := new XML(chipDir "archlist.xml")
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
-	SNstring := "/root/id/diagnoses/device[@SN='" fldval["dev-IPG_SN"] "']"
-	if IsObject(y.selectSingleNode(SNstring)) {									; Device SN found
-		dx := k.parentNode														; Perhaps do this earlier to match the MRN?
-		id := dx.parentNode
-		mrn := id.getAttribute("mrn")
-		ed_pc := k.getAttribute("ed")
-		ed_dx := id.selectSingleNode("diagnoses").getAttribute("ed")
-	}
-	
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
 		y.addElement("demog", MRNstring)
@@ -1232,8 +1222,42 @@ checkEP:
 		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
 	}
 	yID := y.selectSingleNode(MRNstring)
+	if IsObject(yDev := yID.selectSingleNode("diagnoses/device")) {				; Clear out any existing Device node
+		yDev.parentNode.removeChild(yDev)
+	}
+	y.addElement("device"
+		,MRNstring "/diagnoses"
+		,{	au:A_UserName
+		,	ed:A_Now
+		,	model:fldval["dev-IPG"]
+		,	SN:fldval["dev-IPG_SN"]} )
+	pmNowString := MRNstring "/diagnoses/device"
+		y.addElement("mode", pmNowString, fldval["par-Mode"])
+		y.addElement("LRL", pmNowString, fldval["par-LRL"])
+		y.addElement("URL", pmNowString, fldval["par-URL"])
+		y.addElement("AVI", pmNowString, fldval["par-SAV"])
+		y.addElement("PVARP", pmNowString, fldval["par-PVARP"])
+		y.addElement("ApThr", pmNowString, leads["RA","cap"])
+		y.addElement("AsThr", pmNowString, leads["RA","sens"])
+		y.addElement("VpThr", pmNowString, leads["RV","cap"])
+		y.addElement("VsThr", pmNowString, leads["RV","sens"])
+		y.addElement("Ap", pmNowString, leads["RA","output"])
+		y.addElement("As", pmNowString, leads["RA","sensitivity"])
+		y.addElement("Vp", pmNowString, leads["RV","output"])
+		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
+	WriteOut(MRNstring "/diagnoses", "device")
 	
-	if !(yID.selectSingleNode("prov").getAttribute("EP")) {						; Assign a primary EP in prov if it does not exist
+	return
+}
+
+checkEP:
+{
+/*	Find responsible EP
+	and/or assign to someone
+*/
+	yID := y.selectSingleNode(MRNstring)
+	
+	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {						; Assign a primary EP in prov if it does not exist
 		yEP := cMsgBox("No associated EP found"
 						,"Assign a primary EP`nClose [x] if none"
 						,"T. Chun|J. Salerno|S. Seslar"
