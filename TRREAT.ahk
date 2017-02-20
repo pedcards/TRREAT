@@ -41,7 +41,7 @@ newTxt := Object()
 blk := Object()
 blk2 := Object()
 docs := Object()
-docs := {"Chun, Terrence":"783118","Salerno, Jack":"343079","Seslar, Stephen":"358945"}
+docs := {"TC":"783118","JS":"343079","SS":"358945"}
 
 Loop, *.pdf
 { 
@@ -1280,7 +1280,7 @@ checkEP:
 	{
 		enc_MD := cMsgBox("Assign report"
 						, "Send report to:`n`n(primary EP is " yEP ")."
-						, "Chun, Terrence|Salerno, Jack|Seslar, Stephen"
+						, "TC|JS|SS"
 						, "Q","")
 	}
 	
