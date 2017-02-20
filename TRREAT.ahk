@@ -666,7 +666,7 @@ printQ(var1,txt) {
 	var1	= var to query
 	txt		= text to return with ### on spot to insert var1 if present
 */
-	if !(var1) {
+	if (var1="") {
 		return error
 	}
 	return RegExReplace(txt,"###",var1)
