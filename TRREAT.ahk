@@ -1280,7 +1280,7 @@ checkEP:
 	{
 		enc_MD := cMsgBox("Assign report"
 						, "Send report to:`n`n(primary EP is " yEP ")."
-						, "Chun|Salerno|Seslar"
+						, "Chun, Terrence|Salerno, Jack|Seslar, Stephen"
 						, "Q","")
 	}
 	
