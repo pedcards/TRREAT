@@ -1106,6 +1106,14 @@ FetchDem:
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
 	}
+	y := new XML(chipDir "currlist.xml")
+	yArch := new XML(chipDir "archlist.xml")
+	SNstring := "/root/id/diagnoses/device[@SN='" fldval["dev-IPG_SN"] "']"
+	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
+		dx := k.parentNode
+		id := dx.parentNode
+		fldval["dev-MRN"] := id.getAttribute("mrn")								; set dev-MRN based on device SN
+	}
 	
 	/*	set test vals
 	*/
