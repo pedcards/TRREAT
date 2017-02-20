@@ -1271,10 +1271,15 @@ checkEP:
 		} 
 	}
 	
-	yEP := cMsgBox("Assign report"
-					, "Send report to:"
-					, "T. Chun|J. Salerno|S.Seslar"
-					, "Q","")
+	enc_MD :=
+	MsgBox, 36, Send report, % "Send report to EP to sign?"
+	IfMsgBox, Yes
+	{
+		enc_MD := cMsgBox("Assign report"
+						, "Send report to:`n`n(primary EP is " yEP ")."
+						, "Chun|Salerno|Seslar"
+						, "Q","")
+	}
 	
 	Return
 }
