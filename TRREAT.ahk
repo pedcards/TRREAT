@@ -624,6 +624,9 @@ scanParams(txt,blk,pre:="par",rx:="") {
 
 pmPrint:
 {
+	if !(enc_MD) {
+		return
+	}
 	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n\fs18"
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
