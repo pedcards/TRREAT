@@ -1149,8 +1149,6 @@ FetchDem:
 	
 	gosub saveChip
 	
-	gosub checkEP
-	
 	return
 }
 
