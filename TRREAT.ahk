@@ -1264,7 +1264,10 @@ makeReport:
 		ck := ""
 	}
 	InputBox, summ, Enter SUMMARY text..., % ck,,,,,,,,% ck
-	;~ if ErrorLevel 
+	;~ if ErrorLevel {
+		;~ MsgBox clicked CANCEL
+	;~ }
+	
 	gosub checkEP
 	
 	gosub pmPrint
