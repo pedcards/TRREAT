@@ -1220,7 +1220,6 @@ saveChip:
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
-		y.addElement("demog", MRNstring)
 		FetchNode("demog")
 		FetchNode("diagnoses")													; Check for existing node in Archlist,
 		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
