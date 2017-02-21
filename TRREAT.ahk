@@ -149,6 +149,7 @@ mdtQuickLookII:
 	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
 	}
+	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 	fldfill("dev-Alead", RegExReplace(fldval["dev-Alead"],"---"))
 	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
@@ -270,6 +271,7 @@ mdtAdapta:
 			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 				fldval["dev-Physician"] := "Dr. " . trim(tmp)
 			}
+			fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 			fldfill("dev-Name",RegExReplace(fldval["dev-Name"],"i)DOB.*"))
 			fldfill("dev-Alead",RegExReplace(fldval["dev-Alead"],"---"))
 			fldfill("dev-RVlead",RegExReplace(fldval["dev-RVlead"],"---"))
@@ -1119,7 +1121,6 @@ FetchDem:
 		id := dx.parentNode
 		fldval["dev-MRN"] := id.getAttribute("mrn")
 	}
-
 	
 	/*	set test vals
 	*/
