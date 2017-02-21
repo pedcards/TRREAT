@@ -1247,17 +1247,18 @@ saveChip:
 
 makeReport:
 {
-	txt =
-(
-This is a normal device check.
-And a second line.
-|This is another.
-|none
-)
-
-	cMsgBox("Title","Choose a text",txt,"Q","")
+	ck := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
+	if instr(ck,"normal") {
+		ck := "This represents a normal device check. The patient denies any pacemaker related symptoms. "
+			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
+	} else {
+		ck := ""
+	}
+	InputBox, summ, Enter SUMMARY text..., % ck,,,,,,,,% ck
 	
 	gosub checkEP
+	
+	gosub pmPrint
 	
 	return
 }
