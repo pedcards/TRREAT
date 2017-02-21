@@ -95,6 +95,8 @@ Medtronic:
 	
 	gosub fetchDem
 	
+	gosub makeReport
+	
 	gosub pmPrint
 	;~ clipboard := rtfBody
 	;~ MsgBox % rtfBody
@@ -342,6 +344,8 @@ BSCI:
 	gosub bsciZoomView
 	
 	gosub fetchDem
+	
+	gosub makeReport
 	
 	gosub pmPrint
 	;~ clipboard := rtfBody
