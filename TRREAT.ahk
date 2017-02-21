@@ -353,6 +353,7 @@ bsciZoomView:
 	labels[1] := ["Name","DOB","IPG","IPG_SN","Encounter","Last_ck","IPG_impl"]
 	fieldvals(txt,1,"dev")
 	fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
+	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"Boston Scientific "))
 	
 	txt := stregX(maintxt,"My Alerts",1,0,"Leads Data",1)
 	fields[1] := ["Battery","Approximate.*Explant:","`n"]
