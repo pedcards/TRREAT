@@ -1167,7 +1167,6 @@ fetchGUI:
 	fY := 10																	; y pos to start
 	EncNum := fldval["dev-Enc"]													; we need these non-array variables for the Gui statements
 	EncMRN := fldval["dev-MRN"]
-	encDT := parseDate(ptDem.EncDate).YYYY . parseDate(ptDem.EncDate).MM . parseDate(ptDem.EncDate).DD
 	demBits := (EncNum && EncMRN)												; clear the error check
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
