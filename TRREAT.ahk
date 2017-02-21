@@ -1113,7 +1113,13 @@ FetchDem:
 		dx := k.parentNode
 		id := dx.parentNode
 		fldval["dev-MRN"] := id.getAttribute("mrn")								; set dev-MRN based on device SN
+		
+	} else if IsObject(k := yArch.selectSingleNode(SNstring)) {					; Look in yArch if not in y
+		dx := k.parentNode
+		id := dx.parentNode
+		fldval["dev-MRN"] := id.getAttribute("mrn")
 	}
+
 	
 	/*	set test vals
 	*/
