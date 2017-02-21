@@ -1254,11 +1254,12 @@ makeReport:
 	if instr(ck,"normal") {
 		ck := "This represents a normal device check. The patient denies any pacemaker related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
+			. "Routine follow up per implantable device protocol. "
 	} else {
 		ck := ""
 	}
 	InputBox, summ, Enter SUMMARY text..., % ck,,,,,,,,% ck
-	
+	;~ if ErrorLevel 
 	gosub checkEP
 	
 	gosub pmPrint
