@@ -1251,6 +1251,23 @@ saveChip:
 	return
 }
 
+makeReport:
+{
+	txt =
+(
+This is a normal device check.
+And a second line.
+|This is another.
+|none
+)
+
+	cMsgBox("Title","Choose a text",txt,"Q","")
+	
+	gosub checkEP
+	
+	return
+}
+
 checkEP:
 {
 /*	Find responsible EP
