@@ -1130,6 +1130,8 @@ FetchDem:
 	*/
 	
 	getDem := true
+	fetchQuit := false
+	
 	gosub fetchGUI
 	
 	while (getDem) {									; Repeat until we get tired of this
@@ -1150,6 +1152,10 @@ FetchDem:
 			gosub fetchGUI							; Update GUI with new info
 		}
 	}
+	if (fetchQuit) {
+		return
+	}
+	
 	EncNum := fldval["dev-Enc"]
 	EncMRN := fldval["dev-MRN"]
 	
