@@ -1313,7 +1313,9 @@ checkEP:
 	enc_MD := cMsgBox("Assign report"
 					, "Send report to:`n`n(primary EP is " yEP ").`n`n"
 					. "Close [x] window to skip this step."
-					, "TC|JS|SS"
+					, ((yEP="T. Chun") ? "*" : "") . "&TC|"
+					. ((yEP="J. Salerno") ? "*" : "") . "&JS|"
+					. ((yEP="S. Seslar") ? "*" : "") . "&SS"
 					, "Q","")
 	
 	if (enc_MD="Close") {
