@@ -1296,14 +1296,14 @@ checkEP:
 		} 
 	}
 	
-	enc_MD :=
-	MsgBox, 36, Send report, % "Send report to EP to sign?"
-	IfMsgBox, Yes
-	{
-		enc_MD := cMsgBox("Assign report"
-						, "Send report to:`n`n(primary EP is " yEP ")."
-						, "TC|JS|SS"
-						, "Q","")
+	enc_MD := cMsgBox("Assign report"
+					, "Send report to:`n`n(primary EP is " yEP ").`n`n"
+					. "Close [x] window to skip this step."
+					, "TC|JS|SS"
+					, "Q","")
+	
+	if (enc_MD="Close") {
+		enc_MD := ""
 	}
 	
 	Return
