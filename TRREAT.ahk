@@ -95,6 +95,10 @@ Medtronic:
 	
 	gosub fetchDem
 	
+	if (fetchQuit) {
+		return
+	}
+	
 	gosub makeReport
 	
 return	
@@ -342,6 +346,10 @@ BSCI:
 	gosub bsciZoomView
 	
 	gosub fetchDem
+	
+	if (fetchQuit) {
+		return
+	}
 	
 	gosub makeReport
 		
