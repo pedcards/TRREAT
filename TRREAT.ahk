@@ -1,19 +1,4 @@
 /*	TRREAT - The Rhythm Recording Electronic Analysis Transmogrifier - PM
-	Converts file
-		Drag-and-drop onto window
-		Monitor folder for changes
-	Inputs a text file
-		Probably converted from PDF using XPDF's "PDFtoTEXT"
-		Use the -layout or -table option
-		Only need the first 1-2 pages
-	Identifies type of report:
-		PaceArt device check
-		ZioPatch Holter
-		LifeWatch (or other) Holter
-		LifeWatch (or other) Event Recorder
-	Extracts salient data
-	Generates report using mail merge or template in Word
-	Sends report to HIM
 */
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -33,16 +18,22 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	chipDir := "\\childrens\files\HCChipotle\"
 }
 user := A_UserName
-
-Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
-Gui, Add, Button, Disabled w600 h50 , Reload
-Gui, Show
 newTxt := Object()
 blk := Object()
 blk2 := Object()
 docs := Object()
 docs := {"TC":"783118","JS":"343079","SS":"358945"}
 
+if (isAdmin) {
+	role := cMsgBox("Administrator"
+		, "Enter ROLE:"
+		, "Parse PDFs|Sign reports"
+		, "Q","")
+}
+
+Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
+Gui, Add, Button, Disabled w600 h50 , Reload
+Gui, Show
 Loop, *.pdf
 { 
 	blocks := Object()
