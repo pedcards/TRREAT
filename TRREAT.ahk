@@ -24,42 +24,52 @@ blk2 := Object()
 docs := Object()
 docs := {"TC":"783118","JS":"343079","SS":"358945"}
 
-if (isAdmin) {
-	role := cMsgBox("Administrator"
+if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
+	role := "Sign"																; set role to "Sign"
+}
+
+if (isAdmin) {																	; But if isAdmin
+	role := cMsgBox("Administrator"												; offer to either PARSE or SIGN
 		, "Enter ROLE:"
-		, "Parse PDFs|Sign reports"
+		, "*&Parse PDFs|&Sign reports"
 		, "Q","")
 }
 
 Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
 Gui, Add, Button, Disabled w600 h50 , Reload
 Gui, Show
-Loop, *.pdf
-{ 
-	blocks := Object()
-	fields := Object()
-	labels := Object()
-	fldval := Object()
-	leads := Object()
-	summBl := summ := ""
-	fileIn := A_LoopFileName
-	SplitPath, fileIn,,,,fileOut
-	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
-	FileRead, maintxt, temp.txt
-	;~ RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
-	;~ FileRead, mainraw, tempraw.txt
-	cleanlines(maintxt)
-	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
-		gosub Medtronic
+
+if instr(role,"Parse") {
+	Loop, *.pdf
+	{ 
+		blocks := Object()
+		fields := Object()
+		labels := Object()
+		fldval := Object()
+		leads := Object()
+		summBl := summ := ""
+		fileIn := A_LoopFileName
+		SplitPath, fileIn,,,,fileOut
+		RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
+		FileRead, maintxt, temp.txt
+		;~ RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
+		;~ FileRead, mainraw, tempraw.txt
+		cleanlines(maintxt)
+		if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+			gosub Medtronic
+		}
+		if (maintxt~="Boston Scientific Corporation") {
+			gosub BSCI
+		}
 	}
-	if (maintxt~="Boston Scientific Corporation") {
-		gosub BSCI
-	}
+	
+	MsgBox Directory scan complete.
+	GuiControl, Enable, Reload
 }
-
-MsgBox Directory scan complete.
-GuiControl, Enable, Reload
-
+if instr(role,"Sign") {
+	MsgBox SIGN
+	
+}
 ExitApp
 
 
