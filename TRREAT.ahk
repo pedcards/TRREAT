@@ -72,16 +72,16 @@ ExitApp
 
 Medtronic:
 {
-	fileNum += 1
-	LV_Add("", fileIN)
-	LV_Modify(fileNum,"col3","PM")
-	Gui, Show
+	fileNum += 1																; Add a row to the LV
+	LV_Add("", fileIN)															; col1 is filename
 	
-	if (maintxt~="Adapta") {
+	if (maintxt~="Adapta") {													; Scan Adapta family of devices
 		gosub mdtAdapta
-	}
-	if (maintxt~="Quick Look II") {
+	} else if (maintxt~="Quick Look II") {										; or scan more current QuickLook II reports
 		gosub mdtQuickLookII
+	} else {																	; or something else
+		MsgBox NO MATCH
+		return
 	}
 	
 	gosub fetchDem
