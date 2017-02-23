@@ -342,10 +342,16 @@ BSCI:
 {
 	fileNum += 1
 	LV_Add("", fileIN)
-	LV_Modify(fileNum,"col3","PM")
-	Gui, Show
 	
 	gosub bsciZoomView
+	
+	LV_Modify(filenum,"col2",fldval["dev-Name"])
+	LV_Modify(fileNum,"col3",fldval["dev-IPG"])
+	LV_ModifyCol(1,"AutoHdr")
+	LV_ModifyCol(2,"AutoHdr")
+	LV_ModifyCol(3,"AutoHdr")
+	LV_ModifyCol(4,"AutoHdr")
+	Gui, Show
 	
 	gosub fetchDem
 	
