@@ -80,9 +80,20 @@ Medtronic:
 	} else if (maintxt~="Quick Look II") {										; or scan more current QuickLook II reports
 		gosub mdtQuickLookII
 	} else {																	; or something else
+		LV_Modify(fileNum,"col2",fldval["dev-Name"])
+		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
+		LV_Modify(fileNum,"col5","No match")
 		MsgBox NO MATCH
 		return
 	}
+	
+	LV_Modify(filenum,"col2",fldval["dev-Name"])
+	LV_Modify(fileNum,"col3",fldval["dev-IPG"])
+	LV_ModifyCol(1,"AutoHdr")
+	LV_ModifyCol(2,"AutoHdr")
+	LV_ModifyCol(3,"AutoHdr")
+	LV_ModifyCol(4,"AutoHdr")
+	Gui, Show
 	
 	gosub fetchDem
 	
