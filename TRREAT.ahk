@@ -35,11 +35,11 @@ if (isAdmin) {																	; But if isAdmin
 		, "Q","")
 }
 
-Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
-Gui, Add, Button, Disabled w600 h50 , Reload
-Gui, Show
-
 if instr(role,"Parse") {
+	Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
+	Gui, Add, Button, Disabled w600 h50 , Reload
+	Gui, Show
+	
 	Loop, *.pdf
 	{ 
 		blocks := Object()
