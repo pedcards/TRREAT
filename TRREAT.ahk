@@ -8,13 +8,13 @@ SetWorkingDir %A_ScriptDir%
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isAdmin := true
-	;~ holterDir := ".\Holter PDFs\"
-	;~ importFld := ".\Import\"
-	chipDir := "..\CHIPOTLE\"
+	reportDir := ".\pending\"													; generated files pending signature
+	complDir := ".\completed\"													; archive signed files and original PDF files
+	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 } else {
 	isAdmin := false
-	;~ holterDir := "\\chmc16\Cardio\EP\HoltER Database\Holter PDFs\"
-	;~ importFld := "\\chmc16\Cardio\EP\HoltER Database\Import\"
+	reportDir := "\\chmc16\Cardio\EP\TRREAT reports\pending\"
+	complDir := "\\chmc16\Cardio\EP\TRREAT reports\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
 }
 user := A_UserName
