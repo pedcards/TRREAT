@@ -94,14 +94,16 @@ if instr(role,"Sign") {
 	for k,v in l_users															; loop through l_users
 	{
 		tmpHwnd := "HW" . k
+		if !(k~="\d+") {
+			continue
+		}
 		Gui, Tab, % v
 		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w800 h400 vUsr" k " hwnd" tmpHwnd, Date|Name
 		for kk,vv in l_users[v]
 		{
-			;~ MsgBox,, % l_users[v], % kk ":" vv
 			l_name := stregX(vv,"-\d+ ",1,1," \d{6,8}",1)
 			l_date := strX(vv," ",0,1,"",0)
-			;~ Gui, ListView, % v
+			Gui, ListView, % v
 			LV_Add(""
 				, l_date
 				, l_name)
@@ -110,7 +112,7 @@ if instr(role,"Sign") {
 	LV_ModifyCol()
 	LV_ModifyCol(1, "Autohdr")
 	LV_ModifyCol(2, "Autohdr")
-	Gui, Show
+	Gui, Show, AutoSize, Reports Pile
 	
 }
 MsgBox
