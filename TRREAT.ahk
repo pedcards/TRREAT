@@ -73,26 +73,25 @@ if instr(role,"Sign") {
 	l_tabs := 
 	Loop, %reportDir%*.rtf
 	{
-		fileNam := RegExReplace(A_LoopFileName,"i)\.rtf")				; fileNam is name only without extension, no path
-		fileIn := A_LoopFileFullPath									; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
-		
-		l_user := strX(fileNam,"",1,0,"-")								; Get assigned EP from filename
-		;~ l_name := stregX(fileNam,"-\d+ ",1,1," \d{6,8}",1)
-		;~ l_date := strX(fileNam," ",0,1,"",0)
-		;~ MsgBox % fileNam "`n" fileIn "`n" l_user " " l_name " " l_date
-		if !(ObjHasValue(l_users,l_user)) {								; this user not present yet in l_users[]
-			l_users.Push(l_user)										; add user to l_users[]
-			l_users[l_user] := []										; l_users[user] is an object
-			l_tabs .= l_user . "|"										; add user to tab titles string
-		}
-		l_users[l_user].Push(fileNam)									; add filename to l_users[user]
+		fileNam := RegExReplace(A_LoopFileName,"i)\.rtf")						; fileNam is name only without extension, no path
+		fileIn := A_LoopFileFullPath											; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
+				
+		l_user := strX(fileNam,"",1,0,"-")										; Get assigned EP from filename
+		l_name := stregX(fileNam,"-\d+ ",1,1," \d{6,8}",1)		
+		l_date := strX(fileNam," ",0,1,"",0)		
+		if !(ObjHasValue(l_users,l_user)) {										; this user not present yet in l_users[]
+			l_users.Push(l_user)												; add user to l_users[]
+			l_users[l_user] := []												; l_users[user] is an object
+			l_tabs .= l_user . "|"												; add user to tab titles string
+		}		
+		l_users[l_user].Push(fileNam)											; add filename to l_users[user]
 	}
 	l_max := l_users.MaxIndex()
 	
 	Gui, Destroy
-	Gui, Add, Tab2, w800 vRepLV hwndRepH, % l_tabs				; Create a tab control (hwnd=RepH) with titles l_tabs
+	Gui, Add, Tab2, w800 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
 	Gui, Default
-	for k,v in l_users
+	for k,v in l_users															; loop through l_users
 	{
 		tmpHwnd := "HW" . k
 		Gui, Tab, % v
