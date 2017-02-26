@@ -88,7 +88,9 @@ if instr(role,"Sign") {
 			, name:l_name
 			, date:l_date}
 	}
-	
+	gosub SignGUI
+	return
+}
 
 SignGUI:
 {
