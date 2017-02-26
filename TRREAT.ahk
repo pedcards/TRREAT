@@ -92,29 +92,24 @@ if instr(role,"Sign") {
 	Gui, Destroy
 	Gui, Add, Tab2, w800 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
 	Gui, Default
-	for k,v in l_users															; loop through l_users
+	for k in l_users															; loop through l_users
 	{
-		tmpHwnd := "HW" . k
-		if !(k~="\d+") {
-			continue
-		}
-		Gui, Tab, % v
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w800 h400 vUsr" k " hwnd" tmpHwnd, Date|Name
-		for kk,vv in l_users[v]
+		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
+		Gui, Tab, % k															; go to tab for the user
+		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 vUsr" k " hwnd" tmpHwnd, Date|Name
+		for v in l_users[k]														; loop through users in l_users
 		{
-			l_name := stregX(vv,"-\d+ ",1,1," \d{6,8}",1)
-			l_date := strX(vv," ",0,1,"",0)
-			Gui, ListView, % v
+			i := l_users[k,v]													; i is the element for each V
 			LV_Add(""
-				, l_date
-				, l_name)
+				, i.date
+				, i.name
+				, i.filename)													; this is a hidden column
 		}
+		LV_ModifyCol()
+		LV_ModifyCol(2, "Autohdr")
 	}
-	LV_ModifyCol()
-	LV_ModifyCol(1, "Autohdr")
-	LV_ModifyCol(2, "Autohdr")
-	Gui, Show, AutoSize, Reports Pile
-	
+	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
+	Gui, Show, AutoSize, Reports Pile											; show GUI
 }
 MsgBox
 ExitApp
