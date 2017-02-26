@@ -75,6 +75,8 @@ if instr(role,"Sign") {
 }
 ExitApp
 
+SignScan:
+{
 	l_users := {}
 	l_numusers :=
 	l_tabs := 
