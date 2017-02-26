@@ -97,11 +97,10 @@ SignScan:
 			, name:l_name
 			, date:l_date}
 	}
-	gosub SignGUI
-	MsgBox
+	gosub signGUI
+	
+Return
 }
-
-ExitApp
 
 SignGUI:
 {
