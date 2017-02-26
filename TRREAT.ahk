@@ -80,11 +80,14 @@ if instr(role,"Sign") {
 		l_mrn  := strX(fileNam,"-",1,1," ",1,1)
 		l_name := stregX(fileNam,"-\d+ ",1,1," \d{6,8}",1)		
 		l_date := strX(fileNam," ",0,1,"",0)
+		
+		if !Object(l_users[l_user]) {											; this user not present yet in l_users[]
 			l_tabs .= l_user . "|"												; add user to tab titles string
-		}		
-		l_users[l_user].Push(fileNam)											; add filename to l_users[user]
+		}
+		l_users[l_user,A_index] := {filename:fileNam							; creates l_users[l_user, x], where x is just a number
+			, name:l_name
+			, date:l_date}
 	}
-	l_max := l_users.MaxIndex()
 	
 	Gui, Destroy
 	Gui, Add, Tab2, w800 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
