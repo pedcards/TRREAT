@@ -173,12 +173,12 @@ Return
 
 ActPDF:
 {
-	pdfNam := """" complDir fileNam ".pdf"""
-	if !FileExist(pdfNam) {
+	pdfNam := complDir fileNam ".pdf"
+	if FileExist(pdfNam) {
+		run, % pdfNam
+	} else {
 		GuiControl, Act:Disable, S_PDF
-		return
 	}
-	run, % pdfNam
 Return
 }
 
