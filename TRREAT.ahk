@@ -105,17 +105,18 @@ SignGUI:
 	{
 		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
 		Gui, Tab, % k															; go to tab for the user
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 vUsr" k " hwnd" tmpHwnd, Date|Name
+		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, fn|Date|Name
 		for v in l_users[k]														; loop through users in l_users
 		{
 			i := l_users[k,v]													; i is the element for each V
 			LV_Add(""
+				, i.filename													; this is a hidden column 
 				, i.date
-				, i.name
-				, i.filename)													; this is a hidden column
+				, i.name)
 		}
 		LV_ModifyCol()
-		LV_ModifyCol(2, "Autohdr")
+		LV_ModifyCol(1, "0")
+		LV_ModifyCol(3, "Autohdr")
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
 	Gui, Show, AutoSize, Reports Pile											; show GUI
