@@ -91,8 +91,10 @@ if instr(role,"Sign") {
 			, date:l_date}
 	}
 	gosub SignGUI
-	return
+	MsgBox
 }
+
+ExitApp
 
 SignGUI:
 {
@@ -120,9 +122,6 @@ SignGUI:
 	
 	return
 }
-MsgBox
-ExitApp
-
 
 ButtonReload:
 	Reload
