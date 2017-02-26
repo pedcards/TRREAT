@@ -176,6 +176,13 @@ ActPDF:
 Return
 }
 
+ActSign:
+{
+	Gui, Act:Destroy
+	
+Return
+}
+
 Medtronic:
 {
 	fileNum += 1																; Add a row to the LV
