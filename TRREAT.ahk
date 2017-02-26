@@ -919,7 +919,7 @@ PrintOut:
 	FileAppend, %rtfOut%, %fileOut%.rtf
 	
 	FileMove, %fileOut%.rtf, %reportDir%%fileOut%.rtf, 1						; move RTF to the final directory
-	FileCopy, %fileNam%.pdf, %complDir%%fileOut%.pdf, 1							; copy PDF to complete directory
+	FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
 	outDir := (isAdmin) 
 		? ".\completed\"
 		: ".\test\"
