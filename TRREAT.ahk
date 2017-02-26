@@ -179,6 +179,7 @@ Return
 ActSign:
 {
 	Gui, Act:Destroy
+	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf"
 	
 Return
 }
