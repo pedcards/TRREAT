@@ -89,6 +89,9 @@ if instr(role,"Sign") {
 			, date:l_date}
 	}
 	
+
+SignGUI:
+{
 	Gui, Destroy
 	Gui, Add, Tab3, w600 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
 	Gui, Default
@@ -110,6 +113,8 @@ if instr(role,"Sign") {
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
 	Gui, Show, AutoSize, Reports Pile											; show GUI
+	
+	return
 }
 MsgBox
 ExitApp
