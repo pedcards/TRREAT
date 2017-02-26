@@ -77,11 +77,9 @@ if instr(role,"Sign") {
 		fileIn := A_LoopFileFullPath											; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
 				
 		l_user := strX(fileNam,"",1,0,"-")										; Get assigned EP from filename
+		l_mrn  := strX(fileNam,"-",1,1," ",1,1)
 		l_name := stregX(fileNam,"-\d+ ",1,1," \d{6,8}",1)		
-		l_date := strX(fileNam," ",0,1,"",0)		
-		if !(ObjHasValue(l_users,l_user)) {										; this user not present yet in l_users[]
-			l_users.Push(l_user)												; add user to l_users[]
-			l_users[l_user] := []												; l_users[user] is an object
+		l_date := strX(fileNam," ",0,1,"",0)
 			l_tabs .= l_user . "|"												; add user to tab titles string
 		}		
 		l_users[l_user].Push(fileNam)											; add filename to l_users[user]
