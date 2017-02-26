@@ -136,8 +136,12 @@ ExitApp
 
 SignRep:
 {
-	LV_GetText(fnam,A_EventInfo,1)
-	MsgBox % fnam
+	Gui, Sign:ListView, % A_GuiControl											; Select the LV passed to A_GuiControl
+	if !(l_row := LV_GetNext()) {												; will be 0 if selected row is an empty row
+		return
+	}
+	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
+	RunWait, % "WordPad.exe """ reportDir fileNam ".rtf"""						; launch fileNam in WordPad
 Return	
 }
 
