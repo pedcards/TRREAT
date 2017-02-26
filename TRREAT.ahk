@@ -165,6 +165,17 @@ SignActGui:
 Return
 }
 
+ActPDF:
+{
+	pdfNam := """" complDir fileNam ".pdf"""
+	if !FileExist(pdfNam) {
+		GuiControl, Act:Disable, S_PDF
+		return
+	}
+	run, % pdfNam
+Return
+}
+
 Medtronic:
 {
 	fileNum += 1																; Add a row to the LV
