@@ -914,15 +914,18 @@ PrintOut:
 	fileOut :=	enc_MD "-" encMRN " " 
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
 			.	dt.YYYY dt.MM dt.DD
-	FileDelete, %fileOut%.rtf
+	FileDelete, %fileOut%.rtf													; delete and generate RTF fileOut.rtf
 	FileAppend, %rtfOut%, %fileOut%.rtf
+	
+	FileMove, %fileOut%.rtf, %reportDir%%fileOut%.rtf, 1						; move RTF to the final directory
+	FileCopy, %fileNam%.pdf, %complDir%%fileOut%.pdf, 1							; copy PDF to complete directory
 	outDir := (isAdmin) 
 		? ".\completed\"
 		: ".\test\"
 ;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
 
-	FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1			; copy to the final directory
-	FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1			; store in Completed, is this necessary?
+	;~ FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1			; copy to the final directory
+	;~ FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1			; store in Completed, is this necessary?
 	;FileMove, %fileIn%, archive\%fileout%-done.pdf, 1			; archive the PDF. Comment out if don't want to keep moving test PDF.
 	
 	
