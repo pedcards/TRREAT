@@ -140,8 +140,11 @@ SignRep:
 	if !(l_row := LV_GetNext()) {												; will be 0 if selected row is an empty row
 		return
 	}
+	Gui, Sign:Hide
 	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
-	RunWait, % "WordPad.exe """ reportDir fileNam ".rtf"""						; launch fileNam in WordPad
+	
+	gosub SignActGUI
+	Gui, Sign:Show
 Return	
 }
 
