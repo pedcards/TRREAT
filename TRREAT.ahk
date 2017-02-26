@@ -186,7 +186,7 @@ ActSign:
 {
 	Gui, Act:Destroy
 	;~ FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
-	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf"
+	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1
 	Gosub signScan
 Return
 }
