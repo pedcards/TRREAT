@@ -70,6 +70,11 @@ if instr(role,"Parse") {
 }
 
 if instr(role,"Sign") {
+	gosub signScan
+	MsgBox
+}
+ExitApp
+
 	l_users := {}
 	l_numusers :=
 	l_tabs := 
