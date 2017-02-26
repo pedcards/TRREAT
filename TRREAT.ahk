@@ -96,9 +96,9 @@ if instr(role,"Sign") {
 
 SignGUI:
 {
-	Gui, Destroy
-	Gui, Add, Tab3, w600 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
-	Gui, Default
+	Gui, sign:Destroy
+	Gui, sign:Add, Tab3, w600 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
+	Gui, sign:Default
 	for k in l_users															; loop through l_users
 	{
 		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
@@ -129,6 +129,9 @@ ButtonReload:
 Return
 
 ParseGuiClose:
+ExitApp
+
+SignGUIClose:
 ExitApp
 
 Medtronic:
