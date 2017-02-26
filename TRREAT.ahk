@@ -133,6 +133,13 @@ ExitApp
 SignGUIClose:
 ExitApp
 
+SignRep:
+{
+	LV_GetText(fnam,A_EventInfo,1)
+	MsgBox % fnam
+Return	
+}
+
 Medtronic:
 {
 	fileNum += 1																; Add a row to the LV
