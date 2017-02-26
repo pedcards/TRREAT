@@ -90,7 +90,7 @@ if instr(role,"Sign") {
 	}
 	
 	Gui, Destroy
-	Gui, Add, Tab2, w800 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
+	Gui, Add, Tab3, w600 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
 	Gui, Default
 	for k in l_users															; loop through l_users
 	{
