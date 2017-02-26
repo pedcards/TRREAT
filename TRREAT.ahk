@@ -186,7 +186,7 @@ ActSign:
 {
 	Gui, Act:Destroy
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf"
-	
+	Gosub signScan
 Return
 }
 
