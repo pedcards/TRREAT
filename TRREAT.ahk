@@ -36,7 +36,9 @@ if (isAdmin) {																	; But if isAdmin
 }
 
 if instr(role,"Parse") {
-	Gui, Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
+	Gui, Parse:Destroy
+	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
+	Gui, Parse:Default
 	Gui, Add, Button, Disabled w600 h50 , Reload
 	Gui, Show
 	
@@ -126,7 +128,7 @@ ButtonReload:
 	Reload
 Return
 
-GuiClose:
+ParseGuiClose:
 ExitApp
 
 Medtronic:
