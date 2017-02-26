@@ -159,12 +159,16 @@ SignActGui:
 	Gui, Act:Destroy
 	Gui, Act:Default
 	Gui, Add, Text,, % fileNam
-	Gui, Add, Button, vS_PDF gActPDF, View PDF
-	;~ Gui, Add, Button, vS_RTF gActReview, Review Report
+	Gui, Add, Button, vS_PDF gActPDF, Disabled View PDF
 	Gui, Add, Button, vS_rev gActSign Disabled, SIGN && SEND
 	Gui, Color, EEAA99
 	Gui, Show
 	Gui, Act:+AlwaysOnTop -MinimizeBox -MaximizeBox
+	
+	pdfNam := complDir fileNam ".pdf"
+	if !FileExist(pdfNam) {
+		GuiControl, Act:Disable, S_PDF
+	}
 	
 	RunWait, % "WordPad.exe """ reportDir fileNam ".rtf"""						; launch fileNam in WordPad
 	GuiControl, Act:Enable, S_rev
