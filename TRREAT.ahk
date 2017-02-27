@@ -142,7 +142,8 @@ ExitApp
 
 SignRep:
 {
-	Gui, Sign:ListView, % A_GuiControl											; Select the LV passed to A_GuiControl
+	l_tab := A_GuiControl
+	Gui, Sign:ListView, % l_tab													; Select the LV passed to A_GuiControl
 	if !(l_row := LV_GetNext()) {												; will be 0 if selected row is an empty row
 		return
 	}
