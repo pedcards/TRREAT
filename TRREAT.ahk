@@ -13,10 +13,23 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 } else {
 	isAdmin := false
-	reportDir := "\\chmc16\Cardio\EP\TRREAT reports\pending\"
-	complDir := "\\chmc16\Cardio\EP\TRREAT reports\completed\"
+	reportDir := "\\chmc16\Cardio\EP\TRREAT files\pending\"
+	complDir := "\\chmc16\Cardio\EP\TRREAT files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
 }
+if !FileExist(reportDir) {
+	MsgBox % "Missing pending dir`n""" reportDir """"
+	ExitApp
+}
+if !FileExist(complDir) {
+	MsgBox % "Missing completed dir`n""" complDir """"
+	ExitApp
+}
+if !FileExist(chipDir) {
+	MsgBox % "Missing CHIPOTLE dir`n""" chipDir """"
+	ExitApp
+}
+
 user := A_UserName
 newTxt := Object()
 blk := Object()
