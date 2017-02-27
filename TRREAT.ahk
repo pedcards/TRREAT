@@ -21,7 +21,7 @@ user := A_UserName
 newTxt := Object()
 blk := Object()
 blk2 := Object()
-docs := Object()
+;~ docs := Object()
 docs := {"TC":"783118","JS":"343079","SS":"358945"}
 
 if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
