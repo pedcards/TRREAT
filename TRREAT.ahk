@@ -189,24 +189,24 @@ ActSign:
 	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
 	if !(substr(user,1,2)=l_tab) {												; first 2 chars of Citrix login match l_tab?
 		MsgBox, 52, , % "Signing report for " l_tab "?"
-		IfMsgBox Yes
+		IfMsgBox Yes															; signing someone else's report
 		{
-			if !(S_num := SignVerify(user)) {
+			if !(S_num := SignVerify(user)) {									; err if typed login doesn't match Citrix or typed billing code doesn't match
 				return
 			}
-			FileRead, tmp, % reportDir fileNam ".rtf"
+			FileRead, tmp, % reportDir fileNam ".rtf"							; read the generated RTF file
 			tmp := RegExReplace(tmp
-				, "Dictating Phy #\\tab <8:(\d{6})>\\par"
-				, "Dictating Phy #\tab <8:" S_num ">\par")
+				, "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
+				, "Dictating Phy #\tab <8:" S_num ">\par")						; with yours
 			FileDelete, % reportDir fileNam ".rtf"
-			FileAppend, % tmp, % reportDir fileNam ".rtf"
+			FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
 		} else {
-			return
+			return																; not signing this report, return
 		}
 	}
 	;~ FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
-	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1
-	Gosub signScan
+	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
+	Gosub signScan																; regenerate file list
 Return
 }
 
