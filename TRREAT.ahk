@@ -57,7 +57,7 @@ if instr(role,"Parse") {
 	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
 	Gui, Parse:Default
 	Gui, Add, Button, Disabled w600 h50 , Reload
-	Gui, Show
+	Gui, Show, TRREAT Reports scan
 	
 	if (fileArg) {
 		Loop, %0%
@@ -78,8 +78,9 @@ if instr(role,"Parse") {
 
 if instr(role,"Sign") {
 	gosub signScan
-	MsgBox
 }
+
+WinWaitClose, TRREAT Reports
 ExitApp
 
 fileLoop:
@@ -154,7 +155,7 @@ SignGUI:
 		LV_ModifyCol(3, "Autohdr")
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
-	Gui, Show, AutoSize, Reports Pile											; show GUI
+	Gui, Show, AutoSize, TRREAT Reports Pile											; show GUI
 	
 	return
 }
