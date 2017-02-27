@@ -186,7 +186,8 @@ Return
 ActSign:
 {
 	Gui, Act:Hide
-	if !(substr(user,1,2)=l_tab) {
+	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
+	if !(substr(user,1,2)=l_tab) {												; first 2 chars of Citrix login match l_tab?
 		MsgBox, 52, , % "Signing report for " l_tab "?"
 		IfMsgBox Yes
 		{
