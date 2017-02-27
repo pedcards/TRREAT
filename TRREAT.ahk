@@ -18,15 +18,15 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	chipDir := "\\childrens\files\HCChipotle\"
 }
 if !FileExist(reportDir) {
-	MsgBox % "Missing pending dir`n""" reportDir """"
+	MsgBox % "Requires pending dir`n""" reportDir """"
 	ExitApp
 }
 if !FileExist(complDir) {
-	MsgBox % "Missing completed dir`n""" complDir """"
+	MsgBox % "Requires completed dir`n""" complDir """"
 	ExitApp
 }
 if !FileExist(chipDir) {
-	MsgBox % "Missing CHIPOTLE dir`n""" chipDir """"
+	MsgBox % "Requires CHIPOTLE dir`n""" chipDir """"
 	ExitApp
 }
 
