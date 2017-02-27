@@ -185,7 +185,24 @@ Return
 
 ActSign:
 {
-	Gui, Act:Destroy
+	Gui, Act:Hide
+	if !(substr(user,1,2)=l_tab) {
+		MsgBox, 52, , % "Signing report for " l_tab "?"
+		IfMsgBox Yes
+		{
+			if !(S_num := SignVerify(user)) {
+				return
+			}
+			FileRead, tmp, % reportDir fileNam ".rtf"
+			tmp := RegExReplace(tmp
+				, "Dictating Phy #\\tab <8:(\d{6})>\\par"
+				, "Dictating Phy #\tab <8:" S_num ">\par")
+			FileDelete, % reportDir fileNam ".rtf"
+			FileAppend, % tmp, % reportDir fileNam ".rtf"
+		} else {
+			return
+		}
+	}
 	;~ FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1
 	Gosub signScan
