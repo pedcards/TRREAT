@@ -58,10 +58,20 @@ if instr(role,"Parse") {
 	Gui, Add, Button, Disabled w600 h50 , Reload
 	Gui, Show
 	
+	if (fileArg) {
+		Loop, % fileArg
+		{
+			SplitPath, %A_Index%, fileIn 
+			;~ fileIn := %A_Index%
+			gosub fileLoop
 		}
+	} else {
+		Loop, *.pdf
+		{ 
+			fileIn := A_LoopFileName
+			gosub fileLoop
 		}
 	}
-	
 	MsgBox Directory scan complete.
 	GuiControl, Enable, Reload
 }
