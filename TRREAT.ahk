@@ -209,6 +209,22 @@ ActSign:
 Return
 }
 
+SignVerify(user)
+{
+	global docs
+	InputBox, userIn, Sign, Enter CIS user name
+	if !(userIn=user) {
+		MsgBox, 16,, Wrong user name!
+		return error
+	}
+	InputBox, numIn, Sign, Enter billing code
+	if !(numIn=docs[substr(userIn,1,2)]) {
+		MsgBox, 16,, Wrong billing code!
+		return error
+	}
+	return numIn
+}
+
 Medtronic:
 {
 	fileNum += 1																; Add a row to the LV
