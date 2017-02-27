@@ -58,26 +58,7 @@ if instr(role,"Parse") {
 	Gui, Add, Button, Disabled w600 h50 , Reload
 	Gui, Show
 	
-	Loop, *.pdf
-	{ 
-		blocks := Object()
-		fields := Object()
-		labels := Object()
-		fldval := Object()
-		leads := Object()
-		summBl := summ := ""
-		fileIn := A_LoopFileName
-		SplitPath, fileIn,,,,fileOut
-		RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
-		FileRead, maintxt, temp.txt
-		;~ RunWait, pdftotext.exe -raw -nopgbrk "%fileIn%" tempraw.txt , , hide
-		;~ FileRead, mainraw, tempraw.txt
-		cleanlines(maintxt)
-		if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
-			gosub Medtronic
 		}
-		if (maintxt~="Boston Scientific Corporation") {
-			gosub BSCI
 		}
 	}
 	
@@ -90,6 +71,28 @@ if instr(role,"Sign") {
 	MsgBox
 }
 ExitApp
+
+fileLoop:
+{
+	blocks := Object()
+	fields := Object()
+	labels := Object()
+	fldval := Object()
+	leads := Object()
+	summBl := summ := ""
+	SplitPath, fileIn,,,,fileOut
+	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
+	FileRead, maintxt, temp.txt
+	cleanlines(maintxt)
+	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+		gosub Medtronic
+	}
+	if (maintxt~="Boston Scientific Corporation") {
+		gosub BSCI
+	}
+	
+	return
+}
 
 SignScan:
 {
