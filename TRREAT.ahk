@@ -4,6 +4,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
+FileInstall, pdftotext.exe, pdftotext.exe
 #Include includes
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
