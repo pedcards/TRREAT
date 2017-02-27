@@ -43,7 +43,7 @@ if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
 }
 
 if (%0%) {																		; For each parameter: 
-  fileArg := %0%																; Gets parameter passed to script/exe. 
+  fileArg := true																; Gets parameter passed to script/exe. 
   role := "Parse"
 } else if (isAdmin) {															; But if isAdmin
 	role := cMsgBox("Administrator"												; offer to either PARSE or SIGN
@@ -60,10 +60,9 @@ if instr(role,"Parse") {
 	Gui, Show
 	
 	if (fileArg) {
-		Loop, % fileArg
+		Loop, %0%
 		{
 			SplitPath, %A_Index%, fileIn 
-			;~ fileIn := %A_Index%
 			gosub fileLoop
 		}
 	} else {
