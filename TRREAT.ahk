@@ -14,8 +14,8 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 } else {
 	isAdmin := false
-	reportDir := "\\chmc16\Cardio\EP\TRREAT files\pending\"
-	complDir := "\\chmc16\Cardio\EP\TRREAT files\completed\"
+	reportDir := "\\childrens\files\HCEP\TRREAT files\pending\"
+	complDir := "\\childrens\files\HCEP\TRREAT files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
 }
 if !FileExist(reportDir) {
