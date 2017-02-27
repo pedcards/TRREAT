@@ -215,7 +215,11 @@ ActSign:
 {
 	Gui, Act:Hide
 	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
-	if !(substr(user,1,2)=l_tab) {												; first 2 chars of Citrix login match l_tab?
+	if (substr(user,1,2)=l_tab) {												; first 2 chars of Citrix login match l_tab?
+		if !(S_num := SignVerify(user)) {										; but fails authentication
+			return
+		}
+	} else {																	; Different than assigned MD
 		MsgBox, 52, , % "Signing report for " l_tab "?"
 		IfMsgBox Yes															; signing someone else's report
 		{
