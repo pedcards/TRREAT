@@ -990,6 +990,15 @@ PrintOut:
 	FileAppend, %rtfOut%, temp.rtf
 	
 	RunWait, % "WordPad.exe temp.rtf"												; launch fileNam in WordPad
+	MsgBox, 36, , Report looks okay?
+	IfMsgBox, Yes
+	{
+		FileMove, temp.rtf, %reportDir%%fileOut%.rtf, 1								; move RTF to the final directory
+		FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
+		
+		LV_Modify(filenum,"col4","YES")
+		Gui, Show
+	}
 	
 	return
 }
