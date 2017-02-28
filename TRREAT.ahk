@@ -56,7 +56,6 @@ if instr(role,"Parse") {
 	Gui, Parse:Destroy
 	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
 	Gui, Parse:Default
-	Gui, Add, Button, Disabled w600 h50 , Reload
 	Gui, Show,, TRREAT Reports scan
 	
 	if (fileArg) {
