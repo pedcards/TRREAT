@@ -836,7 +836,7 @@ pmPrint:
 	if !(enc_MD) {
 		return
 	}
-	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n\fs18"
+	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n\fs18 "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
 	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
@@ -854,8 +854,8 @@ pmPrint:
 	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###, " fldval["detect-Rx_AT/AF"] ". ")
 	. printQ(fldval["detect-VF"],"VF detection ###, " fldval["detect-Rx_VF"] ". ")
 	. printQ(fldval["detect-FVT"],"FVT detection ###, " fldval["detect-Rx_FVT"] ". ")
-	. printQ(fldval["detect-VT"],"VT detection ###, " fldval["detect-VT"] ". ") . "\par`n"
-	. "\fs22\par`n"
+	. printQ(fldval["detect-VT"],"VT detection ###, " fldval["detect-VT"] ". ") . "\par `n"
+	. "\fs22\par `n"
 	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	
 	for k in leads
@@ -919,7 +919,7 @@ printLead(lead) {
 	. printQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing ###. ")
 	. printQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
 	. printQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
-	. "\par`n"
+	. "\par `n"
 }
 
 printEvents()
@@ -939,7 +939,7 @@ printEvents()
 	. printQ(fldval["event-A_Shocked"]?fldval["event-A_Shocked"]:"","### AT/AF episodes shock-terminated. ")
 	. printQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
 	
-	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18`n###\par`n") 
+	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18 `n###\par `n") 
 return	
 }
 
