@@ -950,37 +950,38 @@ PrintOut:
 	dt := parseDate(fldval["dev-Encounter"])
 	enc_dt := dt.MM "/" dt.DD "/" dt.YYYY 
 	
-	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
-	. "{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\lang9\margl1440\margr1440\margt1440\margb1440`n"
-	. "{\pard\f0\fs22`n"
-	. "{\tx2160`n"
-	. "Transcriptionist\tab "	"<TrID:crd> \par`n"
-	. "Document Type\tab "		"<7:Q8> \par`n"
-	. "Clinic Title code\tab "	"<1035:PACE> \par`n"
-	. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par`n"
-	. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par`n"
-	. "CIS Encounter #\tab "	"<3: " substr("0000" . fldval["dev-Enc"], -11) " >\par`n"
-	. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par`n"
-	. "Dictation Date\tab "		"<13:" enc_date ">\par`n"
-	. "Job #\tab "				"<15:e> \par`n"
-	. "Service Date\tab "		"<31:" enc_dt ">\par`n"
-	. "Surgery Date\tab "		"<6:" enc_dt "> \par`n"
-	. "Attending Phy #\tab "	"<9:" enc_ "> \par`n"
-	. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par`n"
-	. "<EndOfHeader>\par}`n"
-	. "\par`n"
-
+	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
+			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
+			. "\pard\tx2160\fs22\lang9 `n"
+			. "Transcriptionist\tab "	"<TrID:crd> \par `n"
+			. "Document Type\tab "		"<7:Q8> \par `n"
+			. "Clinic Title code\tab "	"<1035:PACE> \par `n"
+			. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par `n"
+			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
+			. "CIS Encounter #\tab "	"<3: " substr("0000" . fldval["dev-Enc"], -11) " >\par `n"
+			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
+			. "Dictation Date\tab "		"<13:" enc_date ">\par `n"
+			. "Job #\tab "				"<15:e> \par `n"
+			. "Service Date\tab "		"<31:" enc_dt ">\par `n"
+			. "Surgery Date\tab "		"<6:" enc_dt "> \par `n"
+			. "Attending Phy #\tab "	"<9:" enc_ "> \par `n"
+			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
+			. "<EndOfHeader>\par `n"
+			. "\par `n"
+	
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
-
+	
 	rtfBody := "\tx1620\tx5220\tx7040" 
-	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18`n"
-	. enc_dt "\par\par\fs22`n"
-	. rtfBody . "\fs22\par`n" 
-	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18`n"
-	. summ . "\par\par{\tx2700\tx5220\tx7040`n"
-
+	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
+	. enc_dt "\par\par\fs22 `n"
+	. rtfBody . "\fs22\par `n" 
+	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
+	. summ . "\par `n"
+	. "\par `n"
+	. "\pard\tx2700\tx5220\tx7040 `n"
+	
 	rtfOut := rtfHdr . rtfBody . rtfFtr
-
+	
 	LV_Modify(filenum,"col4","YES")
 	Gui, Show
 	
@@ -993,15 +994,6 @@ PrintOut:
 	
 	FileMove, %fileOut%.rtf, %reportDir%%fileOut%.rtf, 1						; move RTF to the final directory
 	FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
-	outDir := (isAdmin) 
-		? ".\completed\"
-		: ".\test\"
-;		: "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileOut . ".rtf"
-
-	;~ FileCopy, %fileOut%.rtf, %outDir%%fileOut%.rtf, 1			; copy to the final directory
-	;~ FileMove, %fileOut%.rtf, completed\%fileout%.rtf ,1			; store in Completed, is this necessary?
-	;FileMove, %fileIn%, archive\%fileout%-done.pdf, 1			; archive the PDF. Comment out if don't want to keep moving test PDF.
-	
 	
 	return
 }
