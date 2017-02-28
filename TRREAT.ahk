@@ -986,16 +986,10 @@ PrintOut:
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
 			.	dt.YYYY dt.MM dt.DD
 	
-	FileDelete, %fileOut%.rtf													; delete and generate RTF fileOut.rtf
-	FileAppend, %rtfOut%, %fileOut%.rtf
+	FileDelete, temp.rtf															; delete and generate RTF fileOut.rtf
+	FileAppend, %rtfOut%, temp.rtf
 	
-	RunWait, % "WordPad.exe """ fileOut ".rtf"""								; launch fileNam in WordPad
-	
-	FileMove, %fileOut%.rtf, %reportDir%%fileOut%.rtf, 1						; move RTF to the final directory
-	FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
-	
-	LV_Modify(filenum,"col4","YES")
-	Gui, Show
+	RunWait, % "WordPad.exe temp.rtf"												; launch fileNam in WordPad
 	
 	return
 }
