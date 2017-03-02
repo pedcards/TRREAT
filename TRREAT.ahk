@@ -571,18 +571,6 @@ bsciZoomView:
 	labels[1] := ["Batt_stat","IPG_voltage","null"]
 	fieldvals(txt,1,"dev")
 	
-	txt := stregX(maintxt,"Leads Data",1,0,"Settings",1)
-	hdr := strX(txt,"",1,0,"`n",1)
-	fields[1] := ["Most Recent-Intrinsic Amplitude","Most Recent-Pace Impedance","Most Recent-Pace Threshold","Most Recent-Shock Impedance"]
-	labels[1] := ["sensing","imp","cap","HVimp"]
-	if instr(txt,"Ventricular") {
-		scanParams(parseTable(hdr . stregX(txt,"Atrial",1,1,"Ventricular",1)),1,"Alead")
-		scanParams(parseTable(hdr . stregX(txt ">>>","Ventricular",1,1,">>>",1)),1,"Vlead")
-	} else {
-		scanParams(parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,"Vlead")
-	}
-	fldfill("leads-RV_HVimp",fldval["Vlead-HVimp"])
-	
 	txt := stregX(maintxt,"(Ventricular )?Tachy Settings",1,0,"Brady Settings",1)
 	if instr(txt,"Atrial Tachy") {
 		txt := columns(txt "endcolumn","","endcolumn",0,"Atrial Tachy")
@@ -624,6 +612,28 @@ bsciZoomView:
 	} else {
 		fldfill("leads-RV_Pol_pace",fldval["par-pol0"])
 	}
+	
+	txt := stregX(maintxt,"Leads Data",1,0,"Settings",1)
+	hdr := strX(txt,"",1,0,"`n",1)
+	fields[1] := ["Most Recent-Intrinsic Amplitude","Most Recent-Pace Impedance","Most Recent-Pace Threshold","Most Recent-Shock Impedance"]
+	labels[1] := ["sensing","imp","cap","HVimp"]
+	if instr(txt,"Atrial") {
+		scanParams(parseTable(hdr . stregX(txt ">>>","Atrial",1,1,"Ventricular|>>>",1)),1,"Alead")
+	}
+	if instr(txt,"Ventricular") {
+		scanParams(parseTable(hdr . stregX(txt ">>>","Ventricular",1,1,">>>",1)),1,"Vlead")
+	} 
+	if !(txt~="Atrial|Ventricular") {
+		tmp := substr(fldval["par-Mode"],1,1)
+		if !(tmp~="[AV]") {
+			tmp := cMsgBox("Single Chamber","What type of lead?","A|V","Q","")
+			if (tmp = "Close") {
+				return
+			}
+		}
+		scanParams(parseTable(hdr "`n" stregX(txt ">>>","Intrinsic Amplitude",1,0,">>>",1)),1,tmp "lead")
+	}
+	fldfill("leads-RV_HVimp",fldval["Vlead-HVimp"])
 	
 	ctr := stregX(maintxt,"(Ventricular )?Tachy Counters",1,0,"$",0)
 	ctrT := stregX(ctr,"(Ventricular )?Episode Counters",1,0,"Brady Counters",1)
