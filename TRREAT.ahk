@@ -579,7 +579,6 @@ bsciZoomView:
 	labels[1] := ["VF","VHR","VHR"]
 	scanParams(txt,1,"tachy")
 	
-	;~ txt := stregX(maintxt,"Brady Settings",1,0,"(.*?)Software Version",0)
 	txt := columns(maintxt,"Brady Settings","(.*?)Software Version",0,"Pacing Output")
 	txt := RegExReplace(txt,"(?<=\d)\s+(ppm|ms|mV)"," $1")
 	fields[1] := ["Mode","Lower Rate Limit","Maximum Tracking Rate","Maximum Sensor Rate"
@@ -588,6 +587,7 @@ bsciZoomView:
 	scanParams(txt,1,"par")
 	
 	txt := strX(txt,"Pacing Output",1,0) "endcolumn"
+	tmp := substr(fldval["par-Mode"],1,1)
 	fields[1] := ["Pacing Output","Sensitivity","Leads Configuration \(Pace/Sense\)","(Rate Adaptive Pacing|Sensors)","endcolumn"]
 	labels[1] := ["outp0","sens0","pol0","adaptive","null"]
 	fieldvals(txt,1,"par")
@@ -596,21 +596,21 @@ bsciZoomView:
 		labels[2] := ["AP_thr","VP_thr"]
 		scanParams(RegExReplace(fldval["par-outp0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
 	} else {
-		fldfill("leads-VP_thr",fldval["par-outp0"])
+		fldfill("leads-" tmp "P_thr",fldval["par-outp0"])
 	}
 	if (fldval["par-sens0"]~="(Atrial|Ventricular)") {
 		fields[2] := ["Atrial","Ventricular"]
 		labels[2] := ["AS_thr","VS_thr"]
 		scanParams(RegExReplace(fldval["par-sens0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
 	} else {
-		fldfill("leads-VS_thr",fldval["par-sens0"])
+		fldfill("leads-" tmp "S_thr",fldval["par-sens0"])
 	}
 	if (fldval["par-pol0"]~="(Atrial|Ventricular)") {
 		fields[2] := ["Atrial","Ventricular"]
 		labels[2] := ["A_Pol_pace","RV_Pol_pace"]
 		scanParams(RegExReplace(fldval["par-pol0"],"(Atrial|Ventricular)","$1:  "),2,"leads",1)
 	} else {
-		fldfill("leads-RV_Pol_pace",fldval["par-pol0"])
+		fldfill("leads-R" tmp "_Pol_pace",fldval["par-pol0"])
 	}
 	
 	txt := stregX(maintxt,"Leads Data",1,0,"Settings",1)
@@ -642,8 +642,13 @@ bsciZoomView:
 	scanParams(ctrT,1,"event",1)
 
 	ctrB := stregX(ctr,"Brady Counters",1,0,"$",0)
-	fields[1] := ["% A Paced","% (V )?Paced"]
-	labels[1] := ["AP","VP"]
+	if (ctr~="(A Paced)|(V Paced)") {
+		fields[1] := ["% A Paced","% V Paced"]
+		labels[1] := ["AP","VP"]
+	} else {
+		fields[1] := ["% Paced"]
+		labels[1] := [substr(fldval["par-Mode"],1,1) "P"]
+	}
 	scanParams(ctrB,1,"dev",1)
 	
 	if (fldval["Alead-imp"]||fldval["Alead-cap"]||fldval["Alead-sensing"]) {
