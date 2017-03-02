@@ -56,6 +56,10 @@ if (%0%) {																		; For each parameter:
 		, "Q","")
 }
 
+if instr(role,"Sign") {
+	gosub signScan
+}
+
 if instr(role,"Parse") {
 	Gui, Parse:Destroy
 	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 hwndHLV, Filename|Name|Device|Report|Fix
@@ -77,10 +81,6 @@ if instr(role,"Parse") {
 	}
 	MsgBox Directory scan complete.
 	GuiControl, Enable, Reload
-}
-
-if instr(role,"Sign") {
-	gosub signScan
 }
 
 WinWaitClose, TRREAT Reports
