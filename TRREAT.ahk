@@ -8,15 +8,17 @@ FileInstall, pdftotext.exe, pdftotext.exe
 #Include includes
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
-	isAdmin := true
+	isDevt := true
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
+	pdfDir := ".\USB\"
 } else {
-	isAdmin := false
+	isDevt := false
 	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT files\pending\"
 	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
+	pdfDir := ".\"
 }
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
@@ -45,7 +47,7 @@ if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
 if (%0%) {																		; For each parameter: 
   fileArg := true																; Gets parameter passed to script/exe. 
   role := "Parse"
-} else if (isAdmin) {															; But if isAdmin
+} else if (isDevt) {															; But if isDevt
 	role := cMsgBox("Administrator"												; offer to either PARSE or SIGN
 		, "Enter ROLE:"
 		, "*&Parse PDFs|&Sign reports"
