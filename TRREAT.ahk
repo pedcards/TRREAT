@@ -9,12 +9,14 @@ FileInstall, pdftotext.exe, pdftotext.exe
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
+	binDir := ".\bin\"
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
+	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
 	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
 	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
