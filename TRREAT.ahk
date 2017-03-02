@@ -66,6 +66,8 @@ if instr(role,"Parse") {
 	Gui, Parse:Default
 	Gui, Show,, TRREAT Reports scan
 	
+	gosub readList																; read the worklist
+	
 	if (fileArg) {
 		Loop, %0%
 		{
@@ -85,6 +87,27 @@ if instr(role,"Parse") {
 
 WinWaitClose, TRREAT Reports
 ExitApp
+
+readList:
+{
+	if !FileExist(binDir "worklist.xml") {
+		xl := new XML("<root/>")
+		xl.addElement("work", "root", {ed: A_Now})
+		xl.addElement("done", "root", {ed: A_Now})
+		xl.save(binDir "worklist.xml")
+	} else {
+		xl := new XML(binDir "worklist.xml")
+	}
+return
+}
+
+readFiles:
+{
+/*	Read root - usually MEDT files
+*/
+	
+return
+}
 
 fileLoop:
 {
