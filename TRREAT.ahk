@@ -963,6 +963,20 @@ PrintOut:
 	FormatTime, enc_date, A_now, MM/dd/yyyy
 	dt := parseDate(fldval["dev-Encounter"])
 	enc_dt := dt.MM "/" dt.DD "/" dt.YYYY 
+	for k in leads
+	{
+		ctLeads := A_Index
+	}
+	if (ctLeads = 1) {
+		enc_type := "Single"
+	} else if (ctLeads > 2) {
+		enc_type := "Multi"
+	} else {
+		enc_type := "Dual"
+	}
+	enc_type := (instr(leads["RV","imp"],"Defib"))
+		? "ICD " enc_type
+		: "PM " enc_type
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
@@ -988,6 +1002,8 @@ PrintOut:
 	rtfBody := "\tx1620\tx5220\tx7040" 
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
 	. enc_dt "\par\par\fs22 `n"
+	. "\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
+	. "Device interrogation " enc_type "\par\par\fs22 `n"
 	. rtfBody . "\fs22\par `n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
 	. summ . "\par `n"
