@@ -646,11 +646,11 @@ bsciZoomView:
 	labels[1] := ["AP","VP"]
 	scanParams(ctrB,1,"dev",1)
 	
-		if (fldval["Alead-imp"]||fldval["Alead-cap"]||fldval["Alead-sensing"]) {
+	if (fldval["Alead-imp"]||fldval["Alead-cap"]||fldval["Alead-sensing"]) {
 		normLead("RA"
 				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-				,fldval["Alead-imp"],fldval["Alead-cap"],fldval["leads-AP_thr"],fldval["leads-A_Pol_pace"]
-				,fldval["Alead-sensing"],fldval["leads-AS_thr"],fldval["leads-A_Pol_sens"])
+				,fldval["Alead-imp"],fldval["Alead-cap"],fldval["leads-AP_thr"],fldval["leads-RA_Pol_pace"]
+				,fldval["Alead-sensing"],fldval["leads-AS_thr"],fldval["leads-RA_Pol_sens"])
 	}
 	if (fldval["Vlead-imp"]||fldval["Vlead-cap"]||fldval["Vlead-sensing"]) {
 		normLead("RV"
