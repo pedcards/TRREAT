@@ -15,8 +15,8 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
-	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT files\pending\"
-	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT files\completed\"
+	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
+	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
 	pdfDir := ".\"
 }
