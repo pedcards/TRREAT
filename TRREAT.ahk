@@ -139,23 +139,6 @@ readFiles:
 
 /* Read BSCI "bsc" folder
 */
-	;~ FileRead, bsc_meta, % pdfDir "bsc\meta\Storage.cfg"
-	;~ loop, parse, bsc_meta, `r`n
-	;~ {
-		;~ i := A_LoopField
-		;~ if !instr(i,"PATID_") {
-			;~ continue
-		;~ }
-		;~ stor := StrSplit(i,"\u00A7","`r`n ")
-		;~ bsc_name := stor[2] ", " stor[3]
-		;~ bsc_date := stor[6]
-		;~ bsc_dir := stor[7]
-		
-		;~ if !(FileExist(pdfDir "bsc\patientData\" stor[7])="D") {
-			;~ continue
-		;~ }
-		
-	;~ }
 	bscDir := pdfDir "bsc\patientData\"
 	loop, Files, % bscDir "*", D
 	{
