@@ -103,7 +103,7 @@ readList:
 	{
 		k := w_id.item(A_Index-1)
 		if !IsObject(k) {
-			break
+			continue
 		}
 		fileNum += 1															; Add a row to the LV
 		LV_Add("", k.selectSingleNode("filename").text)							; col1 is filename
