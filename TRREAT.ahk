@@ -920,6 +920,11 @@ scanParams(txt,blk,pre:="par",rx:="") {
 	return
 }
 
+readBnk(lbl) {
+	global bscBnk
+	return stregX(bscBnk,lbl ",",1,1,"[\r\n]+",1)
+}
+
 pmPrint:
 {
 	if !(enc_MD) {
