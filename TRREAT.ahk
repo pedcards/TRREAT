@@ -131,13 +131,44 @@ readFiles:
 
 /* Read SJM "PDFs" folder
 */
-	Loop, FIles, % pdfDir "PDFs\Live.combined\*", D
+	Loop, Files, % pdfDir "PDFs\Live.combined\*", D
 	{
 		sjmDate := A_LoopFileName
-		MsgBox % sjmDates
 		
 	}
 
+/* Read BSCI "bsc" folder
+*/
+	;~ FileRead, bsc_meta, % pdfDir "bsc\meta\Storage.cfg"
+	;~ loop, parse, bsc_meta, `r`n
+	;~ {
+		;~ i := A_LoopField
+		;~ if !instr(i,"PATID_") {
+			;~ continue
+		;~ }
+		;~ stor := StrSplit(i,"\u00A7","`r`n ")
+		;~ bsc_name := stor[2] ", " stor[3]
+		;~ bsc_date := stor[6]
+		;~ bsc_dir := stor[7]
+		
+		;~ if !(FileExist(pdfDir "bsc\patientData\" stor[7])="D") {
+			;~ continue
+		;~ }
+		
+	;~ }
+	bscDir := pdfDir "bsc\patientData\"
+	loop, Files, % bscDir "*", D
+	{
+		patDir := A_LoopFileName 
+		loop, files, % bscDir patDir "\*.bnk"
+		{
+			patBnk := A_LoopFileName
+		}
+		FileRead, i, % bscDir patDir "\" patBnk
+		tmp := parseDate(strX(i,"SAVE DATE:",1,10,"#",1,1))
+		MsgBox % tmp.MMM
+	}
+	
 return
 }
 
