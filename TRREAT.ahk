@@ -101,21 +101,23 @@ readList:
 			continue
 		}
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", k.selectSingleNode("filename").text)							; col1 is filename
-		LV_Modify(fileNum,"col2", k.selectSingleNode("date").text)
-		LV_Modify(fileNum,"col3", k.selectSingleNode("name").text)
-		LV_Modify(fileNum,"col4", k.selectSingleNode("device").text)
-		LV_Modify(fileNum,"col5", k.selectSingleNode("report").text)
-		LV_Modify(fileNum,"col6", k.selectSingleNode("paceart").text)
+		LV_Add("", k.selectSingleNode("date").text)							; col1 is filename
+		LV_Modify(fileNum,"col2", k.selectSingleNode("name").text)
+		LV_Modify(fileNum,"col3", k.selectSingleNode("device").text)
+		LV_Modify(fileNum,"col4", k.selectSingleNode("report").text)
+		LV_Modify(fileNum,"col5", k.selectSingleNode("paceart").text)
+		LV_Modify(fileNum,"col6", k.selectSingleNode("file").text)
+		LV_Modify(fileNum,"col7", k.selectSingleNode("meta").text)
 		;~ LV_ModifyCol()
-		LV_ModifyCol(1, "0")
-		LV_ModifyCol(2, "Autohdr")
-		LV_ModifyCol(3, "Autohdr")
-		LV_ModifyCol(4, "Autohdr")
-		LV_ModifyCol(5, "Autohdr")
-		LV_ModifyCol(6, "Autohdr")
-		GuiControl, Enable, Reload
 	}
+	LV_ModifyCol(1, "Autohdr")
+	LV_ModifyCol(2, "Autohdr")
+	LV_ModifyCol(3, "Autohdr")
+	LV_ModifyCol(4, "Autohdr")
+	LV_ModifyCol(5, "Autohdr")
+	LV_ModifyCol(6, "0")
+	LV_ModifyCol(7, "0")
+	GuiControl, Enable, Reload
 return
 }
 
