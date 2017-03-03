@@ -1743,7 +1743,7 @@ parseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	if (x~="i)(\d{1,2})[\-\s\.]|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\-\s\.](\d{2,4})") {		; 03 Jan 2016
 		StringSplit, DT, x, %A_Space%-.
-		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "YYYY":DT3}
+		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "MMM":DT2, "YYYY":DT3}
 	}
 	
 	StringSplit, DT, x, %A_Space%
