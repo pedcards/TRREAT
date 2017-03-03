@@ -142,18 +142,41 @@ readFiles:
 /* Read BSCI "bsc" folder
 */
 	bscDir := pdfDir "bsc\patientData\"
-	loop, Files, % bscDir "*", D
+	loop, Files, % bscDir "*", D												; Loop through subdirs of patientData
 	{
-		patDir := A_LoopFileName 
-		loop, files, % bscDir patDir "\*.bnk"
+		patDir := bscDir A_LoopFileName
+		loop, files, % patDir "\*.bnk"											; Find the current nnnnnn.bnk file (inactive files are .bn_ files)
 		{
-			patBnk := A_LoopFileName
+			patBnk := patDir "\" A_LoopFileName
 		}
-		FileRead, i, % bscDir patDir "\" patBnk
-		tmp := parseDate(trim(strX(i,"SAVE DATE:",1,10,"#",1,1)," `r`n"))
-		MsgBox % tmp.DD " " tmp.MM " " tmp.YYYY " " tmp.MMM
+		FileRead, bscBnk, % patBnk												; read the patBnk file
+		tmp := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))		; get the DATE array
+		tmp_name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
+		tmp_dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
+		Loop, files, % patDir "\report\Combined*" tmp.MMM "-" tmp.DD "-" tmp.YYYY "*.pdf"
+		{
+			patPDF := patDir "\report\" A_LoopFileName							; find the appropriate PDF matching this .bnk file
+		}
+		
+		/*	Should check whether this check is already in database
+			and skip add row if it already exists
+		*/
+		
+		fileNum += 1															; Add a row to the LV
+		LV_Add("", tmp.YYYY tmp.MM tmp.DD)										; col1 is date
+		LV_Modify(fileNum,"col2", tmp_name)
+		LV_Modify(fileNum,"col3", tmp_dev)
+		LV_Modify(fileNum,"col4", "")
+		LV_Modify(fileNum,"col5", "")
+		LV_Modify(fileNum,"col6", patPDF)
+		LV_Modify(fileNum,"col7", patBnk)
 	}
-	
+	LV_ModifyCol(1, "Autohdr")
+	LV_ModifyCol(2, "Autohdr")
+	LV_ModifyCol(3, "Autohdr")
+	LV_ModifyCol(4, "Autohdr")
+	LV_ModifyCol(5, "Autohdr")
+	GuiControl, Enable, Reload
 return
 }
 
