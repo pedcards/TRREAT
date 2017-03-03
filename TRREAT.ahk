@@ -68,13 +68,13 @@ if instr(role,"Parse") {
 	
 	gosub readList																; read the worklist
 	
-	if (fileArg) {
+	if (fileArg) {																; process files dropped on TRREAT icon
 		Loop, %0%
 		{
 			SplitPath, %A_Index%, fileIn 
 			gosub fileLoop
 		}
-	} else {
+	} else {																	; otherwise scan the folders
 		gosub readFiles
 	}
 	MsgBox Directory scan complete.
@@ -85,23 +85,23 @@ ExitApp
 
 readList:
 {
-	fileNum := 0
+	fileNum := 0																; Start the worklist at fileNum 0
 	if !FileExist(binDir "worklist.xml") {
-		xl := new XML("<root/>")
+		xl := new XML("<root/>")												; Create new XML if doesn't exist
 		xl.addElement("work", "root", {ed: A_Now})
 		xl.addElement("done", "root", {ed: A_Now})
 		xl.save(binDir "worklist.xml")
 	} else {
-		xl := new XML(binDir "worklist.xml")
+		xl := new XML(binDir "worklist.xml")									; otherwise load existing worklist
 	}
-	Loop, % (w_id := xl.selectNodes("/root/work/id")).length
+	Loop, % (w_id := xl.selectNodes("/root/work/id")).length					; scan through each <id>
 	{
-		k := w_id.item(A_Index-1)
-		if !IsObject(k) {
+		k := w_id.item(A_Index-1)												; put it into k
+		if !IsObject(k) {														; skip if empty
 			continue
 		}
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", k.selectSingleNode("date").text)							; col1 is filename
+		LV_Add("", k.selectSingleNode("date").text)								; col1 is date
 		LV_Modify(fileNum,"col2", k.selectSingleNode("name").text)
 		LV_Modify(fileNum,"col3", k.selectSingleNode("device").text)
 		LV_Modify(fileNum,"col4", k.selectSingleNode("report").text)
@@ -110,14 +110,14 @@ readList:
 		LV_Modify(fileNum,"col7", k.selectSingleNode("meta").text)
 		;~ LV_ModifyCol()
 	}
-	LV_ModifyCol(1, "Autohdr")
+	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
 	LV_ModifyCol(2, "Autohdr")
 	LV_ModifyCol(3, "Autohdr")
 	LV_ModifyCol(4, "Autohdr")
 	LV_ModifyCol(5, "Autohdr")
-	LV_ModifyCol(6, "0")
-	LV_ModifyCol(7, "0")
-	GuiControl, Enable, Reload
+	LV_ModifyCol(6, "0")														; hide the filename col
+	LV_ModifyCol(7, "0")														; hide the metadata col
+	GuiControl, Enable, Reload													; reload the GUI
 return
 }
 
@@ -125,10 +125,9 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	Loop, % pdfDir "*.pdf"
+	Loop, % pdfDir "*.pdf"														; read all PDFs in root
 	{
 		fileIn := A_LoopFileName
-		gosub fileLoop
 	}
 
 /* Read SJM "PDFs" folder
