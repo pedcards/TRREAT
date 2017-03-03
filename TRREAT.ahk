@@ -75,14 +75,9 @@ if instr(role,"Parse") {
 			gosub fileLoop
 		}
 	} else {
-		Loop, *.pdf
-		{ 
-			fileIn := A_LoopFileName
-			gosub fileLoop
-		}
+		gosub readFiles
 	}
 	MsgBox Directory scan complete.
-	GuiControl, Enable, Reload
 }
 
 WinWaitClose, TRREAT Reports
@@ -128,7 +123,21 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	
+	Loop, % pdfDir "*.pdf"
+	{
+		fileIn := A_LoopFileName
+		gosub fileLoop
+	}
+
+/* Read SJM "PDFs" folder
+*/
+	Loop, FIles, % pdfDir "PDFs\Live.combined\*", D
+	{
+		sjmDate := A_LoopFileName
+		MsgBox % sjmDates
+		
+	}
+
 return
 }
 
