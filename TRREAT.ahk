@@ -165,8 +165,8 @@ readFiles:
 			patBnk := A_LoopFileName
 		}
 		FileRead, i, % bscDir patDir "\" patBnk
-		tmp := parseDate(strX(i,"SAVE DATE:",1,10,"#",1,1))
-		MsgBox % tmp.MMM
+		tmp := parseDate(trim(strX(i,"SAVE DATE:",1,10,"#",1,1)," `r`n"))
+		MsgBox % tmp.DD " " tmp.MM " " tmp.YYYY " " tmp.MMM
 	}
 	
 return
