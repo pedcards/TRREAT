@@ -656,6 +656,17 @@ return
 BSCI:
 {
 	gosub bsciZoomView
+	if (fileArg) {
+		fileNum += 1
+		LV_Add("", fldval["dev-date"])
+		LV_Modify(filenum,"col2",fldval["dev-Name"])
+		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
+		LV_Modify(fileNum,"col4",fldval["dev-Ser"])
+		LV_ModifyCol(1,"AutoHdr")
+		LV_ModifyCol(2,"AutoHdr")
+		LV_ModifyCol(3,"AutoHdr")
+		LV_ModifyCol(4,"AutoHdr")
+	}
 	
 	gosub fetchDem
 	
@@ -1143,7 +1154,7 @@ PrintOut:
 		FileMove, temp.rtf, %reportDir%%fileOut%.rtf, 1								; move RTF to the final directory
 		FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
 		
-		LV_Modify(filenum,"col5","YES")
+		LV_Modify(filenum,"col5","YES")												; update the Report column in LV
 		Gui, Show
 	}
 	
