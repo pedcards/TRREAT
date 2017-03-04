@@ -184,6 +184,25 @@ readFiles:
 return
 }
 
+parsePat:
+{
+	if !(l_row := LV_GetNext()) {
+		return
+	}
+	LV_GetText(pat_date,l_row,1)
+	LV_GetText(pat_name,l_row,2)
+	LV_GetText(pat_dev,l_row,3)
+	LV_GetText(pat_ser,l_row,4)
+	LV_GetText(pat_report,l_row,5)
+	LV_GetText(pat_paceart,l_row,6)
+	LV_GetText(fileIn,l_row,7)
+	LV_GetText(pat_meta,l_row,8)
+	
+	gosub fileLoop
+	
+Return
+}
+
 fileLoop:
 {
 	blocks := Object()
