@@ -155,6 +155,7 @@ readFiles:
 		tmp_name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp_dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
 		tmp_ser := readBnk("SystemSerialNumber")
+		
 		Loop, files, % patDir "\report\Combined*" tmp.MMM "-" tmp.DD "-" tmp.YYYY "*.pdf"
 		{
 			patPDF := patDir "\report\" A_LoopFileName							; find the appropriate PDF matching this .bnk file
@@ -186,17 +187,17 @@ return
 
 parsePat:
 {
-	if !(l_row := LV_GetNext()) {
+	if !(fileNum := LV_GetNext()) {
 		return
 	}
-	LV_GetText(pat_date,l_row,1)
-	LV_GetText(pat_name,l_row,2)
-	LV_GetText(pat_dev,l_row,3)
-	LV_GetText(pat_ser,l_row,4)
-	LV_GetText(pat_report,l_row,5)
-	LV_GetText(pat_paceart,l_row,6)
-	LV_GetText(fileIn,l_row,7)
-	LV_GetText(pat_meta,l_row,8)
+	LV_GetText(pat_date,fileNum,1)
+	LV_GetText(pat_name,fileNum,2)
+	LV_GetText(pat_dev,fileNum,3)
+	LV_GetText(pat_ser,fileNum,4)
+	LV_GetText(pat_report,fileNum,5)
+	LV_GetText(pat_paceart,fileNum,6)
+	LV_GetText(fileIn,fileNum,7)
+	LV_GetText(pat_meta,fileNum,8)
 	
 	gosub fileLoop
 	
