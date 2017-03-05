@@ -200,6 +200,9 @@ parsePat:
 	LV_GetText(fileIn,fileNum,7)
 	LV_GetText(pat_meta,fileNum,8)
 	
+	/*	Should check here if entered into PaceArt
+		If yes, move to DONE node
+	*/
 	if (pat_report) {
 		MsgBox Report already exists
 		return
@@ -380,6 +383,10 @@ ActSign:
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
 	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")				; copy ID node to DONE
 	xl.save(binDir "worklist.xml")
+	
+	/*	Should change report field to "Signed", not move node yet
+		Node moved when both Signed and entered into PaceArt
+	*/
 	
 	Gosub signScan																; regenerate file list
 Return
