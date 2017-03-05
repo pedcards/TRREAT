@@ -244,7 +244,8 @@ SignScan:
 				
 		l_user := strX(fileNam,"",1,0,"-")										; Get assigned EP from filename
 		l_mrn  := strX(fileNam,"-",1,1," ",1,1)
-		l_name := stregX(fileNam,"-\d+ ",1,1," \d{6,8}",1)		
+		l_name := stregX(fileNam,"-\d+ ",1,1," #",1)		
+		l_ser  := stregX(fileNam," #",1,1," \d{6,8}",1)
 		l_date := strX(fileNam," ",0,1,"",0)
 		
 		if !Object(l_users[l_user]) {											; this user not present yet in l_users[]
@@ -252,7 +253,8 @@ SignScan:
 		}
 		l_users[l_user,A_index] := {filename:fileNam							; creates l_users[l_user, x], where x is just a number
 			, name:l_name
-			, date:l_date}
+			, date:l_date
+			, ser:l_ser}
 	}
 	gosub signGUI
 	
@@ -268,18 +270,20 @@ SignGUI:
 	{
 		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
 		Gui, Tab, % k															; go to tab for the user
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, fn|Date|Name
+		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, fn|Date|Name|Serial
 		for v in l_users[k]														; loop through users in l_users
 		{
 			i := l_users[k,v]													; i is the element for each V
 			LV_Add(""
 				, i.filename													; this is a hidden column 
 				, i.date
-				, i.name)
+				, i.name
+				, i.ser)
 		}
 		LV_ModifyCol()
 		LV_ModifyCol(1, "0")
 		LV_ModifyCol(3, "Autohdr")
+		LV_ModifyCol(4, "0")
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
 	Gui, Show, AutoSize, TRREAT Reports Pile											; show GUI
@@ -306,6 +310,8 @@ SignRep:
 	}
 	Gui, Sign:Hide
 	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
+	LV_GetText(l_date,l_row,2)
+	LV_GetText(l_ser,l_row,4)													; get hidden serial number
 	
 	gosub SignActGUI
 	Gui, Sign:Show
