@@ -381,11 +381,16 @@ ActSign:
 		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
-	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")				; copy ID node to DONE
+	
+	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/report",A_now)
 	xl.save(binDir "worklist.xml")
 	
 	/*	Should change report field to "Signed", not move node yet
 		Node moved when both Signed and entered into PaceArt
+		
+	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")				; copy ID node to DONE
+	xl.save(binDir "worklist.xml")
+	
 	*/
 	
 	Gosub signScan																; regenerate file list
