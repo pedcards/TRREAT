@@ -377,7 +377,9 @@ ActSign:
 		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
-	removeNode(xl.selectSingleNode("/root/work/id[@date='"))
+	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")
+	xl.save(binDir "worklist.xml")
+	
 	Gosub signScan																; regenerate file list
 Return
 }
@@ -1724,10 +1726,19 @@ FetchNode(node) {
 	}
 }
 
+archNode(node) {
+	global
+	local clone
+	clone := xl.selectSingleNode(node).cloneNode(true)
+	xl.selectSingleNode("/root/done").appendChild(clone)
+	removeNode(node)
+	return
+}
+
 RemoveNode(node) {
 	global
 	local q
-	q := y.selectSingleNode(node)
+	q := xl.selectSingleNode(node)
 	q.parentNode.removeChild(q)
 }
 
