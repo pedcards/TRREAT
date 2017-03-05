@@ -270,20 +270,21 @@ SignGUI:
 	{
 		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
 		Gui, Tab, % k															; go to tab for the user
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, fn|Date|Name|Serial
+		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, file|serial|Date|Name
 		for v in l_users[k]														; loop through users in l_users
 		{
 			i := l_users[k,v]													; i is the element for each V
 			LV_Add(""
 				, i.filename													; this is a hidden column 
+				, i.ser															; this is a hidden column
 				, i.date
-				, i.name
-				, i.ser)
+				, i.name)
 		}
 		LV_ModifyCol()
 		LV_ModifyCol(1, "0")
+		LV_ModifyCol(2, "0")
 		LV_ModifyCol(3, "Autohdr")
-		LV_ModifyCol(4, "0")
+		LV_ModifyCol(4, "AutoHdr")
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
 	Gui, Show, AutoSize, TRREAT Reports Pile											; show GUI
@@ -310,8 +311,8 @@ SignRep:
 	}
 	Gui, Sign:Hide
 	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
-	LV_GetText(l_date,l_row,2)
-	LV_GetText(l_ser,l_row,4)													; get hidden serial number
+	LV_GetText(l_ser,l_row,2)													; get hidden serial number
+	LV_GetText(l_date,l_row,3)
 	
 	gosub SignActGUI
 	Gui, Sign:Show
@@ -377,7 +378,7 @@ ActSign:
 		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
-	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")
+	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")				; copy ID node to DONE
 	xl.save(binDir "worklist.xml")
 	
 	Gosub signScan																; regenerate file list
