@@ -1165,6 +1165,7 @@ PrintOut:
 	{
 		FileMove, temp.rtf, %reportDir%%fileOut%.rtf, 1								; move RTF to the final directory
 		FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
+		FileCopy, %pat_meta%, %complDir%%fileOut%.bnk, 1							; copy BNK to complete directory
 		
 		LV_Modify(filenum,"col5","YES")												; update the Report column in LV
 		Gui, Show
