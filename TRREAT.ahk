@@ -370,6 +370,7 @@ ActSign:
 		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
+	removeNode(xl.selectSingleNode("/root/work/id[@date='"))
 	Gosub signScan																; regenerate file list
 Return
 }
@@ -1713,6 +1714,13 @@ FetchNode(node) {
 	} else {
 		y.addElement(node, MRNstring)								; If no node arch exists, create placeholder
 	}
+}
+
+RemoveNode(node) {
+	global
+	local q
+	q := y.selectSingleNode(node)
+	q.parentNode.removeChild(q)
 }
 
 WriteOut(path,node) {
