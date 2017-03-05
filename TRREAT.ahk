@@ -57,6 +57,7 @@ if (%0%) {																		; For each parameter:
 }
 
 if instr(role,"Sign") {
+	xl := new XML(binDir "worklist.xml")									; otherwise load existing worklist
 	gosub signScan
 }
 
