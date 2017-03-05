@@ -661,11 +661,12 @@ BSCI:
 		LV_Add("", fldval["dev-date"])
 		LV_Modify(filenum,"col2",fldval["dev-Name"])
 		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
-		LV_Modify(fileNum,"col4",fldval["dev-Ser"])
+		LV_Modify(fileNum,"col4",fldval["dev-IPG_SN"])
 		LV_ModifyCol(1,"AutoHdr")
 		LV_ModifyCol(2,"AutoHdr")
 		LV_ModifyCol(3,"AutoHdr")
 		LV_ModifyCol(4,"AutoHdr")
+		Gui, Show
 	}
 	
 	gosub fetchDem
@@ -675,7 +676,9 @@ BSCI:
 	}
 	
 	gosub makeReport
-		
+	
+	xl.addElement("id","/root/work",{date: dt.YYYY dt.MM dt.DD, ser:fldval["dev-IPG_SN"], ed:A_now, au:user})
+	xl.save(binDir "worklist.xml")
 return	
 }
 
