@@ -165,10 +165,6 @@ readFiles:
 			patPDF := patDir "\report\" A_LoopFileName							; find the appropriate PDF matching this .bnk file
 		}
 		
-		/*	Should check whether this check is already in database
-			and skip add row if it already exists
-		*/
-		
 		fileNum += 1															; Add a row to the LV
 		LV_Add("", tmp.YYYY tmp.MM tmp.DD)										; col1 is date
 		LV_Modify(fileNum,"col2", tmp_name)
