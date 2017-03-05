@@ -199,6 +199,11 @@ parsePat:
 	LV_GetText(fileIn,fileNum,7)
 	LV_GetText(pat_meta,fileNum,8)
 	
+	if (pat_report) {
+		MsgBox Report already exists
+		return
+	}
+	
 	gosub fileLoop
 	
 Return
