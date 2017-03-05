@@ -103,9 +103,9 @@ readList:
 		fileNum += 1															; Add a row to the LV
 		LV_Add("", k.getAttribute("date"))								; col1 is date
 		LV_Modify(fileNum,"col2", k.selectSingleNode("name").text)
-		LV_Modify(fileNum,"col3", k.selectSingleNode("device").text)
-		LV_Modify(fileNum,"col4", k.getAttribute("serial"))
-		LV_Modify(fileNum,"col5", k.selectSingleNode("report").text)
+		LV_Modify(fileNum,"col3", k.selectSingleNode("dev").text)
+		LV_Modify(fileNum,"col4", k.getAttribute("ser"))
+		LV_Modify(fileNum,"col5", (k.selectSingleNode("report").text)?"Done":"")
 		LV_Modify(fileNum,"col6", k.selectSingleNode("paceart").text)
 		LV_Modify(fileNum,"col7", k.selectSingleNode("file").text)
 		LV_Modify(fileNum,"col8", k.selectSingleNode("meta").text)
