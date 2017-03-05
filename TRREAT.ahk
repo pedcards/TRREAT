@@ -1160,6 +1160,7 @@ PrintOut:
 	nm := fldval["dev-Name"]
 	fileOut :=	enc_MD "-" encMRN " " 
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
+			.	"#" fldval["dev-IPG_SN"] " "
 			.	dt.YYYY dt.MM dt.DD
 	
 	FileDelete, temp.rtf															; delete and generate RTF fileOut.rtf
