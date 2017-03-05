@@ -155,8 +155,8 @@ readFiles:
 		tmp_name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp_dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
 		tmp_ser := readBnk("SystemSerialNumber")
-		if ((xl.selectSingleNode("/root/work/id[@date='" tmp.YYYY tmp.MM tmp.DD "']"))
-			&& (xl.selectSingleNode("/root/work/id[@ser='" tmp_ser "']"))) {
+		if ((xl.selectSingleNode("//id[@date='" tmp.YYYY tmp.MM tmp.DD "']"))	; skip reprocessing if in either work or done lists
+			&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
 			continue
 		}
 		
