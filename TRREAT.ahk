@@ -111,7 +111,7 @@ readList:
 		tmp["file"] := k.selectSingleNode("file").text
 		tmp["meta"] := k.selectSingleNode("meta").text
 		tmp["report"] := k.selectSingleNode("report").text
-		if ((tmp.report) && !(tmp.status="Signed") && (tmp.paceart)) {
+		if ((tmp.report) && (tmp.status="Signed") && (tmp.paceart)) {
 			MsgBox, 68, Tasks completed
 				, % "Patient " tmp.name "`n"
 				. 	"- Report done`n"
