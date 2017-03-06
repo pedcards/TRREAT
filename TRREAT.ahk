@@ -16,7 +16,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
-	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
+	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\bin\"
 	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
 	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
@@ -1874,7 +1874,7 @@ eventlog(event) {
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyy.MM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
-	name := "logs/" . sessdate . ".log"
+	name := binDir "..\logs\" . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
 	filePrepend(txt,name)
 ;	FileAppend, % timenow " ["  user "/" comp "] " event "`n", % "logs/" . sessdate . ".log"
