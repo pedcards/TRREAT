@@ -78,7 +78,6 @@ if instr(role,"Parse") {
 	} else {																	; otherwise scan the folders
 		gosub readFiles
 	}
-	MsgBox Directory scan complete.
 }
 
 WinWaitClose, TRREAT Reports
