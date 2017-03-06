@@ -156,7 +156,24 @@ readFiles:
 */
 	Loop, % pdfDir "*.pdf"														; read all PDFs in root
 	{
-		fileIn := A_LoopFileName
+		patPDF := A_LoopFileName
+		tmp_name := strX(patPDF,"",1,0,"_",1,1,n)
+		tmp_ser := strX(patPDF,"_",n,1,"_",1,1,n)
+		FileGetTime,tmp_date
+		tmp_date := substr(tmp_date,1,8)
+		if ((xl.selectSingleNode("//id[@date='" tmp.date "']"))					; skip reprocessing if in either work or done lists
+			&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
+			continue
+		}
+		fileNum += 1															; Add a row to the LV
+		LV_Add("", tmp_date)													; col1 is date
+		LV_Modify(fileNum,"col2", tmp_name)
+		LV_Modify(fileNum,"col3", "Medtronic")
+		LV_Modify(fileNum,"col4", tmp_ser)
+		LV_Modify(fileNum,"col5", "")
+		LV_Modify(fileNum,"col6", "")
+		LV_Modify(fileNum,"col7", patPDF)
+		LV_Modify(fileNum,"col8", "")
 	}
 
 /* Read SJM "PDFs" folder
@@ -202,6 +219,7 @@ readFiles:
 		LV_Modify(fileNum,"col7", patPDF)
 		LV_Modify(fileNum,"col8", patBnk)
 	}
+	
 	LV_ModifyCol(1, "Autohdr")
 	LV_ModifyCol(2, "Autohdr")
 	LV_ModifyCol(3, "Autohdr")
