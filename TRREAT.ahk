@@ -228,13 +228,21 @@ parsePat:
 	LV_GetText(pat_report,fileNum,9)
 	
 	if (pat_report) {
-		opt := (pat_status="Sent")?"Modify report|Mark entered in PaceArt":"Mark entered in PaceArt"
-		tmp := cMsgBox("Action required","Do what?",opt,"Q","")
+		opt := (pat_status="Pending")
+			? "Modify report|Regenerate report|Mark entered in PaceArt"		; Not signed yet
+			: "Mark entered in PaceArt"										; Report signed
+		tmp := cMsgBox(pat_name " report","Do what?",opt,"Q","")
 		if (tmp="Close") {
 			return
 		}
 		if instr(tmp,"Modify") {
 			RunWait, % "WordPad.exe """ pat_report """"						; launch fileNam in WordPad
+			return
+		}
+		if instr(tmp,"Regenerate") {
+			removeNode("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']")
+			xl.save(binDir "worklist.xml")
+			gosub fileLoop
 			return
 		}
 		if instr(tmp,"PaceArt") {
