@@ -242,6 +242,7 @@ parsePat:
 		if instr(tmp,"Regenerate") {
 			removeNode("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']")
 			xl.save(binDir "worklist.xml")
+			FileDelete, % pat_report
 			gosub fileLoop
 			return
 		}
