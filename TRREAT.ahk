@@ -870,11 +870,11 @@ fldfill(var,val) {
 */
 	global fldval
 	
-	if (val=="") {																	; val is null
+	if (val=="") {																; val is null
 		return																	; do nothing
 	}
 	
-	fldval[var] := val															; set var as val
+	fldval[var] := trim(val," `t`r`n")											; set var as val
 	
 return
 }
