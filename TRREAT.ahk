@@ -63,7 +63,7 @@ if instr(role,"Sign") {
 
 if instr(role,"Parse") {
 	Gui, Parse:Destroy
-	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Report|PaceArt|FileName|MetaData
+	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Parse:Default
 	Gui, Show,, TRREAT Reports scan
 	
