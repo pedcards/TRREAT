@@ -86,6 +86,8 @@ ExitApp
 
 readList:
 {
+	tmp := []
+	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
 	if !FileExist(binDir "worklist.xml") {
 		xl := new XML("<root/>")												; Create new XML if doesn't exist
@@ -101,16 +103,40 @@ readList:
 		if !IsObject(k) {														; skip if empty
 			continue
 		}
+		tmp["date"] := k.getAttribute("date")
+		tmp["name"] := k.selectSingleNode("name").text
+		tmp["dev"]  := k.selectSingleNode("dev").text
+		tmp["ser"]  := k.getAttribute("ser")
+		tmp["status"] := k.selectSingleNode("status").text
+		tmp["paceart"] := k.selectSingleNode("paceart").text
+		tmp["file"] := k.selectSingleNode("file").text
+		tmp["meta"] := k.selectSingleNode("meta").text
+		tmp["report"] := k.selectSingleNode("report").text
+		if ((tmp.report) && !(tmp.status="Signed") && (tmp.paceart)) {
+			MsgBox, 68, Tasks completed
+				, % "Patient " tmp.name "`n"
+				. 	"- Report done`n"
+				. 	"- Report signed`n"
+				. 	"- PaceArt filled`n`n"
+				. 	"Archive this task?"
+			IfMsgBox, Yes
+			{
+				archNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")				; copy ID node to DONE
+				xl.save(binDir "worklist.xml")
+				continue
+			}
+		}
+		
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", k.getAttribute("date"))								; col1 is date
-		LV_Modify(fileNum,"col2", k.selectSingleNode("name").text)
-		LV_Modify(fileNum,"col3", k.selectSingleNode("dev").text)
-		LV_Modify(fileNum,"col4", k.getAttribute("ser"))
-		LV_Modify(fileNum,"col5", (k.selectSingleNode("report").text)?"Done":"")
-		LV_Modify(fileNum,"col6", k.selectSingleNode("paceart").text)
-		LV_Modify(fileNum,"col7", k.selectSingleNode("file").text)
-		LV_Modify(fileNum,"col8", k.selectSingleNode("meta").text)
-		;~ LV_ModifyCol()
+		LV_Add("", tmp.date)								; col1 is date
+		LV_Modify(fileNum,"col2", tmp.name)
+		LV_Modify(fileNum,"col3", tmp.dev)
+		LV_Modify(fileNum,"col4", tmp.ser)
+		LV_Modify(fileNum,"col5", tmp.status)
+		LV_Modify(fileNum,"col6", tmp.paceart)
+		LV_Modify(fileNum,"col7", tmp.file)
+		LV_Modify(fileNum,"col8", tmp.meta)
+		LV_Modify(fileNum,"col9", tmp.report)
 	}
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
 	LV_ModifyCol(2, "Autohdr")
@@ -120,6 +146,7 @@ readList:
 	LV_ModifyCol(6, "Autohdr")
 	LV_ModifyCol(7, "0")														; hide the filename col
 	LV_ModifyCol(8, "0")														; hide the metadata col
+	LV_ModifyCol(9, "0")														; hide the report col
 	GuiControl, Enable, Reload													; reload the GUI
 return
 }
@@ -195,10 +222,11 @@ parsePat:
 	LV_GetText(pat_name,fileNum,2)
 	LV_GetText(pat_dev,fileNum,3)
 	LV_GetText(pat_ser,fileNum,4)
-	LV_GetText(pat_report,fileNum,5)
+	LV_GetText(pat_status,fileNum,5)
 	LV_GetText(pat_paceart,fileNum,6)
 	LV_GetText(fileIn,fileNum,7)
 	LV_GetText(pat_meta,fileNum,8)
+	LV_GetText(pat_report,fileNum,9)
 	
 	/*	Should check here if entered into PaceArt
 		If yes, move to DONE node
