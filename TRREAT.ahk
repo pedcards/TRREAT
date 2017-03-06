@@ -228,12 +228,20 @@ parsePat:
 	LV_GetText(pat_meta,fileNum,8)
 	LV_GetText(pat_report,fileNum,9)
 	
-	/*	Should check here if entered into PaceArt
-		If yes, move to DONE node
-	*/
 	if (pat_report) {
-		MsgBox Report already exists
-		return
+		opt := (pat_status="Sent")?"Modify report|Mark entered in PaceArt":"Mark entered in PaceArt"
+		tmp := cMsgBox("Action required","Do what?",opt,"Q","")
+		if instr(tmp,"Modify") {
+			RunWait, % "WordPad.exe """ pat_report """"						; launch fileNam in WordPad
+			return
+		}
+		if instr(tmp,"PaceArt") {
+			xl.addElement("paceart","/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']","true")
+			xl.save(binDir "worklist.xml")
+			gosub readList
+			gosub readFiles
+			return
+		}
 	}
 	
 	gosub fileLoop
@@ -410,16 +418,8 @@ ActSign:
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
 	
-	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/report",A_now)
+	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
 	xl.save(binDir "worklist.xml")
-	
-	/*	Should change report field to "Signed", not move node yet
-		Node moved when both Signed and entered into PaceArt
-		
-	archNode("/root/work/id[@date='" l_date "'][@ser='" l_ser "']")				; copy ID node to DONE
-	xl.save(binDir "worklist.xml")
-	
-	*/
 	
 	Gosub signScan																; regenerate file list
 Return
