@@ -733,17 +733,6 @@ BSCI:
 	
 	gosub makeReport
 	
-	t_now := A_Now
-	xl.addElement("id","/root/work",{date: dt.YYYY dt.MM dt.DD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
-	edID := "/root/work/id[@ed='" t_now "']"
-	xl.addElement("name",edID,fldval["dev-Name"])
-	xl.addElement("dev",edID,fldval["dev-IPG"])
-	xl.addElement("report",edID,reportDir fileOut ".rtf")
-	;~ xl.addElement("paceart","")
-	xl.addElement("file",edID,complDir fileOut ".pdf")
-	xl.addElement("meta",edID,complDir fileOut ".bnk")
-	
-	xl.save(binDir "worklist.xml")
 return	
 }
 
@@ -1226,6 +1215,19 @@ PrintOut:
 		
 		LV_Modify(filenum,"col5","YES")												; update the Report column in LV
 		Gui, Show
+		
+		t_now := A_Now
+		xl.addElement("id","/root/work",{date: dt.YYYY dt.MM dt.DD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
+		edID := "/root/work/id[@ed='" t_now "']"
+		xl.addElement("name",edID,fldval["dev-Name"])
+		xl.addElement("dev",edID,fldval["dev-IPG"])
+		xl.addElement("status",edID,"Sent")
+		xl.addElement("paceart",edID,"")
+		xl.addElement("file",edID,complDir fileOut ".pdf")
+		xl.addElement("meta",edID,complDir fileOut ".bnk")
+		xl.addElement("report",edID,reportDir fileOut ".rtf")
+		
+		xl.save(binDir "worklist.xml")
 	}
 	
 	return
