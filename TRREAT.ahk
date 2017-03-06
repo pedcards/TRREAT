@@ -230,12 +230,15 @@ parsePat:
 	if (pat_report) {
 		opt := (pat_status="Sent")?"Modify report|Mark entered in PaceArt":"Mark entered in PaceArt"
 		tmp := cMsgBox("Action required","Do what?",opt,"Q","")
+		if (tmp="Close") {
+			return
+		}
 		if instr(tmp,"Modify") {
 			RunWait, % "WordPad.exe """ pat_report """"						; launch fileNam in WordPad
 			return
 		}
 		if instr(tmp,"PaceArt") {
-			xl.addElement("paceart","/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']","true")
+			xl.setText("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']/paceart","True")
 			xl.save(binDir "worklist.xml")
 			gosub readList
 			gosub readFiles
