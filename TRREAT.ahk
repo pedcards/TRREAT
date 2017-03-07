@@ -773,11 +773,13 @@ bsciZoomView:
 	fieldvals(txt,1,"dev")
 	fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
 	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"Boston Scientific "))
+	fldfill("dev-Physician",readBnk("PatientPhysFirstName") " " readBnk("PatientPhysLastName"))
 	
 	txt := stregX(maintxt,"My Alerts",1,0,"Leads Data",1)
 	fields[1] := ["Battery","Approximate.*Explant:","`n"]
 	labels[1] := ["Batt_stat","IPG_voltage","null"]
 	fieldvals(txt,1,"dev")
+	fldfill("dev-Battery_stat",readBnk("BatteryStatus.BatteryPhase"))
 	
 	txt := stregX(maintxt,"(Ventricular )?Tachy Settings",1,0,"Brady Settings",1)
 	if instr(txt,"Atrial Tachy") {
@@ -843,6 +845,24 @@ bsciZoomView:
 	}
 	fldfill("leads-RV_HVimp",fldval["Vlead-HVimp"])
 	
+	fldfill("dev-Alead"
+		, printQ(readBnk("PatientLeadAManufacturer"),"###") 
+		. printQ(readBnk("PatientLeadAModelNum"), " ###") 
+		. printQ(readBnk("PatientLeadASerialNum"), " (serial ###)"))
+	fldfill("Alead-Pol_pace",readBnk("PatientLeadAPolarity"))
+	
+	fldfill("dev-RVlead"
+		, printQ(readBnk("PatientLeadV1Manufacturer"),"###") 
+		. printQ(readBnk("PatientLeadV1ModelNum"), " ###") 
+		. printQ(readBnk("PatientLeadV1SerialNum"), " (serial ###)"))
+	fldfill("RVlead-Pol_pace",readBnk("PatientLeadV1Polarity"))
+	
+	fldfill("dev-LVlead"
+		, printQ(readBnk("PatientLeadV2Manufacturer"),"###") 
+		. printQ(readBnk("PatientLeadV2ModelNum"), " ###") 
+		. printQ(readBnk("PatientLeadV2SerialNum"), " (serial ###)"))
+	fldfill("LVlead-Pol_pace",readBnk("PatientLeadV2Polarity"))
+	
 	ctr := stregX(maintxt,"(Ventricular )?Tachy Counters",1,0,"$",0)
 	ctrT := stregX(ctr,"(Ventricular )?Episode Counters",1,0,"Brady Counters",1)
 	fields[1] := ["Total Episodes","Nonsustained Episodes","ATP Delivered","Shocks Delivered","Shocks Diverted","SVT Episodes.*"]
@@ -862,19 +882,19 @@ bsciZoomView:
 	if (fldval["Alead-imp"]||fldval["Alead-cap"]||fldval["Alead-sensing"]) {
 		normLead("RA"
 				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-				,fldval["Alead-imp"],fldval["Alead-cap"],fldval["leads-AP_thr"],fldval["leads-RA_Pol_pace"]
+				,fldval["Alead-imp"],fldval["Alead-cap"],fldval["leads-AP_thr"],fldval["Alead-Pol_pace"]
 				,fldval["Alead-sensing"],fldval["leads-AS_thr"],fldval["leads-RA_Pol_sens"])
 	}
 	if (fldval["Vlead-imp"]||fldval["Vlead-cap"]||fldval["Vlead-sensing"]) {
 		normLead("RV"
-				,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
-				,fldval["Vlead-imp"],fldval["Vlead-cap"],fldval["leads-VP_thr"],fldval["leads-RV_Pol_pace"]
+				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
+				,fldval["Vlead-imp"],fldval["Vlead-cap"],fldval["leads-VP_thr"],fldval["RVlead-Pol_pace"]
 				,fldval["Vlead-sensing"],fldval["leads-VS_thr"],fldval["leads-RV_Pol_sens"])
 	}
 	if (fldval["leads-LV_imp"]||fldval["leads-LV_cap"]||fldval["leads-LV_Sthr"]) {
 		normLead("LV"
 				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
-				,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+				,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["LVlead-Pol_pace"]
 				,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
 	}
 
