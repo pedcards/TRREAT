@@ -158,10 +158,13 @@ readFiles:
 	{
 		patPDF := A_LoopFileName
 		tmp_name := strX(patPDF,"",1,0,"_",1,1,n)
-		tmp_ser := strX(patPDF,"_",n,1,"_",1,1,n)
-		FileGetTime,tmp_date
-		tmp_date := substr(tmp_date,1,8)
-		if ((xl.selectSingleNode("//id[@date='" tmp.date "']"))					; skip reprocessing if in either work or done lists
+		tmp_ser := strX(patPDF,"_",n-1,1,"_",1,1,n)
+		tmp := parseDate(strX(patPDF,"_",n+1,1,".pdf",1,6))
+		tmp_date := tmp.YYYY tmp.MM tmp.DD
+		;~ FileGetTime,tmp_date
+		;~ tmp_date := substr(tmp_date,1,8)
+		patPDF := pdfDir patPDF
+		if ((xl.selectSingleNode("//id[@date='" tmp_date "']"))					; skip reprocessing if in either work or done lists
 			&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
 			continue
 		}
