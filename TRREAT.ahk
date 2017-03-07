@@ -1919,7 +1919,10 @@ parseDate(x) {
 		StringSplit, DT, x, %A_Space%-.
 		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "MMM":DT2, "YYYY":year4dig(DT3)}
 	}
-	
+	if (x~="\d{1,2}_\d{1,2}_\d{2,4}") {											; 03_06_17 or 03_06_2017
+		StringSplit, DT, x, _
+		return {"MM":zDigit(DT1), "DD":zDigit(DT2), "MMM":mo[DT2], "YYYY":year4dig(DT3)}
+	}
 	StringSplit, DT, x, %A_Space%
 	StringSplit, DY, DT1, /
 	StringSplit, DHM, DT2, :
