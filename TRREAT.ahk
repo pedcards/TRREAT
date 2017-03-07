@@ -1260,9 +1260,9 @@ PrintOut:
 	MsgBox, 36, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		FileMove, temp.rtf, %reportDir%%fileOut%.rtf, 1								; move RTF to the final directory
-		FileCopy, %fileIn%, %complDir%%fileOut%.pdf, 1								; copy PDF to complete directory
-		FileCopy, %pat_meta%, %complDir%%fileOut%.bnk, 1							; copy BNK to complete directory
+		FileMove, temp.rtf, % reportDir fileOut ".rtf", 1								; move RTF to the final directory
+		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
+		FileCopy, % pat_meta, % complDir fileOut ".bnk", 1							; copy BNK to complete directory
 		
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
