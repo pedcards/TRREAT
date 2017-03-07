@@ -154,9 +154,20 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	Loop, % pdfDir "*.pdf"														; read all PDFs in root
+	Loop, files, % pdfDir "*.pdf"														; read all PDFs in root
 	{
 		patPDF := A_LoopFileName
+		kmax := 0
+		Loop, files, % pdfDir strX(patPDF,"",1,0,"_",0,1) "*.pdf"
+		{
+			i := A_LoopFileName
+			k := strX(i,"_",substr(i,instr(i,"_",,-1)),1,".",1)
+			if (k > kmax) {
+				kmax := k
+				patPDF := i
+				MsgBox % i
+			}
+		}
 		tmp_name := strX(patPDF,"",1,0,"_",1,1,n)
 		tmp_ser := strX(patPDF,"_",n-1,1,"_",1,1,n)
 		tmp := parseDate(strX(patPDF,"_",n+1,1,".pdf",1,6))
