@@ -472,28 +472,27 @@ SignVerify(user)
 
 Medtronic:
 {
-	fileNum += 1																; Add a row to the LV
-	LV_Add("", fileIN)															; col1 is filename
-	
 	if (maintxt~="Adapta") {													; Scan Adapta family of devices
 		gosub mdtAdapta
 	} else if (maintxt~="Quick Look II") {										; or scan more current QuickLook II reports
 		gosub mdtQuickLookII
 	} else {																	; or something else
-		LV_Modify(fileNum,"col2",fldval["dev-Name"])
-		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
-		LV_Modify(fileNum,"col5","No match")
 		MsgBox NO MATCH
 		return
 	}
 	
-	LV_Modify(filenum,"col2",fldval["dev-Name"])
-	LV_Modify(fileNum,"col3",fldval["dev-IPG"])
-	LV_ModifyCol(1,"AutoHdr")
-	LV_ModifyCol(2,"AutoHdr")
-	LV_ModifyCol(3,"AutoHdr")
-	LV_ModifyCol(4,"AutoHdr")
-	Gui, Show
+	if (fileArg) {
+		fileNum += 1
+		LV_Add("", fldval["dev-date"])
+		LV_Modify(filenum,"col2",fldval["dev-Name"])
+		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
+		LV_Modify(fileNum,"col4",fldval["dev-IPG_SN"])
+		LV_ModifyCol(1,"AutoHdr")
+		LV_ModifyCol(2,"AutoHdr")
+		LV_ModifyCol(3,"AutoHdr")
+		LV_ModifyCol(4,"AutoHdr")
+		Gui, Show
+	}
 	
 	gosub fetchDem
 	
