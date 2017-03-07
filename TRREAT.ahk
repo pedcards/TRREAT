@@ -290,7 +290,7 @@ fileLoop:
 	leads := Object()
 	summBl := summ := ""
 	SplitPath, fileIn,,,,fileOut
-	RunWait, pdftotext.exe -table "%PDFdir%%fileIn%" temp.txt , , hide
+	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
 	cleanlines(maintxt)
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
