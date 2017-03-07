@@ -1914,13 +1914,13 @@ parseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	if (x~="i)(\d{1,2})[\-\s\.]|(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\-\s\.](\d{2,4})") {		; 03 Jan 2016
 		StringSplit, DT, x, %A_Space%-.
-		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "MMM":DT2, "YYYY":DT3}
+		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "MMM":DT2, "YYYY":year4dig(DT3)}
 	}
 	
 	StringSplit, DT, x, %A_Space%
 	StringSplit, DY, DT1, /
 	StringSplit, DHM, DT2, :
-	return {"MM":zDigit(DY1), "DD":zDigit(DY2), "YYYY":DY3, "hr":zDigit(DHM1), "min":zDigit(DHM2), "Date":DT1, "Time":DT2}
+	return {"MM":zDigit(DY1), "DD":zDigit(DY2), "YYYY":year4dig(DY3), "hr":zDigit(DHM1), "min":zDigit(DHM2), "Date":DT1, "Time":DT2}
 }
 
 niceDate(x) {
@@ -1928,6 +1928,16 @@ niceDate(x) {
 		return error
 	FormatTime, x, %x%, MM/dd/yyyy
 	return x
+}
+
+year4dig(x) {
+	if (StrLen(x)=4) {
+		return x
+	}
+	if (StrLen(x)=2) {
+		return (x<50)?("20" x):("19" x)
+	}
+	return error
 }
 
 zDigit(x) {
