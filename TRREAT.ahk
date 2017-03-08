@@ -203,15 +203,10 @@ readFiles:
 		DateDir := sjmDir "\" A_LoopFileName
 		Loop, Files, % DateDir "\*", D
 		{
-			patDir := DateDir "\" A_LoopFileName
 			patDir := A_LoopFileName
-			tmp_ser := trim(substr(patDir,n:=instr(patDir,"_",,-1))," _`r`n")
-			tmp_file := substr(patDir,1,n)
-			;~ tmp_ser := strX(patDir,"",10,0,"_",0,0)
-			tmp_dev := trim(substr(tmp_file,n:=instr(tmp_file,"_",,-1))," _`r`n")
-			tmp_name := trim(substr(tmp_file,1,n)," _`r`n")
-			MsgBox % tmp_dev "`n" tmp_ser "`n" tmp_name
-			
+			tmp_name := stregx(patDir,"",1,0,"_\d{2,}",1,n)
+			tmp_dev  := stregx(patDir,"_",n,1,"_",1,n)
+			tmp_ser  := strx(patDir,"_",n,1,"",0)
 		}
 	}
 
