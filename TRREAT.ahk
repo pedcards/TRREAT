@@ -154,26 +154,31 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	Loop, files, % pdfDir "*.pdf"														; read all PDFs in root
+	kmaxstr :=																	; clear string of files to skip
+	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
-		patPDF := A_LoopFileName
-		kmax := 0
-		Loop, files, % pdfDir strX(patPDF,"",1,0,"_",0,1) "*.pdf"
+		patPDF := A_LoopFileName												; next file in PDFdir
+		if instr(kmaxstr,patPDF) {												; in skiplist?
+			continue
+		}
+		kmax := 1																; reset max k counter
+		Loop, files, % pdfDir strX(patPDF,"",1,0,"_",0,1) "*.pdf"				; loop through all files with this "prefix"
 		{
-			i := A_LoopFileName
-			k := strX(i,"_",substr(i,instr(i,"_",,-1)),1,".",1)
-			if (k > kmax) {
-				kmax := k
-				patPDF := i
-				MsgBox % i
+			i := A_LoopFileName													; i is filename in this inner loop
+			n := substr(i,instr(i,"_",,-1))										; n is string up to final _#
+			k := strX(i,"_",n,1,".",1)											; k is # between _ and .pdf
+			if (k > kmax) {														; greater than previous kmax?
+				j := substr(i,1,instr(i,"_",,-1)) (kmax) ".pdf"					; j is filename of previous kmax
+				FileMove, % pdfDir j, % pdfDir j ".old"							; rename it to j.pdf.old
+				kmax := k														; new kmax
+				patPDF := i														; set patPDF as this new max (for when exits)
+				kmaxstr .= i "`n"												; add to string of files to subsequently ignore
 			}
 		}
 		tmp_name := strX(patPDF,"",1,0,"_",1,1,n)
 		tmp_ser := strX(patPDF,"_",n-1,1,"_",1,1,n)
 		tmp := parseDate(strX(patPDF,"_",n+1,1,".pdf",1,6))
 		tmp_date := tmp.YYYY tmp.MM tmp.DD
-		;~ FileGetTime,tmp_date
-		;~ tmp_date := substr(tmp_date,1,8)
 		patPDF := pdfDir patPDF
 		if ((xl.selectSingleNode("//id[@date='" tmp_date "']"))					; skip reprocessing if in either work or done lists
 			&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
