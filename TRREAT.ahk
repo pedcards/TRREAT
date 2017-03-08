@@ -332,6 +332,10 @@ fileLoop:
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
 	cleanlines(maintxt)
+	if (instr(pat_dev,"SJM")) {
+		FileRead, maintxt, % pat_meta
+		MsgBox,, SJM, % maintxt
+	}
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
 		gosub Medtronic
 	}
