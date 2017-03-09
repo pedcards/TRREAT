@@ -344,10 +344,10 @@ fileLoop:
 	else if (maintxt~="Boston Scientific Corporation") {
 		gosub BSCI
 	}
-	else if instr(pat_dev,"SJM") {													; SJM device clicked from LV
+	else if instr(pat_dev,"SJM") {												; SJM device clicked from LV
 		gosub SJM
 	} else {
-		MsgBox No match!`nParse PDF?
+		MsgBox No match!`nAttempt OCR on PDF?
 	}
 	
 	return
@@ -955,7 +955,11 @@ bsciZoomView:
 
 SJM:
 {
-	
+	if (pat_meta) {																; SJM device with metadata (ICD exported)
+		gosub SJM_meta
+	} else {
+		
+	}
 	
 return
 }
