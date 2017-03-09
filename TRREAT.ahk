@@ -991,6 +991,22 @@ SJM_meta:
 	fldfill("dev-LVlead_impl",RegExReplace(fldval["dev-LVlead_impl"]," 00:00:00"))
 	fldfill("dev-IPG_voltage",round(fldval["dev-IPG_voltage"],2) " V")
 	
+	fields[1] := ["Atrial Pulse Configuration","Atrial Pulse Width","Atrial Pulse Amplitude"
+				, "Atrial Sense Configuration","Atrial Sensitivity","(?<!\s)Atrial Signal Amplitude"
+				, "Atrial Pacing Lead Impedance", "A. .* Capture Threshold","A. .* Test Pulse Width"
+				, "RV Pulse Configuration","RV Pulse Width","RV Pulse Amplitude"
+				, "Ventricular Sense Configuration","Ventricular Sensitivity","(?<!\s)Ventricular Signal Amplitude"
+				, "RV Pacing Lead Impedance", "V. .* Capture Threshold","V. .* Test Pulse Width"
+				, "HV Lead Impedance"]
+	labels[1] := ["RA_Pol_Pace","RA_Pace_PW","RA_Pace_Amp"
+				, "RA_Pol_Sens","RA_Sensitivity","RA_Thr_Sens"
+				, "RA_imp","RA_Thr_Amp","RA_Thr_PW"
+				, "RV_Pol_Pace","RV_Pace_PW","RV_Pace_Amp"
+				, "RV_Pol_Sens","RV_Sensitivity","RV_Thr_Sens"
+				, "RV_imp","RV_Thr_Amp","RV_Thr_PW"
+				, "HV_imp"]
+	sjmVals(1,"leads")
+	
 return
 }
 
