@@ -331,7 +331,7 @@ fileLoop:
 	labels := Object()
 	fldval := Object()
 	leads := Object()
-	summBl := summ := ""
+	summBl := summ := sjmLog := ""
 	FileDelete, temp.txt
 	SplitPath, fileIn,,,,fileOut
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
@@ -1149,14 +1149,14 @@ readSjm(lbl) {
 	Loop, parse, sjmLog, `n,`r
 	{
 		line := A_LoopField
-		if !instr(line,lbl) {
+		if !(line~="i)" lbl) {
 			continue
 		}
 		StringSplit, el, line, % Chr(28), `n
 		;~ MsgBox,, % el0, % "#" el1 "`nlabel: " el2 "`nvalue: '" el3 "'`nother4: '" el4 "'`nother5: '" el5 "'"
 		break
 	}
-	return el3 . el4 . el5
+	return el3 . printQ(el4," ###") . printQ(el5," ###")
 }
 
 pmPrint:
