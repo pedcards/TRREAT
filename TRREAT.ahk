@@ -1619,6 +1619,16 @@ fieldvals(x,bl,pre:="") {
 	}
 }
 
+sjmVals(bl,pre:="") {
+	global fields, labels
+	
+	for k,i in fields[bl]
+	{
+		lbl := labels[bl][A_Index]
+		fldfill(pre "-" lbl, readSJM(i))
+	}
+}
+
 cleanlines(ByRef txt) {
 	Loop, Parse, txt, `n, `r
 	{
