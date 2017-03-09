@@ -963,7 +963,20 @@ return
 
 SJM_meta:
 {
-	MsgBox % readSJM("Device Model Name")
+	fields[1] := ["Device Model Name","Device Model Number"
+				,"Device Serial Number","Implant Date: Device"
+				, "Patient ID","Patient Name"
+				, "Manufacturer:.*Atrial Lead","Model Number:.*Atrial Lead","Implant Date:.*Atrial Lead","Atrial Lead Serial Number"
+				, "Manufacturer:.*RV Lead","Model Number:.*RV Lead","Implant Date:.*RV Lead","RV Lead Serial Number"
+				, "Manufacturer:.*LV Lead","Model Number:.*LV Lead","Implant Date:.*LV Lead","LV Lead Serial Number"
+				, "Battery Voltage","Longevity Estimate"]
+	labels[1] := ["IPG","IPG_model","IPG_SN","IPG_impl"
+				, "MRN","Name"
+				, "Alead_man","Alead_model","Alead_impl","Alead_SN"
+				, "RVlead_man","RVlead_model","RVlead_impl","RVlead_SN"
+				, "LVlead_man","LVlead_model","LVlead_impl","LVlead_SN"
+				, "IPG_voltage","IPG_longevity"]
+	sjmVals(1,"dev")
 return
 }
 
