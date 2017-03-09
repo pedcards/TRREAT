@@ -1198,18 +1198,27 @@ readBnk(lbl) {
 }
 
 readSjm(lbl) {
+/*	SJM nnnnnn.log files output from Merlin programmer
+	read like a HL7 stream:
+	el1 | el2 | el3 | el4 | el5 \n
+	el1 = entry numberk
+	el2 = label
+	el3 = value
+	el4 = units
+	el5 = ?
+	|   = chr(28) = x1C = "section seperator"
+*/
 	global sjmLog
-	Loop, parse, sjmLog, `n,`r
+	Loop, parse, sjmLog, `n,`r													; Read sjmLog
 	{
 		line := A_LoopField
-		if !(line~="i)" lbl) {
-			continue
+		if !(line~="i)" lbl) {													; lbl regexmatch in line?
+			continue															; no, move along
 		}
-		StringSplit, el, line, % Chr(28), `n
-		;~ MsgBox,, % el0, % "#" el1 "`nlabel: " el2 "`nvalue: '" el3 "'`nother4: '" el4 "'`nother5: '" el5 "'"
-		break
+		StringSplit, el, line, % Chr(28), `n									; yes, split line on chr(28)
+		break																	; and break out of loop
 	}
-	return el3 . printQ(el4," ###") . printQ(el5," ###")
+	return el3 . printQ(el4," ###") . printQ(el5," ###")						; return: value ( units)( whatever el5 is)
 }
 
 pmPrint:
