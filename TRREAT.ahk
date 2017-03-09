@@ -969,13 +969,13 @@ SJM_meta:
 				, "Manufacturer:.*Atrial Lead","Model Number:.*Atrial Lead","Implant Date:.*Atrial Lead","Atrial Lead Serial Number"
 				, "Manufacturer:.*RV Lead","Model Number:.*RV Lead","Implant Date:.*RV Lead","RV Lead Serial Number"
 				, "Manufacturer:.*LV Lead","Model Number:.*LV Lead","Implant Date:.*LV Lead","LV Lead Serial Number"
-				, "Battery Voltage","Longevity Estimate"]
+				, "Battery Voltage","Longevity Estimate","Percent Paced In Ventricle","Percent Paced in Atrium"]
 	labels[1] := ["IPG","IPG_model","IPG_SN","IPG_impl"
 				, "MRN","Name"
 				, "Alead_man","Alead_model","Alead_impl","Alead_SN"
 				, "RVlead_man","RVlead_model","RVlead_impl","RVlead_SN"
 				, "LVlead_man","LVlead_model","LVlead_impl","LVlead_SN"
-				, "IPG_voltage","IPG_longevity"]
+				, "IPG_voltage","IPG_longevity","V_Paced","A_Paced"]
 	sjmVals(1,"dev")
 	fldfill("dev-Encounter",pat_date)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
@@ -993,10 +993,10 @@ SJM_meta:
 	
 	fields[1] := ["Atrial Pulse Configuration","Atrial Pulse Width","Atrial Pulse Amplitude"
 				, "Atrial Sense Configuration","Atrial Sensitivity","(?<!\s)Atrial Signal Amplitude"
-				, "Atrial Pacing Lead Impedance", "A. .* Capture Threshold","A. .* Test Pulse Width"
+				, "Atrial Pacing Lead Impedance","A. .* Capture Threshold","A. .* Test Pulse Width"
 				, "RV Pulse Configuration","RV Pulse Width","RV Pulse Amplitude"
 				, "Ventricular Sense Configuration","Ventricular Sensitivity","(?<!\s)Ventricular Signal Amplitude"
-				, "RV Pacing Lead Impedance", "V. .* Capture Threshold","V. .* Test Pulse Width"
+				, "RV Pacing Lead Impedance","V. .* Capture Threshold","V. .* Test Pulse Width"
 				, "HV Lead Impedance"]
 	labels[1] := ["RA_Pol_Pace","RA_Pace_PW","RA_Pace_Amp"
 				, "RA_Pol_Sens","RA_Sensitivity","RA_Thr_Sens"
@@ -1006,6 +1006,16 @@ SJM_meta:
 				, "RV_imp","RV_Thr_Amp","RV_Thr_PW"
 				, "HV_imp"]
 	sjmVals(1,"leads")
+	
+	fields[1] := ["\x1CMode\x1c","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
+				, "Paced AV Delay","Sensed AV Delay"]
+	labels[1] := ["Mode","LRL","URL","USR"
+				, "PAV","SAV"]
+	sjmVals(1,"par")
+	
+	fields[1] := ["AT/AF Episodes","VT/VF Episodes"]
+	labels[1] := ["ATAF","VT"]
+	sjmVals(1,"event")
 	
 return
 }
