@@ -337,15 +337,17 @@ fileLoop:
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
 	cleanlines(maintxt)
-	if (instr(pat_dev,"SJM")) {
-		FileRead, maintxt, % pat_meta
-		MsgBox,, SJM, % maintxt
-	}
+	
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
 		gosub Medtronic
 	}
-	if (maintxt~="Boston Scientific Corporation") {
+	else if (maintxt~="Boston Scientific Corporation") {
 		gosub BSCI
+	}
+	else if instr(pat_dev,"SJM") {													; SJM device clicked from LV
+		gosub SJM
+	} else {
+		MsgBox No match!`nParse PDF?
 	}
 	
 	return
@@ -951,6 +953,12 @@ bsciZoomView:
 	return
 }
 
+SJM:
+{
+	
+	
+return
+}
 
 fldfill(var,val) {
 /*	Nondestructively fill fields
