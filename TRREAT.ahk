@@ -977,6 +977,20 @@ SJM_meta:
 				, "LVlead_man","LVlead_model","LVlead_impl","LVlead_SN"
 				, "IPG_voltage","IPG_longevity"]
 	sjmVals(1,"dev")
+	fldfill("dev-Encounter",pat_date)
+	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
+	fldfill("dev-IPG_impl",RegExReplace(fldval["dev-IPG_impl"]," 00:00:00"))
+	fldfill("dev-Alead",fldval["dev-Alead_man"] 
+		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], " (###)"))
+	fldfill("dev-Alead_impl",RegExReplace(fldval["dev-Alead_impl"]," 00:00:00"))
+	fldfill("dev-RVlead",fldval["dev-RVlead_man"] 
+		. printQ(fldval["dev-RVlead_model"], " ###") printQ(fldval["dev-RVlead_SN"], " (###)"))
+	fldfill("dev-RVlead_impl",RegExReplace(fldval["dev-RVlead_impl"]," 00:00:00"))
+	fldfill("dev-LVlead",fldval["dev-LVlead_man"] 
+		. printQ(fldval["dev-LVlead_model"], " ###") printQ(fldval["dev-LVlead_SN"], " (###)"))
+	fldfill("dev-LVlead_impl",RegExReplace(fldval["dev-LVlead_impl"]," 00:00:00"))
+	fldfill("dev-IPG_voltage",round(fldval["dev-IPG_voltage"],2) " V")
+	
 return
 }
 
