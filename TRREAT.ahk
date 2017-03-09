@@ -979,17 +979,12 @@ SJM_meta:
 	sjmVals(1,"dev")
 	fldfill("dev-Encounter",pat_date)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
-	fldfill("dev-IPG_impl",RegExReplace(fldval["dev-IPG_impl"]," 00:00:00"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
 		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], " (###)"))
-	fldfill("dev-Alead_impl",RegExReplace(fldval["dev-Alead_impl"]," 00:00:00"))
 	fldfill("dev-RVlead",fldval["dev-RVlead_man"] 
 		. printQ(fldval["dev-RVlead_model"], " ###") printQ(fldval["dev-RVlead_SN"], " (###)"))
-	fldfill("dev-RVlead_impl",RegExReplace(fldval["dev-RVlead_impl"]," 00:00:00"))
 	fldfill("dev-LVlead",fldval["dev-LVlead_man"] 
 		. printQ(fldval["dev-LVlead_model"], " ###") printQ(fldval["dev-LVlead_SN"], " (###)"))
-	fldfill("dev-LVlead_impl",RegExReplace(fldval["dev-LVlead_impl"]," 00:00:00"))
-	fldfill("dev-IPG_voltage",round(fldval["dev-IPG_voltage"],2) " V")
 	
 	fields[1] := ["Atrial Pulse Configuration","Atrial Pulse Width","Atrial Pulse Amplitude"
 				, "Atrial Sense Configuration","Atrial Sensitivity","(?<!\s)Atrial Signal Amplitude"
@@ -1687,7 +1682,20 @@ sjmVals(bl,pre:="") {
 	for k,i in fields[bl]
 	{
 		lbl := labels[bl][A_Index]
-		fldfill(pre "-" lbl, readSJM(i))
+		val := readSJM(i)
+		if (val="") {
+			continue
+		}
+		if instr(i,"impedance") {
+			val := round(val) " Ohms"
+		}
+		if instr(i,"voltage") {
+			val := round(val,3) " V"
+		}
+		if instr(i,"implant date") {
+			val := RegExReplace(val," 00:00:00")
+		}
+		fldfill(pre "-" lbl, val)
 	}
 }
 
