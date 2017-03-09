@@ -413,10 +413,6 @@ SignGUI:
 	return
 }
 
-ButtonReload:
-	Reload
-Return
-
 ParseGuiClose:
 ExitApp
 
