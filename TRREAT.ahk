@@ -332,6 +332,7 @@ fileLoop:
 	fldval := Object()
 	leads := Object()
 	summBl := summ := ""
+	FileDelete, temp.txt
 	SplitPath, fileIn,,,,fileOut
 	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
 	FileRead, maintxt, temp.txt
