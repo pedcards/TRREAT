@@ -66,6 +66,15 @@ if instr(role,"Parse") {
 	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Parse:Default
 	Gui, Show,, TRREAT Reports scan
+	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
+	LV_ModifyCol(2, "Autohdr")
+	LV_ModifyCol(3, "Autohdr")
+	LV_ModifyCol(4, "Autohdr")
+	LV_ModifyCol(5, "Autohdr")
+	LV_ModifyCol(6, "Autohdr")
+	LV_ModifyCol(7, "0")														; hide the filename col
+	LV_ModifyCol(8, "0")														; hide the metadata col
+	LV_ModifyCol(9, "0")														; hide the report col
 	
 	gosub readList																; read the worklist
 	
@@ -143,10 +152,6 @@ readList:
 	LV_ModifyCol(4, "Autohdr")
 	LV_ModifyCol(5, "Autohdr")
 	LV_ModifyCol(6, "Autohdr")
-	LV_ModifyCol(7, "0")														; hide the filename col
-	LV_ModifyCol(8, "0")														; hide the metadata col
-	LV_ModifyCol(9, "0")														; hide the report col
-	GuiControl, Enable, Reload													; reload the GUI
 return
 }
 
@@ -268,7 +273,6 @@ readFiles:
 	LV_ModifyCol(4, "Autohdr")
 	LV_ModifyCol(5, "Autohdr")
 	LV_ModifyCol(6, "Autohdr")
-	GuiControl, Enable, Reload
 return
 }
 
