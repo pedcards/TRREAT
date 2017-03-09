@@ -1144,6 +1144,21 @@ readBnk(lbl) {
 	return stregX(bscBnk,lbl ",",1,1,"[\r\n]+",1)
 }
 
+readSjm(lbl) {
+	global sjmLog
+	Loop, parse, sjmLog, `n,`r
+	{
+		line := A_LoopField
+		if !instr(line,lbl) {
+			continue
+		}
+		StringSplit, el, line, % Chr(28), `n
+		;~ MsgBox,, % el0, % "#" el1 "`nlabel: " el2 "`nvalue: '" el3 "'`nother4: '" el4 "'`nother5: '" el5 "'"
+		break
+	}
+	return el3 . el4 . el5
+}
+
 pmPrint:
 {
 	if !(enc_MD) {
