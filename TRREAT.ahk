@@ -952,13 +952,21 @@ bsciZoomView:
 SJM:
 {
 	if (pat_meta) {																; SJM device with metadata (ICD exported)
-		gosub SJM_meta
+		FileRead, sjmLog, % pat_meta
+		gosub SJM_meta															; 
 	} else {
 		
 	}
 	
 return
 }
+
+SJM_meta:
+{
+	MsgBox % readSJM("Device Model Name")
+return
+}
+
 
 fldfill(var,val) {
 /*	Nondestructively fill fields
