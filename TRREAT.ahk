@@ -63,7 +63,7 @@ if instr(role,"Sign") {
 
 if instr(role,"Parse") {
 	Gui, Parse:Destroy
-	Gui, Parse:Add, Listview, w600 -Multi NoSortHdr Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
+	Gui, Parse:Add, Listview, w600 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Parse:Default
 	Gui, Show,, TRREAT Reports scan
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
