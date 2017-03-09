@@ -958,6 +958,14 @@ SJM:
 		
 	}
 	
+	gosub fetchDem
+	
+	if (fetchQuit) {
+		return
+	}
+	
+	gosub makeReport
+	
 return
 }
 
