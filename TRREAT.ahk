@@ -1012,6 +1012,28 @@ SJM_meta:
 	labels[1] := ["ATAF","VT"]
 	sjmVals(1,"event")
 	
+	if (fldval["leads-RA_imp"]||fldval["leads-RA_Pace_Amp"]||fldval["leads-RA_Thr_Sens"]) {
+		normLead("RA"
+				,fldval["dev-Alead"],fldval["dev-Alead_impl"],fldval["leads-RA_imp"]
+				,fldval["leads-RA_Pace_Amp"] " @ " fldval["leads-RA_Pace_PW"]
+				,fldval["leads-RA_Thr_Amp"] " @ " fldval["leads-RA_Thr_PW"],fldval["leads-RA_Pol_pace"]
+				,fldval["leads-RA_Sensitivity"],fldval["leads-RA_Thr_Sens"],fldval["leads-RA_Pol_sens"])
+	}
+	if (fldval["leads-RV_imp"]||fldval["leads-RV_Pace_Amp"]||fldval["leads-RV_Thr_Sens"]) {
+		normLead("RV"
+				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-RV_imp"]
+				,fldval["leads-RV_Pace_Amp"] " @ " fldval["leads-RV_Pace_PW"]
+				,fldval["leads-RV_Thr_Amp"] " @ " fldval["leads-RV_Thr_PW"],fldval["leads-RV_Pol_pace"]
+				,fldval["leads-RV_Sensitivity"],fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Pol_sens"])
+	}
+	if (fldval["leads-LV_imp"]||fldval["leads-LV_Pace_Amp"]||fldval["leads-LV_Thr_Sens"]) {
+		normLead("LV"
+				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"],fldval["leads-LV_imp"]
+				,fldval["leads-LV_Pace_Amp"] " @ " fldval["leads-LV_Pace_PW"]
+				,fldval["leads-LV_Thr_Amp"] " @ " fldval["leads-LV_Thr_PW"],fldval["leads-LV_Pol_pace"]
+				,fldval["leads-LV_Sensitivity"],fldval["leads-LV_Thr_Sens"],fldval["leads-LV_Pol_sens"])
+	}
+
 return
 }
 
