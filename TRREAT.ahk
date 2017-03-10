@@ -1011,7 +1011,7 @@ SJM_meta:
 				, "RV_Pol_Pace","RV_Pace_PW","RV_Pace_Amp"
 				, "RV_Pol_Sens","RV_Sensitivity","RV_Thr_Sens"
 				, "RV_imp","RV_Thr_Amp","RV_Thr_PW"
-				, "HV_imp"]
+				, "RV_HVimp"]
 	sjmVals(1,"leads")
 	
 	fields[1] := ["\x1CMode\x1c","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
