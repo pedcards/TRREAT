@@ -2121,6 +2121,10 @@ parseDate(x) {
 		StringSplit, DT, x, _
 		return {"MM":zDigit(DT1), "DD":zDigit(DT2), "MMM":mo[DT2], "YYYY":year4dig(DT3)}
 	}
+	if (x~="\d{4}-\d{2}-\d{2}") {
+		StringSplit, DT, x, -
+		return {"YYYY":DT1, "MM":DT2, "DD":DT3}
+	}
 	StringSplit, DT, x, %A_Space%
 	StringSplit, DY, DT1, /
 	StringSplit, DHM, DT2, :
