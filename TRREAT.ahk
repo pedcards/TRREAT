@@ -987,16 +987,18 @@ SJM_meta:
 				, "Alead_man","Alead_model","Alead_impl","Alead_SN"
 				, "RVlead_man","RVlead_model","RVlead_impl","RVlead_SN"
 				, "LVlead_man","LVlead_model","LVlead_impl","LVlead_SN"
-				, "IPG_voltage","IPG_longevity","V_Paced","A_Paced"]
+				, "IPG_voltage","IPG_longevity","VP","AP"]
 	sjmVals(1,"dev")
+	fldfill("dev-AP",RegExReplace(fldval["dev-AP"]," %"))
+	fldfill("dev-VP",RegExReplace(fldval["dev-VP"]," %"))
 	fldfill("dev-Encounter",RegExReplace(fldval["dev-Encounter"]," \d\d:\d\d:\d\d"))
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
-		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], " (###)"))
+		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], ", serial ###"))
 	fldfill("dev-RVlead",fldval["dev-RVlead_man"] 
-		. printQ(fldval["dev-RVlead_model"], " ###") printQ(fldval["dev-RVlead_SN"], " (###)"))
+		. printQ(fldval["dev-RVlead_model"], " ###") printQ(fldval["dev-RVlead_SN"], ", serial ###"))
 	fldfill("dev-LVlead",fldval["dev-LVlead_man"] 
-		. printQ(fldval["dev-LVlead_model"], " ###") printQ(fldval["dev-LVlead_SN"], " (###)"))
+		. printQ(fldval["dev-LVlead_model"], " ###") printQ(fldval["dev-LVlead_SN"], ", serial ###"))
 	
 	fields[1] := ["Atrial Pulse Configuration","Atrial Pulse Width","Atrial Pulse Amplitude"
 				, "Atrial Sense Configuration","Atrial Sensitivity","(?<!\s)Atrial Signal Amplitude"
