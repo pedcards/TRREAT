@@ -796,6 +796,9 @@ return
 
 BSCI:
 {
+	if (pat_meta) {
+		FileRead, bscbnk, % pat_meta
+	}
 	gosub bsciZoomView
 	if (fileArg) {
 		fileNum += 1
@@ -1445,13 +1448,13 @@ PrintOut:
 	FileAppend, %rtfOut%, temp.rtf
 	
 	RunWait, % "WordPad.exe temp.rtf"												; launch fileNam in WordPad
-	MsgBox, 36, , Report looks okay?
+	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
 		FileMove, temp.rtf, % reportDir fileOut ".rtf", 1								; move RTF to the final directory
 		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
-		if FileExist(pat_meta) {
-			FileCopy, % pat_meta, % complDir fileOut ".bnk", 1							; copy BNK to complete directory
+		if (pat_meta) {
+			FileCopy, % pat_meta, % complDir fileOut ".meta", 1							; copy BNK to complete directory
 		}
 		
 		t_now := A_Now
@@ -1462,7 +1465,7 @@ PrintOut:
 			xl.addElement("status",edID,"Pending")
 			xl.addElement("paceart",edID,"")
 			xl.addElement("file",edID,complDir fileOut ".pdf")
-			xl.addElement("meta",edID,complDir fileOut ".bnk")
+			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
 		xl.save(worklist)
 	}
