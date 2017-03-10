@@ -351,7 +351,8 @@ fileLoop:
 	}
 	else if instr(pat_dev,"SJM") {												; SJM device clicked from LV
 		gosub SJM
-	} else {
+	} 
+	else {
 		MsgBox No match!`nAttempt OCR on PDF?
 	}
 	
@@ -960,7 +961,8 @@ SJM:
 		FileRead, sjmLog, % pat_meta
 		gosub SJM_meta															; 
 	} else {
-		
+		MsgBox No metafile found!
+		return
 	}
 	
 	gosub fetchDem
