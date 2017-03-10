@@ -1365,11 +1365,14 @@ printLead(lead) {
 printEvents()
 {
 	global rtfBody, fldval
-	txt := ""
-	. printQ(fldval["event-AHR"]?fldval["event-AHR"]:"","There were ### Atrial High Rate episodes. ")
-	. printQ(fldval["event-VHR"]?fldval["event-VHR"]:"","There were ### Ventricular High Rate episodes. ")
-	. printQ(fldval["event-VF"]?fldval["event-VF"]:"","### VF episodes detected. ")
-	. printQ(fldval["event-VT"]?fldval["event-VT"]:"","### VT episodes detected. ")
+	if (fldval["leads-RV_HVimp"]) {
+		txt := ""
+		. printQ(fldval["event-AHR"]?fldval["event-AHR"]:"0","There were ### Atrial High Rate episodes. ")
+		. printQ(fldval["event-VHR"]?fldval["event-VHR"]:"0","There were ### Ventricular High Rate episodes. ")
+		. printQ(fldval["event-VF"]?fldval["event-VF"]:"0","### VF episodes detected. ")
+		. printQ(fldval["event-VT"]?fldval["event-VT"]:"0","### VT episodes detected. ")
+	}
+	txt .= ""
 	. printQ(fldval["event-VTNS"]?fldval["event-VTNS"]:"","### NS-VT episodes detected. ")
 	. printQ(fldval["event-ATAF"]?fldval["event-ATAF"]:"","### AT/AF episodes detected. ")
 	. printQ(fldval["event-V_Paced"]?fldval["event-V_Paced"]:"","### VT episodes pace-terminated. ")
