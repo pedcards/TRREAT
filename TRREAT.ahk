@@ -40,6 +40,7 @@ newTxt := Object()
 blk := Object()
 blk2 := Object()
 ;~ docs := Object()
+worklist := reportDir "worklist.xml"
 docs := {"TC":"783118","JS":"343079","SS":"358945"}
 
 if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
@@ -57,7 +58,7 @@ if (%0%) {																		; For each parameter:
 }
 
 if instr(role,"Sign") {
-	xl := new XML(binDir "worklist.xml")									; otherwise load existing worklist
+	xl := new XML(worklist)									; otherwise load existing worklist
 	gosub signScan
 }
 
@@ -97,13 +98,13 @@ readList:
 	tmp := []
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
-	if !FileExist(binDir "worklist.xml") {
+	if !FileExist(worklist) {
 		xl := new XML("<root/>")												; Create new XML if doesn't exist
 		xl.addElement("work", "root", {ed: A_Now})
 		xl.addElement("done", "root", {ed: A_Now})
-		xl.save(binDir "worklist.xml")
+		xl.save(worklist)
 	} else {
-		xl := new XML(binDir "worklist.xml")									; otherwise load existing worklist
+		xl := new XML(worklist)													; otherwise load existing worklist
 	}
 	Loop, % (w_id := xl.selectNodes("/root/work/id")).length					; scan through each <id>
 	{
@@ -130,7 +131,7 @@ readList:
 			IfMsgBox, Yes
 			{
 				archNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")				; copy ID node to DONE
-				xl.save(binDir "worklist.xml")
+				xl.save(worklist)
 				continue
 			}
 		}
@@ -310,14 +311,14 @@ parsePat:
 		}
 		if instr(tmp,"Regenerate") {
 			removeNode("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']")
-			xl.save(binDir "worklist.xml")
+			xl.save(worklist)
 			FileDelete, % pat_report
 			gosub fileLoop
 			return
 		}
 		if instr(tmp,"PaceArt") {
 			xl.setText("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']/paceart","True")
-			xl.save(binDir "worklist.xml")
+			xl.save(worklist)
 			gosub readList
 			gosub readFiles
 			return
@@ -503,7 +504,7 @@ ActSign:
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
 	
 	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
-	xl.save(binDir "worklist.xml")
+	xl.save(worklist)
 	
 	Gosub signScan																; regenerate file list
 Return
@@ -1462,7 +1463,7 @@ PrintOut:
 			xl.addElement("file",edID,complDir fileOut ".pdf")
 			xl.addElement("meta",edID,complDir fileOut ".bnk")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
-		xl.save(binDir "worklist.xml")
+		xl.save(worklist)
 	}
 	gosub readList
 	gosub readFiles
