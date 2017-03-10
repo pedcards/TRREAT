@@ -1334,8 +1334,7 @@ return
 printLead(lead) {
 	global rtfBody, leads
 	rtfBody .= "\b " lead " lead: \b0 " 
-	. printQ(leads[lead,"model"],"###. ")
-	. printQ(leads[lead,"date"],"(Implanted ###). ")
+	. printQ(leads[lead,"model"],"###" printQ(leads[lead,"date"],", implanted ###") ". ")
 	. printQ(leads[lead,"imp"],"Pacing impedance ###. ")
 	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
 	. printQ(leads[lead,"output"],"Pacing output ###. ")
