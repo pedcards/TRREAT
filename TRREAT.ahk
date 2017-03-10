@@ -277,6 +277,7 @@ readFiles:
 	LV_ModifyCol(4, "Autohdr")
 	LV_ModifyCol(5, "Autohdr")
 	LV_ModifyCol(6, "Autohdr")
+	WinActivate, TRREAT Reports
 return
 }
 
