@@ -221,6 +221,7 @@ readFiles:
 			Loop, Files, % sjmDir "\" DateDir "\" patDir "\*.pdf", F
 			{
 				patPDF := A_LoopFileName
+				patPDFfull := A_LoopFileFullPath
 				tmp_dev := strx(patPDF,"",1,0,"_",1,1)
 				tmp_meta := (FileExist(pdfDir tmp_ser ".log")) ? pdfDir tmp_ser ".log" : ""
 				fileNum += 1													; Add a row to the LV
@@ -230,7 +231,7 @@ readFiles:
 				LV_Modify(fileNum,"col4", tmp_ser)
 				LV_Modify(fileNum,"col5", "")
 				LV_Modify(fileNum,"col6", "")
-				LV_Modify(fileNum,"col7", patPDF)
+				LV_Modify(fileNum,"col7", patPDFfull)
 				LV_Modify(fileNum,"col8", tmp_meta)
 			}
 		}
@@ -258,7 +259,7 @@ readFiles:
 		
 		Loop, files, % patDir "\report\Combined*" tmp.MMM "-" tmp.DD "-" tmp.YYYY "*.pdf"
 		{
-			patPDF := patDir "\report\" A_LoopFileName							; find the appropriate PDF matching this .bnk file
+			patPDF := A_LoopFileFullPath										; find the appropriate PDF matching this .bnk file
 		}
 		
 		fileNum += 1															; Add a row to the LV
