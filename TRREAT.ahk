@@ -977,19 +977,19 @@ SJM_meta:
 {
 	fields[1] := ["Device Model Name","Device Model Number"
 				,"Device Serial Number","Implant Date: Device"
-				, "Patient ID","Patient Name"
+				, "Patient ID","Patient Name","Device Last Interrogation"
 				, "Manufacturer:.*Atrial Lead","Model Number:.*Atrial Lead","Implant Date:.*Atrial Lead","Atrial Lead Serial Number"
 				, "Manufacturer:.*RV Lead","Model Number:.*RV Lead","Implant Date:.*RV Lead","RV Lead Serial Number"
 				, "Manufacturer:.*LV Lead","Model Number:.*LV Lead","Implant Date:.*LV Lead","LV Lead Serial Number"
 				, "Battery Voltage","Longevity Estimate","Percent Paced In Ventricle","Percent Paced in Atrium"]
 	labels[1] := ["IPG","IPG_model","IPG_SN","IPG_impl"
-				, "MRN","Name"
+				, "MRN","Name","Encounter"
 				, "Alead_man","Alead_model","Alead_impl","Alead_SN"
 				, "RVlead_man","RVlead_model","RVlead_impl","RVlead_SN"
 				, "LVlead_man","LVlead_model","LVlead_impl","LVlead_SN"
 				, "IPG_voltage","IPG_longevity","V_Paced","A_Paced"]
 	sjmVals(1,"dev")
-	fldfill("dev-Encounter",pat_date)
+	fldfill("dev-Encounter",RegExReplace(fldval["dev-Encounter"]," \d\d:\d\d:\d\d"))
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
 		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], " (###)"))
