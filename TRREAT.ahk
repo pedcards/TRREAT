@@ -1019,11 +1019,20 @@ SJM_meta:
 				, "RV_HVimp"]
 	sjmVals(1,"leads")
 	
-	fields[1] := ["\x1CMode\x1c","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
+	fields[1] := ["(\x1C)Mode(\x1c)","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
 				, "Paced AV Delay","Sensed AV Delay"]
 	labels[1] := ["Mode","LRL","URL","USR"
 				, "PAV","SAV"]
 	sjmVals(1,"par")
+	
+	fields[1] := ["(\x1C)VF Detection Interval","(\x1C)VT-1 Detection Interval"
+				, "VT-1 Therapy 1 Type","VF Therapy 1 Type","VF Voltage 1"]
+	labels[1] := ["VF","VT"
+				, "Rx_VT","VF0","VF1"]
+	sjmVals(1,"detect")
+	fldfill("detect-VF",fldval["detect-VF"]?round(60000/RegExReplace(fldval["detect-VF"],"\D")):"")
+	fldfill("detect-VT",fldval["detect-VT"]?round(60000/RegExReplace(fldval["detect-VT"],"\D")):"")
+	fldfill("detect-Rx_VF",fldval["detect-VF0"] printQ(fldval["detect-VF1"],", ###"))
 	
 	fields[1] := ["AT/AF Episodes","VT/VF Episodes"]
 	labels[1] := ["ATAF","VT"]
@@ -1281,7 +1290,7 @@ pmPrint:
 	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###, " fldval["detect-Rx_AT/AF"] ". ")
 	. printQ(fldval["detect-VF"],"VF detection ###, " fldval["detect-Rx_VF"] ". ")
 	. printQ(fldval["detect-FVT"],"FVT detection ###, " fldval["detect-Rx_FVT"] ". ")
-	. printQ(fldval["detect-VT"],"VT detection ###, " fldval["detect-VT"] ". ") . "\par `n"
+	. printQ(fldval["detect-VT"],"VT detection ###, " fldval["detect-Rx_VT"] ". ") . "\par `n"
 	. "\fs22\par `n"
 	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	
