@@ -205,21 +205,25 @@ readFiles:
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
-		DateDir := sjmDir "\" A_LoopFileName
-		Loop, Files, % DateDir "\*", D
+		DateDir := A_LoopFileName
+		Loop, Files, % sjmDir "\" DateDir "\*", D
 		{
 			patDir := A_LoopFileName
+			tmp_date := RegExReplace(DateDir,"-")
 			tmp_name := stregx(patDir,"",1,0,"_\d{2,}",1,n)
 			tmp_dev  := stregx(patDir,"_",n,1,"_",1,n)
 			tmp_ser  := strx(patDir,"_",n,1,"",0)
-			Loop, Files, % DateDir "\" patDir "\*.pdf", F
+			if ((xl.selectSingleNode("//id[@date='" tmp_date "']"))				; skip reprocessing if in either work or done lists
+				&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
+				continue
+			}
+			Loop, Files, % sjmDir "\" DateDir "\" patDir "\*.pdf", F
 			{
 				patPDF := A_LoopFileName
 				tmp_dev := strx(patPDF,"",1,0,"_",1,1)
-				FileGetTime, tmp_date
 				tmp_meta := (FileExist(pdfDir tmp_ser ".log")) ? pdfDir tmp_ser ".log" : ""
-				fileNum += 1															; Add a row to the LV
-				LV_Add("", substr(tmp_date,1,8))										; col1 is date
+				fileNum += 1													; Add a row to the LV
+				LV_Add("", tmp_date)											; col1 is date
 				LV_Modify(fileNum,"col2", tmp_name)
 				LV_Modify(fileNum,"col3", "SJM " tmp_dev)
 				LV_Modify(fileNum,"col4", tmp_ser)
