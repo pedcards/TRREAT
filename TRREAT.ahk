@@ -50,7 +50,7 @@ if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
 if (%0%) {																		; For each parameter: 
   fileArg := true																; Gets parameter passed to script/exe. 
   role := "Parse"
-} else if (isDevt) {															; But if isDevt
+} else if instr(user,"TC") {													; But if is TC
 	role := cMsgBox("Administrator"												; offer to either PARSE or SIGN
 		, "Enter ROLE:"
 		, "*&Parse PDFs|&Sign reports"
