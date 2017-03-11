@@ -206,6 +206,7 @@ readFiles:
 
 /* Read SJM "PDFs" folder
 */
+	tmp := []
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
@@ -213,37 +214,37 @@ readFiles:
 		Loop, Files, % sjmDir "\" DateDir "\*", D
 		{
 			patDir := A_LoopFileName
-			tmp_date := RegExReplace(DateDir,"-")
-			tmp_name := stregx(patDir,"",1,0,"_\d{2,}",1,n)
-			tmp_dev  := stregx(patDir,"_",n,1,"_",1,n)
-			tmp_ser  := strx(patDir,"_",n,1,"",0)
+			tmp.date := RegExReplace(DateDir,"-")
+			tmp.name := stregx(patDir,"",1,0,"_\d{2,}",1,n)
+			tmp.dev  := stregx(patDir,"_",n,1,"_",1,n)
+			tmp.ser  := strx(patDir,"_",n,1,"",0)
 			
-			if (xl.selectSingleNode("/root/work/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+			if (xl.selectSingleNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 				continue															; skip reprocessing in WORK list
 			}
-			if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+			if (xl.selectSingleNode("/root/done/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 				fileNum += 1
-				LV_Add("", tmp_date)
-				LV_Modify(fileNum,"col2", tmp_name)										; add marker line if in DONE list
+				LV_Add("", tmp.date)
+				LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
 				LV_Modify(fileNum,"col3", "[DONE]")
 				continue
 			}
 			
 			Loop, Files, % sjmDir "\" DateDir "\" patDir "\*.pdf", F
 			{
-				patPDF := A_LoopFileName
-				patPDFfull := A_LoopFileFullPath
-				tmp_dev := strx(patPDF,"",1,0,"_",1,1)
-				tmp_meta := (FileExist(pdfDir tmp_ser ".log")) ? pdfDir tmp_ser ".log" : ""
+				tmp.file := A_LoopFileName
+				tmp.full := A_LoopFileFullPath
+				tmp.dev := strx(tmp.file,"",1,0,"_",1,1)
+				tmp.meta := (FileExist(pdfDir tmp.ser ".log")) ? pdfDir tmp.ser ".log" : ""
 				fileNum += 1													; Add a row to the LV
-				LV_Add("", tmp_date)											; col1 is date
-				LV_Modify(fileNum,"col2", tmp_name)
-				LV_Modify(fileNum,"col3", "SJM " tmp_dev)
-				LV_Modify(fileNum,"col4", tmp_ser)
+				LV_Add("", tmp.date)											; col1 is date
+				LV_Modify(fileNum,"col2", tmp.name)
+				LV_Modify(fileNum,"col3", "SJM " tmp.dev)
+				LV_Modify(fileNum,"col4", tmp.ser)
 				LV_Modify(fileNum,"col5", "")
 				LV_Modify(fileNum,"col6", "")
-				LV_Modify(fileNum,"col7", patPDFfull)
-				LV_Modify(fileNum,"col8", tmp_meta)
+				LV_Modify(fileNum,"col7", tmp.full)
+				LV_Modify(fileNum,"col8", tmp.meta)
 			}
 		}
 	}
