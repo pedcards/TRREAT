@@ -542,9 +542,9 @@ SignVerify(user)
 		MsgBox, 16,, Wrong user name!
 		return error
 	}
-	InputBox, numIn, Sign, Enter billing code
+	InputBox, numIn, Sign, Enter signature code
 	if !(numIn=docs[substr(userIn,1,2)]) {
-		MsgBox, 16,, Wrong billing code!
+		MsgBox, 16,, Wrong signature number!
 		return error
 	}
 	return numIn
