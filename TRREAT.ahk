@@ -253,6 +253,7 @@ readFiles:
 
 /* Read BSCI "bsc" folder
 */
+	tmp := []
 	bscDir := pdfDir "bsc\patientData\"
 	loop, Files, % bscDir "*", D												; Loop through subdirs of patientData
 	{
@@ -311,39 +312,46 @@ parsePat:
 	if !(fileNum := LV_GetNext()) {
 		return
 	}
-	pat := []
-	LV_GetText(pat.date,fileNum,1)
-	LV_GetText(pat.name,fileNum,2)
-	LV_GetText(pat.dev,fileNum,3)
-	LV_GetText(pat.ser,fileNum,4)
-	LV_GetText(pat.status,fileNum,5)
-	LV_GetText(pat.paceart,fileNum,6)
+	pat_date:=
+	pat_name:=
+	pat_dev:=
+	pat_ser:=
+	pat_status:=
+	pat_paceart:=
+	pat_meta:=
+	pat_report:=
+	LV_GetText(pat_date,fileNum,1)
+	LV_GetText(pat_name,fileNum,2)
+	LV_GetText(pat_dev,fileNum,3)
+	LV_GetText(pat_ser,fileNum,4)
+	LV_GetText(pat_status,fileNum,5)
+	LV_GetText(pat_paceart,fileNum,6)
 	LV_GetText(fileIn,fileNum,7)
-	LV_GetText(pat.meta,fileNum,8)
-	LV_GetText(pat.report,fileNum,9)
+	LV_GetText(pat_meta,fileNum,8)
+	LV_GetText(pat_report,fileNum,9)
 	
-	if (pat.report) {
-		pat.node := "/root/work/id[@date='" pat.date "'][@ser='" pat.ser "']"
-		opt := (pat.status="Pending")
+	if (pat_report) {
+		pat_node := "/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']"
+		opt := (pat_status="Pending")
 			? "Modify report|Regenerate report|Mark entered in PaceArt"		; Not signed yet
 			: "Mark entered in PaceArt"										; Report signed
-		tmp := cMsgBox(pat.name " report","Do what?",opt,"Q","")
+		tmp := cMsgBox(pat_name " report","Do what?",opt,"Q","")
 		if (tmp="Close") {
 			return
 		}
 		if instr(tmp,"Modify") {
-			RunWait, % "WordPad.exe """ pat.report """"						; launch fileNam in WordPad
+			RunWait, % "WordPad.exe """ pat_report """"						; launch fileNam in WordPad
 			return
 		}
 		if instr(tmp,"Regenerate") {
-			removeNode(pat.node)
+			removeNode(pat_node)
 			xl.save(worklist)
 			FileDelete, % pat_report
 			gosub fileLoop
 			return
 		}
 		if instr(tmp,"PaceArt") {
-			xl.setText(pat.node "/paceart","True")
+			xl.setText(pat_node "/paceart","True")
 			xl.save(worklist)
 			gosub readList
 			gosub readFiles
@@ -822,8 +830,8 @@ return
 
 BSCI:
 {
-	if (pat.meta) {
-		FileRead, bscbnk, % pat.meta
+	if (pat_meta) {
+		FileRead, bscbnk, % pat_meta
 	}
 	gosub bsciZoomView
 	if (fileArg) {
@@ -988,8 +996,8 @@ bsciZoomView:
 
 SJM:
 {
-	if (pat.meta) {																; SJM device with metadata (ICD exported)
-		FileRead, sjmLog, % pat.meta
+	if (pat_meta) {																; SJM device with metadata (ICD exported)
+		FileRead, sjmLog, % pat_meta
 		gosub SJM_meta															; 
 	} else {
 		MsgBox No metafile found!
