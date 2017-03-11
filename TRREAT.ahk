@@ -186,10 +186,17 @@ readFiles:
 		tmp := parseDate(strX(patPDF,"_",n+1,1,".pdf",1,6))
 		tmp_date := tmp.YYYY tmp.MM tmp.DD
 		patPDF := pdfDir patPDF
-		if ((xl.selectSingleNode("//id[@date='" tmp_date "']"))					; skip reprocessing if in either work or done lists
-			&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
+		
+		if (xl.selectSingleNode("/root/work/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+			continue															; skip reprocessing in WORK list
+		}
+		if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+			fileNum += 1
+			LV_Add("", tmp_date)
+			LV_Modify(fileNum,"col2", tmp_name " [DONE]")						; add marker line if in DONE list
 			continue
 		}
+		
 		fileNum += 1															; Add a row to the LV
 		LV_Add("", tmp_date)													; col1 is date
 		LV_Modify(fileNum,"col2", tmp_name)
@@ -214,10 +221,17 @@ readFiles:
 			tmp_name := stregx(patDir,"",1,0,"_\d{2,}",1,n)
 			tmp_dev  := stregx(patDir,"_",n,1,"_",1,n)
 			tmp_ser  := strx(patDir,"_",n,1,"",0)
-			if ((xl.selectSingleNode("//id[@date='" tmp_date "']"))				; skip reprocessing if in either work or done lists
-				&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
+			
+			if (xl.selectSingleNode("/root/work/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+				continue															; skip reprocessing in WORK list
+			}
+			if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+				fileNum += 1
+				LV_Add("", tmp_date)
+				LV_Modify(fileNum,"col2", tmp_name " [DONE]")						; add marker line if in DONE list
 				continue
 			}
+			
 			Loop, Files, % sjmDir "\" DateDir "\" patDir "\*.pdf", F
 			{
 				patPDF := A_LoopFileName
@@ -252,8 +266,14 @@ readFiles:
 		tmp_name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp_dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
 		tmp_ser := readBnk("SystemSerialNumber")
-		if ((xl.selectSingleNode("//id[@date='" tmp.YYYY tmp.MM tmp.DD "']"))	; skip reprocessing if in either work or done lists
-			&& (xl.selectSingleNode("//id[@ser='" tmp_ser "']"))) {
+		
+		if (xl.selectSingleNode("/root/work/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+			continue															; skip reprocessing in WORK list
+		}
+		if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+			fileNum += 1
+			LV_Add("", tmp_date)
+			LV_Modify(fileNum,"col2", tmp_name " [DONE]")						; add marker line if in DONE list
 			continue
 		}
 		
