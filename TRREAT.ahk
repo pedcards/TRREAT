@@ -155,52 +155,52 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	kmaxstr :=																	; clear string of files to skip
+	tmp := []
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
-		patPDF := A_LoopFileName												; next file in PDFdir
-		if instr(kmaxstr,patPDF) {												; in skiplist?
+		tmp.file := A_LoopFileName												; next file in PDFdir
+		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
 		}
-		kmax := 1																; reset max k counter
-		Loop, files, % pdfDir strX(patPDF,"",1,0,"_",0,1) "*.pdf"				; loop through all files with this "prefix"
+		tmp.max := 1															; reset max k counter
+		Loop, files, % pdfDir strX(tmp.file,"",1,0,"_",0,1) "*.pdf"				; loop through all files with this "prefix"
 		{
 			i := A_LoopFileName													; i is filename in this inner loop
 			n := substr(i,instr(i,"_",,-1))										; n is string up to final _#
 			k := strX(i,"_",n,1,".",1)											; k is # between _ and .pdf
-			if (k > kmax) {														; greater than previous kmax?
-				j := substr(i,1,instr(i,"_",,-1)) (kmax) ".pdf"					; j is filename of previous kmax
+			if (k > tmp.max) {														; greater than previous kmax?
+				j := substr(i,1,instr(i,"_",,-1)) (tmp.max) ".pdf"					; j is filename of previous kmax
 				FileMove, % pdfDir j, % pdfDir j ".old"							; rename it to j.pdf.old
-				kmax := k														; new kmax
-				patPDF := i														; set patPDF as this new max (for when exits)
-				kmaxstr .= i "`n"												; add to string of files to subsequently ignore
+				tmp.max := k														; new kmax
+				tmp.file := i														; set patPDF as this new max (for when exits)
+				tmp.maxstr .= i "`n"												; add to string of files to subsequently ignore
 			}
 		}
-		tmp_name := strX(patPDF,"",1,0,"_",1,1,n)
-		tmp_ser := strX(patPDF,"_",n-1,1,"_",1,1,n)
-		tmp := parseDate(strX(patPDF,"_",n+1,1,".pdf",1,6))
-		tmp_date := tmp.YYYY tmp.MM tmp.DD
-		patPDF := pdfDir patPDF
+		tmp.name := strX(tmp.file,"",1,0,"_",1,1,n)
+		tmp.ser := strX(tmp.file,"_",n-1,1,"_",1,1,n)
+		td := parseDate(strX(tmp.file,"_",n+1,1,".pdf",1,6))
+		tmp.date := td.YYYY td.MM td.DD
+		tmp.file := pdfDir tmp.file
 		
-		if (xl.selectSingleNode("/root/work/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+		if (xl.selectSingleNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 			continue															; skip reprocessing in WORK list
 		}
-		if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+		if (xl.selectSingleNode("/root/done/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 			fileNum += 1
-			LV_Add("", tmp_date)
-			LV_Modify(fileNum,"col2", tmp_name)										; add marker line if in DONE list
+			LV_Add("", tmp.date)
+			LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
 			continue
 		}
 		
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", tmp_date)													; col1 is date
-		LV_Modify(fileNum,"col2", tmp_name)
+		LV_Add("", tmp.date)													; col1 is date
+		LV_Modify(fileNum,"col2", tmp.name)
 		LV_Modify(fileNum,"col3", "Medtronic")
-		LV_Modify(fileNum,"col4", tmp_ser)
+		LV_Modify(fileNum,"col4", tmp.ser)
 		LV_Modify(fileNum,"col5", "")
 		LV_Modify(fileNum,"col6", "")
-		LV_Modify(fileNum,"col7", patPDF)
+		LV_Modify(fileNum,"col7", tmp.file)
 		LV_Modify(fileNum,"col8", "")
 	}
 
