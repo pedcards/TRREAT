@@ -168,12 +168,12 @@ readFiles:
 			i := A_LoopFileName													; i is filename in this inner loop
 			n := substr(i,instr(i,"_",,-1))										; n is string up to final _#
 			k := strX(i,"_",n,1,".",1)											; k is # between _ and .pdf
-			if (k > tmp.max) {														; greater than previous kmax?
-				j := substr(i,1,instr(i,"_",,-1)) (tmp.max) ".pdf"					; j is filename of previous kmax
+			if (k > tmp.max) {													; greater than previous kmax?
+				j := substr(i,1,instr(i,"_",,-1)) (tmp.max) ".pdf"				; j is filename of previous kmax
 				FileMove, % pdfDir j, % pdfDir j ".old"							; rename it to j.pdf.old
-				tmp.max := k														; new kmax
-				tmp.file := i														; set patPDF as this new max (for when exits)
-				tmp.maxstr .= i "`n"												; add to string of files to subsequently ignore
+				tmp.max := k													; new kmax
+				tmp.file := i													; set patPDF as this new max (for when exits)
+				tmp.maxstr .= i "`n"											; add to string of files to subsequently ignore
 			}
 		}
 		tmp.name := strX(tmp.file,"",1,0,"_",1,1,n)
