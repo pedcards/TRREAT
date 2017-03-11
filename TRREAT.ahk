@@ -188,7 +188,8 @@ readFiles:
 		if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
 			fileNum += 1
 			LV_Add("", tmp_date)
-			LV_Modify(fileNum,"col2", tmp_name " [DONE]")						; add marker line if in DONE list
+			LV_Modify(fileNum,"col2", tmp_name)										; add marker line if in DONE list
+			LV_Modify(fileNum,"col3", "[DONE]")
 			continue
 		}
 		
@@ -223,7 +224,8 @@ readFiles:
 			if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
 				fileNum += 1
 				LV_Add("", tmp_date)
-				LV_Modify(fileNum,"col2", tmp_name " [DONE]")						; add marker line if in DONE list
+				LV_Modify(fileNum,"col2", tmp_name)										; add marker line if in DONE list
+				LV_Modify(fileNum,"col3", "[DONE]")
 				continue
 			}
 			
@@ -268,7 +270,8 @@ readFiles:
 		if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
 			fileNum += 1
 			LV_Add("", tmp_date)
-			LV_Modify(fileNum,"col2", tmp_name " [DONE]")						; add marker line if in DONE list
+			LV_Modify(fileNum,"col2", tmp_name)										; add marker line if in DONE list
+			LV_Modify(fileNum,"col3", "[DONE]")
 			continue
 		}
 		
