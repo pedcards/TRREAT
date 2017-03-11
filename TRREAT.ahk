@@ -121,19 +121,14 @@ readList:
 		tmp["file"] := k.selectSingleNode("file").text
 		tmp["meta"] := k.selectSingleNode("meta").text
 		tmp["report"] := k.selectSingleNode("report").text
-		if ((tmp.report) && (tmp.status="Signed") && (tmp.paceart)) {
-			MsgBox, 68, Tasks completed
-				, % "Patient " tmp.name "`n"
-				. 	"- Report done`n"
-				. 	"- Report signed`n"
-				. 	"- PaceArt filled`n`n"
-				. 	"Archive this task?"
-			IfMsgBox, Yes
-			{
-				archNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")				; copy ID node to DONE
-				xl.save(worklist)
-				continue
-			}
+		if ((tmp.report) && (tmp.status="Signed") && (tmp.paceart)) {				; REPORT and SIGNED and PACEART all true
+			fileNum += 1
+			LV_Add("", tmp.date)
+			LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
+			LV_Modify(fileNum,"col3", "[DONE]")
+			archNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")		; copy ID node to DONE
+			xl.save(worklist)
+			continue
 		}
 		
 		fileNum += 1															; Add a row to the LV
