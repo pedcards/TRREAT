@@ -259,8 +259,8 @@ readFiles:
 		{
 			tmp.bnk := patDir "\" A_LoopFileName
 		}
-		FileRead, bscBnk, % tmp.bnk											; read the patBnk file
-		td := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))			; get the DATE array
+		FileRead, bscBnk, % tmp.bnk												; need bscBnk for readBnk
+		td := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))		; get the DATE array
 		tmp.date := td.YYYY td.MM td.DD
 		tmp.name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp.dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
@@ -272,7 +272,7 @@ readFiles:
 		if (xl.selectSingleNode("/root/done/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 			fileNum += 1
 			LV_Add("", tmp.date)
-			LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
+			LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
 			continue
 		}
