@@ -822,8 +822,8 @@ return
 
 BSCI:
 {
-	if (pat_meta) {
-		FileRead, bscbnk, % pat_meta
+	if (pat.meta) {
+		FileRead, bscbnk, % pat.meta
 	}
 	gosub bsciZoomView
 	if (fileArg) {
@@ -988,8 +988,8 @@ bsciZoomView:
 
 SJM:
 {
-	if (pat_meta) {																; SJM device with metadata (ICD exported)
-		FileRead, sjmLog, % pat_meta
+	if (pat.meta) {																; SJM device with metadata (ICD exported)
+		FileRead, sjmLog, % pat.meta
 		gosub SJM_meta															; 
 	} else {
 		MsgBox No metafile found!
