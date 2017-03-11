@@ -308,37 +308,39 @@ parsePat:
 	if !(fileNum := LV_GetNext()) {
 		return
 	}
-	LV_GetText(pat_date,fileNum,1)
-	LV_GetText(pat_name,fileNum,2)
-	LV_GetText(pat_dev,fileNum,3)
-	LV_GetText(pat_ser,fileNum,4)
-	LV_GetText(pat_status,fileNum,5)
-	LV_GetText(pat_paceart,fileNum,6)
+	pat := []
+	LV_GetText(pat.date,fileNum,1)
+	LV_GetText(pat.name,fileNum,2)
+	LV_GetText(pat.dev,fileNum,3)
+	LV_GetText(pat.ser,fileNum,4)
+	LV_GetText(pat.status,fileNum,5)
+	LV_GetText(pat.paceart,fileNum,6)
 	LV_GetText(fileIn,fileNum,7)
-	LV_GetText(pat_meta,fileNum,8)
-	LV_GetText(pat_report,fileNum,9)
+	LV_GetText(pat.meta,fileNum,8)
+	LV_GetText(pat.report,fileNum,9)
 	
-	if (pat_report) {
-		opt := (pat_status="Pending")
+	if (pat.report) {
+		pat.node := "/root/work/id[@date='" pat.date "'][@ser='" pat.ser "']"
+		opt := (pat.status="Pending")
 			? "Modify report|Regenerate report|Mark entered in PaceArt"		; Not signed yet
 			: "Mark entered in PaceArt"										; Report signed
-		tmp := cMsgBox(pat_name " report","Do what?",opt,"Q","")
+		tmp := cMsgBox(pat.name " report","Do what?",opt,"Q","")
 		if (tmp="Close") {
 			return
 		}
 		if instr(tmp,"Modify") {
-			RunWait, % "WordPad.exe """ pat_report """"						; launch fileNam in WordPad
+			RunWait, % "WordPad.exe """ pat.report """"						; launch fileNam in WordPad
 			return
 		}
 		if instr(tmp,"Regenerate") {
-			removeNode("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']")
+			removeNode(pat.node)
 			xl.save(worklist)
 			FileDelete, % pat_report
 			gosub fileLoop
 			return
 		}
 		if instr(tmp,"PaceArt") {
-			xl.setText("/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']/paceart","True")
+			xl.setText(pat.node "/paceart","True")
 			xl.save(worklist)
 			gosub readList
 			gosub readFiles
