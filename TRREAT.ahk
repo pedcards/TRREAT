@@ -257,39 +257,40 @@ readFiles:
 		patDir := bscDir A_LoopFileName
 		loop, files, % patDir "\*.bnk"											; Find the current nnnnnn.bnk file (inactive files are .bn_ files)
 		{
-			patBnk := patDir "\" A_LoopFileName
+			tmp.bnk := patDir "\" A_LoopFileName
 		}
-		FileRead, bscBnk, % patBnk												; read the patBnk file
-		tmp := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))		; get the DATE array
-		tmp_name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
-		tmp_dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
-		tmp_ser := readBnk("SystemSerialNumber")
+		FileRead, bscBnk, % tmp.bnk											; read the patBnk file
+		td := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))			; get the DATE array
+		tmp.date := td.YYYY td.MM td.DD
+		tmp.name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
+		tmp.dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
+		tmp.ser := readBnk("SystemSerialNumber")
 		
-		if (xl.selectSingleNode("/root/work/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+		if (xl.selectSingleNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 			continue															; skip reprocessing in WORK list
 		}
-		if (xl.selectSingleNode("/root/done/id[@date='" tmp_date "'][@ser='" tmp_ser "']")) {
+		if (xl.selectSingleNode("/root/done/id[@date='" tmp.date "'][@ser='" tmp.ser "']")) {
 			fileNum += 1
-			LV_Add("", tmp_date)
-			LV_Modify(fileNum,"col2", tmp_name)										; add marker line if in DONE list
+			LV_Add("", tmp.date)
+			LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
 			continue
 		}
 		
-		Loop, files, % patDir "\report\Combined*" tmp.MMM "-" tmp.DD "-" tmp.YYYY "*.pdf"
+		Loop, files, % patDir "\report\Combined*" td.MMM "-" td.DD "-" td.YYYY "*.pdf"
 		{
-			patPDF := A_LoopFileFullPath										; find the appropriate PDF matching this .bnk file
+			tmp.file := A_LoopFileFullPath										; find the appropriate PDF matching this .bnk file
 		}
 		
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", tmp.YYYY tmp.MM tmp.DD)										; col1 is date
-		LV_Modify(fileNum,"col2", tmp_name)
-		LV_Modify(fileNum,"col3", tmp_dev)
-		LV_Modify(fileNum,"col4", tmp_ser)
+		LV_Add("", tmp.date)										; col1 is date
+		LV_Modify(fileNum,"col2", tmp.name)
+		LV_Modify(fileNum,"col3", tmp.dev)
+		LV_Modify(fileNum,"col4", tmp.ser)
 		LV_Modify(fileNum,"col5", "")
 		LV_Modify(fileNum,"col6", "")
-		LV_Modify(fileNum,"col7", patPDF)
-		LV_Modify(fileNum,"col8", patBnk)
+		LV_Modify(fileNum,"col7", tmp.file)
+		LV_Modify(fileNum,"col8", tmp.bnk)
 	}
 	
 	LV_ModifyCol(1, "Autohdr")
