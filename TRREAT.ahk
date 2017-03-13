@@ -45,6 +45,8 @@ docs := {"TC":"783118","JS":"343079","SS":"358945"}
 
 if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
 	role := "Sign"																; set role to "Sign"
+} else {
+	role := "Parse"
 }
 
 if (%0%) {																		; For each parameter: 
