@@ -567,7 +567,7 @@ Medtronic:
 {
 	if (maintxt~="Adapta|Sensia") {													; Scan Adapta family of devices
 		gosub mdtAdapta
-	} else if (maintxt~="Quick Look II") {										; or scan more current QuickLook II reports
+	} else if (maintxt~="Final:\s+Session Summary") {										; or scan more current QuickLook II reports
 		gosub mdtQuickLookII
 	} else {																	; or something else
 		MsgBox NO MATCH
