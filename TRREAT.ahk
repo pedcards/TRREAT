@@ -565,7 +565,7 @@ SignVerify(user)
 
 Medtronic:
 {
-	if (maintxt~="Adapta") {													; Scan Adapta family of devices
+	if (maintxt~="Adapta|Sensia") {													; Scan Adapta family of devices
 		gosub mdtAdapta
 	} else if (maintxt~="Quick Look II") {										; or scan more current QuickLook II reports
 		gosub mdtQuickLookII
