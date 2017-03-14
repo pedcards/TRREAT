@@ -1460,7 +1460,7 @@ PrintOut:
 			. "Job #\tab "				"<15:e> \par `n"
 			. "Service Date\tab "		"<31:" enc_dt ">\par `n"
 			. "Surgery Date\tab "		"<6:" enc_dt "> \par `n"
-			. "Attending Phy #\tab "	"<9:"  "> \par `n"
+			. "Attending Phy #\tab "	"<9:" docs[enc_MD] "> \par `n"
 			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
 			. "<EndOfHeader>\par `n"
 			. "\par `n"
