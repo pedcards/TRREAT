@@ -526,6 +526,9 @@ ActSign:
 			tmp := RegExReplace(tmp
 				, "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
 				, "Dictating Phy #\tab <8:" S_num ">\par")						; with yours
+			tmp := RegExReplace(tmp
+				, "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
+				, "Attending Phy #\tab <9:" S_num ">\par")
 			FileDelete, % reportDir fileNam ".rtf"
 			FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
 		} else {
