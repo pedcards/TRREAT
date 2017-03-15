@@ -1943,7 +1943,12 @@ parseClip(clip) {
 /*	If clip matches "val1:val2" format, and val1 in demVals[], return field:val
 	If clip contains proper Encounter Type ("Outpatient", "Inpatient", "Observation", etc), return Type, Date, Time
 */
-	;~ global demVals
+	if (clip~="[A-Z \-]+, [A-Z \-]+") {													; matches name format "SMITH, WILLIAM JAMES"
+		nameL := trim(strX(clip,"",1,0,",",1,1))
+		nameF := trim(strX(clip,",",1,1," ",1,1))
+		return {field:"Name", value:nameL ", " nameF}
+	}
+	
 	demVals := ["Account Number","MRN"]
 	
 	StringSplit, val, clip, :															; break field into val1:val2
