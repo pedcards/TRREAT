@@ -1925,11 +1925,20 @@ fetchGUI:
 	demBits := (EncNum && EncMRN && EncName)									; clear the error check
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
+	
+	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , Name
+	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
+		. " readonly c" ((encName)?"Default":"Red") , % fldval["dev-Name"]
+	
 	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , MRN
-	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH " cDefault", % fldval["dev-MRN"]
-	Gui, fetch:Add, Text, % "x" fX1 " y" (fY += fYd) " w" fW1 " h" fH " c" , Encounter
-	Gui, fetch:Add, Edit, % "readonly x" fX2 " y" fY-4 " w" fW2 " h" fH , % fldval["dev-Enc"]
-	Gui, fetch:Add, Button, % "x" fX1+10 " y" (fY += fYD) " h" fH+10 " w" fW1+fW2 " gfetchSubmit " ((demBits)?"":"Disabled"), Submit!
+	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
+		. " readonly c" ((encMRN~="\d{6,7}")?"Default":"Red"), % fldval["dev-MRN"]
+	
+	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , Encounter
+	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
+		. " readonly c" ((encNum~="\d{8}")?"Default":"Red"), % fldval["dev-Enc"]
+	
+	Gui, fetch:Add, Button, % "x" fX1 " yP+" fYD " h" fH+10 " w" fW1+fW2+10 " gfetchSubmit " ((demBits)?"":"Disabled"), Submit!
 	Gui, fetch:Show, AutoSize, % fldval["dev-Name"]
 	return
 }
