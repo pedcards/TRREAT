@@ -1921,7 +1921,8 @@ fetchGUI:
 	fY := 10																	; y pos to start
 	EncNum := fldval["dev-Enc"]													; we need these non-array variables for the Gui statements
 	EncMRN := fldval["dev-MRN"]
-	demBits := (EncNum && EncMRN)												; clear the error check
+	EncName := (fldval["dev-Name"]~="[A-Z \-]+, [A-Z\-]")
+	demBits := (EncNum && EncMRN && EncName)									; clear the error check
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
 	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , MRN
