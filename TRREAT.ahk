@@ -1889,11 +1889,12 @@ FetchDem:
 			if !ErrorLevel {															; parseClip {field:value} matches valid data
 				if (clk.field = "Account Number") {
 					fldval["dev-Enc"] := clk.value
-					eventlog("MouseGrab Account Number " clk.value ".")
 				}
 				if (clk.field = "MRN") {
 					fldval["dev-MRN"] := clk.value
-					eventlog("MouseGrab MRN " clk.value ".")
+				}
+				if (clk.field = "Name") {
+					fldval["dev-Name"] := clk.value
 				}
 			}
 			gosub fetchGUI							; Update GUI with new info
