@@ -41,7 +41,8 @@ blk := Object()
 blk2 := Object()
 ;~ docs := Object()
 worklist := reportDir "worklist.xml"
-docs := {"TC":"783118","JS":"343079","SS":"358945"}
+docs := {"TC":"783118","JS":"343079","SS":"358945"
+		, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
 
 if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
 	role := "Sign"																; set role to "Sign"
@@ -1510,6 +1511,23 @@ PrintOut:
 			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
 		xl.save(worklist)
+		
+		ol := ComObjCreate("Outlook.Application")
+		olEml := ol.CreateItem[0]
+			olEml.To := docs[end_MD "eml"] "@seattlechildrens.org"
+			olEml.Subject := "TRREAT report to sign"
+			olEml.Body := "There is/are one or more pacemaker reports available for you to review/sign. "
+			
+		olEml := ComObjActive("Outlook.Application").CreateItem(0)				; item type 0 = olMailItem
+			olEml.To := docs[end_MD "eml"] "@seattlechildrens.org"
+			olEml.Subject := "TRREAT report to sign"
+			olEml.BodyFormat := 2												; format type 2 = HTML
+			olEml.HTMLBody := "<HTML><BODY>There is/are one or more pacemaker reports available for you to review/sign. "
+				. "The TRREAT program can be launched here: "
+				. "<a href=`"" binDir "..\TRREAT.exe`">TRREAT</a></BODY></HTML>"
+			olEml.send()
+		MsgBox pause
+		
 	}
 	gosub readList
 	gosub readFiles
