@@ -240,7 +240,14 @@ readFiles:
 				tmp.file := A_LoopFileName
 				tmp.full := A_LoopFileFullPath
 				tmp.dev := strx(tmp.file,"",1,0,"_",1,1)
-				tmp.meta := (FileExist(pdfDir tmp.ser ".log")) ? pdfDir tmp.ser ".log" : ""
+				Loop, Files, % pdfDir "*.log", F
+				{
+					k := RegExReplace(A_LoopFileName,".log")
+					if InStr(tmp.file,k) {
+						tmp.meta := pdfDir k ".log"
+					}
+				}
+				;~ tmp.meta := (FileExist(pdfDir tmp.ser ".log")) ? pdfDir tmp.ser ".log" : ""
 				fileNum += 1													; Add a row to the LV
 				LV_Add("", tmp.date)											; col1 is date
 				LV_Modify(fileNum,"col2", tmp.name)
