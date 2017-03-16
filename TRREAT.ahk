@@ -2032,7 +2032,7 @@ makeReport:
 	} else {
 		ck := ""
 	}
-	InputBox, summ, Enter SUMMARY text..., % ck,,,,,,,,% ck
+	;~ InputBox, summ, Enter SUMMARY text..., % ck,,,,,,,,% ck
 	;~ if ErrorLevel {
 		;~ MsgBox clicked CANCEL
 	;~ }
