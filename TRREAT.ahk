@@ -1519,13 +1519,15 @@ PrintOut:
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
 		xl.save(worklist)
 		
-		;~ olEml := ComObjCreate("Outlook.Application").CreateItem(0)
-			;~ olEml.To := docs[enc_MD "eml"] "@seattlechildrens.org"
-			;~ olEml.Subject := "TRREAT report to sign"
-			;~ olEml.Body := "There is/are one or more pacemaker reports available for you to review/sign. "
-				;~ . "The TRREAT program can be launched here: " binDir "..\TRREAT.exe"
-			;~ olEml.send()
-			
+		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")							; initialize http request in object whr
+		whr.Open("GET"															; set the http verb to GET file "change"
+			, "https://depts.washington.edu/pedcards/change/direct.php?" 
+				. "do=trreat" 
+				. "&to=" enc_MD
+			, true)
+		whr.Send()																; SEND the command to the address
+			;~ whr.WaitForResponse()	
+			;~ err := whr.ResponseText													; the http response
 	}
 	gosub readList
 	gosub readFiles
