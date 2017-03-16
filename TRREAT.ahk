@@ -2026,7 +2026,7 @@ makeReport:
 {
 	ck := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
 	if instr(ck,"normal") {
-		ck := "This represents a normal device check. The patient denies any pacemaker related symptoms. "
+		ck := "This represents a normal device check. The patient denies any device related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. "
 	} else {
