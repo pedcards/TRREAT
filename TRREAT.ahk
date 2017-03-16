@@ -1323,7 +1323,7 @@ pmPrint:
 	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
 	. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
 	. printQ(fldval["par-URL"],", upper tracking rate ###")
-	. printQ(fldval["par-USR"],", upper sensor rate ###")
+	. printQ((substr(fldval["par-Mode"],0,1)="R"),printQ(fldval["par-USR"],", upper sensor rate ###"))
 	. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
 	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
 	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
