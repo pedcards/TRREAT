@@ -9,14 +9,14 @@ FileInstall, pdftotext.exe, pdftotext.exe
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
-	binDir := ".\bin\"
+	binDir := ".\"
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
-	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\bin\"
+	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
 	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
 	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
@@ -387,7 +387,7 @@ fileLoop:
 	Run, %fileIn%
 	FileDelete, temp.txt
 	SplitPath, fileIn,,,,fileOut
-	RunWait, pdftotext.exe -table "%fileIn%" temp.txt , , hide
+	RunWait, pdftotext.exe -table "%fileIn%" "%binDir%temp.txt" , , hide
 	FileRead, maintxt, temp.txt
 	cleanlines(maintxt)
 	
@@ -2232,7 +2232,7 @@ eventlog(event) {
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyy.MM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
-	name := binDir "..\logs\" . sessdate . ".log"
+	name := binDir "logs\" . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
 	filePrepend(txt,name)
 ;	FileAppend, % timenow " ["  user "/" comp "] " event "`n", % "logs/" . sessdate . ".log"
