@@ -2247,9 +2247,15 @@ parseDate(x) {
 		StringSplit, DT, x, _
 		return {"MM":zDigit(DT1), "DD":zDigit(DT2), "MMM":mo[DT2], "YYYY":year4dig(DT3)}
 	}
-	if (x~="\d{4}-\d{2}-\d{2}") {
+	if (x~="\d{4}-\d{2}-\d{2}") {												; 2017-02-11
 		StringSplit, DT, x, -
 		return {"YYYY":DT1, "MM":DT2, "DD":DT3}
+	}
+	if (x~="i)^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4}") {			; Mar 9, 2015 (8:33 am)?
+		StringSplit, DT, x, %A_Space%
+		StringSplit, DHM, DT4, :
+		return {"MM":zDigit(objHasValue(mo,DT1)),"DD":zDigit(trim(DT2,",")),"YYYY":DT3
+			,	hr:zDigit((DT5~="i)p")?(DHM1+12):DHM1),min:DHM2}
 	}
 	StringSplit, DT, x, %A_Space%
 	StringSplit, DY, DT1, /
