@@ -1037,25 +1037,36 @@ SJM_old:
 {
 	fields[1] := ["Device Name","Model:", "Serial:","Implant Date:"
 				, "Voltage","Current","Impedance"
-				, "Lead Chamber","Last Interrogated On:"]
+				, "Last Interrogated On:"]
 	labels[1] := ["IPG","IPG_model","IPG_SN","IPG_impl"
 				, "IPG_voltage","IPG_current","IPG_imped"
-				, "Chamber","Encounter"]
+				, "Encounter"]
 	sjmVals(1,"dev")
 	fldfill("dev-Name",pat_name)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
 	tmp := parseDate(fldval["dev-Encounter"])
 	fldfill("dev-Encounter", tmp.MM "/" tmp.DD "/" tmp.YYYY)
 	fldfill("dev-IPG_impl",niceDate(fldval["dev-IPG_impl"]))
-
-	if (fldval["leads-RV_imp"]||fldval["leads-RV_Pace_Amp"]||fldval["leads-RV_Thr_Sens"]) {
-		normLead("RV"
-				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-RV_imp"]
-				,printQ(fldval["leads-RV_Thr_Amp"],"###" printQ(fldval["leads-RV_Thr_PW"]," @ ###"))
-				,printQ(fldval["leads-RV_Pace_Amp"],"###" printQ(fldval["leads-RV_Pace_PW"]," @ ###"))
-				,fldval["leads-RV_Pol_pace"]
-				,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
-	}
+	
+	fields[1] := ["Lead Chamber","Lead Type"
+				, ".. Pulse Amplitude",".. Pulse Width","Lead Impedance","P/R Sensitivity",
+				, "Vario Capture Threshold","Test Pulse Width","E/R Sensitivity"]
+	labels[1] := ["Chamber","Type"
+				, "Pace_Amp","Pace_PW","Imped","Sensitivity"
+				, "Thr_Amp","Thr_PW","Thr_Sens"]
+	sjmVals(1,"leads")
+	
+	fields[1] := ["(\x1C)Mode(\x1C)","Base Rate","Max Sensor Rate"]
+	labels[1] := ["Mode","LRL","USR"]
+	sjmVals(1,"par")
+	
+	normLead("R" (InStr(fldval["leads-Chamber"],"V")?"V":"A")
+		,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-Imped"]
+		,printQ(fldval["leads-Thr_Amp"],"###" printQ(fldval["leads-Thr_PW"]," @ ###"))
+		,printQ(fldval["leads-Pace_Amp"],"###" printQ(fldval["leads-Pace_PW"]," @ ###"))
+		,fldval["leads-RV_Pol_pace"]
+		,fldval["leads-Thr_Sens"],fldval["leads-Sensitivity"],fldval["leads-RV_Pol_sens"])
+	
 return	
 }
 
