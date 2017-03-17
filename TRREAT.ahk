@@ -545,10 +545,7 @@ ActSign:
 			return																; not signing this report, return
 		}
 	}
-	
-	MsgBox, 52, ARE YOU SURE?, Send report to ESIG?
-	IfMsgBox, Yes
-	{
+	if !(isDevt) {
 		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
