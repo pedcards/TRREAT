@@ -247,7 +247,9 @@ readFiles:
 						tmp.meta := pdfDir k ".log"
 					}
 				}
-				;~ tmp.meta := (FileExist(pdfDir tmp.ser ".log")) ? pdfDir tmp.ser ".log" : ""
+				if !(tmp.meta) {
+					continue
+				}
 				fileNum += 1													; Add a row to the LV
 				LV_Add("", tmp.date)											; col1 is date
 				LV_Modify(fileNum,"col2", tmp.name)
