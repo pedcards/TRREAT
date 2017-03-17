@@ -496,7 +496,7 @@ SignActGui:
 	Gui, Act:Default
 	Gui, Add, Text,, % fileNam
 	Gui, Add, Button, vS_PDF gActPDF, View PDF
-	Gui, Add, Button, vS_rev gActSign Disabled, SIGN && SEND
+	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO ESIG
 	Gui, Color, EEAA99
 	
 	if !FileExist(complDir fileNam ".pdf") {
@@ -521,24 +521,20 @@ ActSign:
 {
 	Gui, Act:Hide
 	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
-	if (substr(user,1,2)=l_tab) {												; first 2 chars of Citrix login match l_tab?
-		if !(S_num := SignVerify(user)) {										; but fails authentication
-			return
-		}
-	} else {																	; Different than assigned MD
-		MsgBox, 52, , % "Signing report for " l_tab "?"
+	l_usr := substr(user,1,2)
+	if !(substr(l_usr=l_tab) {													; first 2 chars of Citrix login don't match l_tab?
+		MsgBox, 52, 
+			, % "Sign this report?`n`n"
+			. "Was originally assigned to " l_tab "."
 		IfMsgBox Yes															; signing someone else's report
 		{
-			if !(S_num := SignVerify(user)) {									; err if typed login doesn't match Citrix or typed billing code doesn't match
-				return
-			}
 			FileRead, tmp, % reportDir fileNam ".rtf"							; read the generated RTF file
 			tmp := RegExReplace(tmp
 				, "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
-				, "Dictating Phy #\tab <8:" S_num ">\par")						; with yours
+				, "Dictating Phy #\tab <8:" docs[l_usr] ">\par")				; with yours
 			tmp := RegExReplace(tmp
 				, "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
-				, "Attending Phy #\tab <9:" S_num ">\par")
+				, "Attending Phy #\tab <9:" docs[l_usr] ">\par")
 			FileDelete, % reportDir fileNam ".rtf"
 			FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
 		} else {
@@ -557,21 +553,21 @@ ActSign:
 Return
 }
 
-SignVerify(user)
-{
-	global docs
-	InputBox, userIn, Sign, Enter CIS user name
-	if !(userIn=user) {
-		MsgBox, 16,, Wrong user name!
-		return error
-	}
-	InputBox, numIn, Sign, Enter signature code
-	if !(numIn=docs[substr(userIn,1,2)]) {
-		MsgBox, 16,, Wrong signature number!
-		return error
-	}
-	return numIn
-}
+;~ SignVerify(user)
+;~ {
+	;~ global docs
+	;~ InputBox, userIn, Sign, Enter CIS user name
+	;~ if !(userIn=user) {
+		;~ MsgBox, 16,, Wrong user name!
+		;~ return error
+	;~ }
+	;~ InputBox, numIn, Sign, Enter signature code
+	;~ if !(numIn=docs[substr(userIn,1,2)]) {
+		;~ MsgBox, 16,, Wrong signature number!
+		;~ return error
+	;~ }
+	;~ return numIn
+;~ }
 
 Medtronic:
 {
