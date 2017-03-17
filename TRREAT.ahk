@@ -1941,7 +1941,7 @@ fetchGUI:
 	EncNum := fldval["dev-Enc"]													; we need these non-array variables for the Gui statements
 	EncMRN := fldval["dev-MRN"]
 	EncName := (fldval["dev-Name"]~="[A-Z \-]+, [A-Z\-](?!=\s)")
-	demBits := (EncNum && EncMRN && EncName)									; clear the error check
+	demBits := ((EncNum~="\d{8}") && (EncMRN~="\d{6,7}") && EncName)			; clear the error check
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
 	
