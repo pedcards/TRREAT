@@ -417,7 +417,7 @@ SignScan:
 		fileNam := RegExReplace(A_LoopFileName,"i)\.rtf")						; fileNam is name only without extension, no path
 		fileIn := A_LoopFileFullPath											; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
 				
-		l_user := strX(fileNam,"",1,0,"-")										; Get assigned EP from filename
+		l_user := strX(fileNam,"",1,0,"-",1)										; Get assigned EP from filename
 		l_mrn  := strX(fileNam,"-",1,1," ",1,1)
 		l_name := stregX(fileNam,"-\d+ ",1,1," #",1)		
 		l_ser  := stregX(fileNam," #",1,1," \d{6,8}",1)
