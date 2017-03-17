@@ -1945,15 +1945,15 @@ fetchGUI:
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
 	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , Name
+	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encName)?"Default":"Red") , Name
 	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
 		. " readonly c" ((encName)?"Default":"Red") , % fldval["dev-Name"]
 	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , MRN
+	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encMRN~="\d{6,7}")?"Default":"Red") , MRN
 	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
 		. " readonly c" ((encMRN~="\d{6,7}")?"Default":"Red"), % fldval["dev-MRN"]
 	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" , Encounter
+	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encNum~="\d{8}")?"Default":"Red") , Encounter
 	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
 		. " readonly c" ((encNum~="\d{8}")?"Default":"Red"), % fldval["dev-Enc"]
 	
