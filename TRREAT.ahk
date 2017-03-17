@@ -1403,7 +1403,8 @@ printLead(lead) {
 	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
 	. printQ(leads[lead,"output"],"Pacing output ###. ")
 	. printQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
-	. printQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing ###. ")
+	. printQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing " 
+		. ((leads[lead,"sens"]~="N/R")?"not measured/detected":"###") ". ")
 	. printQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
 	. printQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
 	. "\par `n"
