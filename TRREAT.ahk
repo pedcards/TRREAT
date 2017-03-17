@@ -1358,7 +1358,9 @@ readSjm(lbl) {
 		StringSplit, el, line, % Chr(28), `n									; yes, split line on chr(28)
 		break																	; and break out of loop
 	}
-	return el3 . printQ(el4," ###") . printQ(el5," ###")						; return: value ( units)( whatever el5 is)
+	return RegExReplace(el3,"[^[:ascii:]]") 
+		. printQ(RegExReplace(el4,"[^[:ascii:]]")," ###") 
+		. printQ(RegExReplace(el5,"[^[:ascii:]]")," ###")						; return: value ( units)( whatever el5 is)
 }
 
 pmPrint:
