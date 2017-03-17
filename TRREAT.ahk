@@ -1009,12 +1009,15 @@ bsciZoomView:
 
 SJM:
 {
-	if (pat_meta) {																; SJM device with metadata (ICD exported)
-		FileRead, sjmLog, % pat_meta
-		gosub SJM_meta															; 
-	} else {
+	if !(pat_meta) {																; SJM device with metadata (ICD exported)
 		MsgBox No metafile found!
 		return
+	} 
+	FileRead, sjmLog, % pat_meta
+	if (sjmLog~="Microny|Zephyr") {
+		gosub SJM_old
+	} else {
+		gosub SJM_meta															; 
 	}
 	
 	gosub fetchDem
