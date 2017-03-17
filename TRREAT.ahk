@@ -1035,14 +1035,18 @@ return
 
 SJM_old:
 {
-	fields[1] := ["Device Name","Model:"
-				, "Serial:","Implant Date:"
-				, "Lead Chamber"
-				, "Voltage","Current","Impedance"]
+	fields[1] := ["Device Name","Model:", "Serial:","Implant Date:"
+				, "Voltage","Current","Impedance"
+				, "Lead Chamber","Last Interrogated On:"]
 	labels[1] := ["IPG","IPG_model","IPG_SN","IPG_impl"
-				, "Chamber"
-				, "IPG_voltage","IPG_current","IPG_imped"]
+				, "IPG_voltage","IPG_current","IPG_imped"
+				, "Chamber","Encounter"]
 	sjmVals(1,"dev")
+	fldfill("dev-Name",pat_name)
+	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
+	tmp := parseDate(fldval["dev-Encounter"])
+	fldfill("dev-Encounter", tmp.MM "/" tmp.DD "/" tmp.YYYY)
+	fldfill("dev-IPG_impl",niceDate(fldval["dev-IPG_impl"]))
 
 	if (fldval["leads-RV_imp"]||fldval["leads-RV_Pace_Amp"]||fldval["leads-RV_Thr_Sens"]) {
 		normLead("RV"
