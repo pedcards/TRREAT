@@ -210,13 +210,13 @@ readFiles:
 
 /* Read SJM "PDFs" folder
 */
-	tmp := []
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
 		DateDir := A_LoopFileName
 		Loop, Files, % sjmDir "\" DateDir "\*", D
 		{
+			tmp := []
 			patDir := A_LoopFileName
 			tmp.date := RegExReplace(DateDir,"-")
 			tmp.name := stregx(patDir,"",1,0,"_\d{2,}",1,n)
@@ -243,7 +243,7 @@ readFiles:
 				Loop, Files, % pdfDir "*.log", F
 				{
 					k := RegExReplace(A_LoopFileName,".log")
-					if InStr(tmp.file,k) {
+					if InStr(tmp.ser,k) {
 						tmp.meta := pdfDir k ".log"
 					}
 				}
