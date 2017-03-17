@@ -1031,6 +1031,28 @@ SJM:
 return
 }
 
+SJM_old:
+{
+	fields[1] := ["Device Name","Model:"
+				, "Serial:","Implant Date:"
+				, "Lead Chamber"
+				, "Voltage","Current","Impedance"]
+	labels[1] := ["IPG","IPG_model","IPG_SN","IPG_impl"
+				, "Chamber"
+				, "IPG_voltage","IPG_current","IPG_imped"]
+	sjmVals(1,"dev")
+
+	if (fldval["leads-RV_imp"]||fldval["leads-RV_Pace_Amp"]||fldval["leads-RV_Thr_Sens"]) {
+		normLead("RV"
+				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-RV_imp"]
+				,printQ(fldval["leads-RV_Thr_Amp"],"###" printQ(fldval["leads-RV_Thr_PW"]," @ ###"))
+				,printQ(fldval["leads-RV_Pace_Amp"],"###" printQ(fldval["leads-RV_Pace_PW"]," @ ###"))
+				,fldval["leads-RV_Pol_pace"]
+				,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+	}
+return	
+}
+
 SJM_meta:
 {
 	fields[1] := ["Device Model Name","Device Model Number"
