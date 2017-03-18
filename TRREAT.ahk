@@ -2223,12 +2223,13 @@ filecheck() {
 	return
 }
 
-eventlog(event) {
-	global user
+eventlog(event,ch:="") {
+	global user, binDir, chipDir
+	dir := (ch="C") ? chipDir : binDir 
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyy.MM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
-	name := binDir "logs\" . sessdate . ".log"
+	name := dir "logs\" . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
 	filePrepend(txt,name)
 ;	FileAppend, % timenow " ["  user "/" comp "] " event "`n", % "logs/" . sessdate . ".log"
