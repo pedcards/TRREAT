@@ -2101,6 +2101,7 @@ saveChip:
 	yID := y.selectSingleNode(MRNstring)
 	if IsObject(yDev := yID.selectSingleNode("diagnoses/device")) {				; Clear out any existing Device node
 		yDev.parentNode.removeChild(yDev)
+		eventlog("Removed existing <device> node.","C")
 		eventlog("Removed existing <device> node from currlist.")
 	}
 	y.addElement("device"
@@ -2124,6 +2125,7 @@ saveChip:
 		y.addElement("Vp", pmNowString, leads["RV","output"])
 		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
 	WriteOut(MRNstring "/diagnoses", "device")
+	eventlog("Add new <device> node.","C")
 	eventlog("Add new <device> node to currlist.")
 	
 	return
@@ -2167,6 +2169,7 @@ checkEP:
 			yID.selectSingleNode("prov").setAttribute("au", A_UserName)
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
 			eventlog(yEP " set as primary EP.")
+			eventlog(yEP " set as primary EP.","C")
 			writeOut(MRNstring,"prov")
 		} 
 	}
@@ -2244,6 +2247,7 @@ WriteOut(path,node) {
 	zPath.replaceChild(clone,zNode)												; replace existing zNode with node clone
 	
 	z.save(chipDir "currlist.xml")												; write z into currlist
+	eventlog(path "/" node " saved.","C")
 	eventlog("CHIPOTLE currlist updated.")
 	y := z																		; make Y match Z, don't need a file op
 	FileDelete, % chipDir ".currlock"											; release lock file.
