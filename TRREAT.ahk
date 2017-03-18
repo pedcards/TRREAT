@@ -1532,14 +1532,14 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	dt.YYYY dt.MM dt.DD
 	
-	FileDelete, temp.rtf															; delete and generate RTF fileOut.rtf
-	FileAppend, %rtfOut%, temp.rtf
+	FileDelete, %binDir%temp.rtf															; delete and generate RTF fileOut.rtf
+	FileAppend, %rtfOut%, %binDir%temp.rtf
 	
-	RunWait, % "WordPad.exe temp.rtf"												; launch fileNam in WordPad
+	RunWait, % "WordPad.exe " binDir "temp.rtf"												; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		FileMove, temp.rtf, % reportDir fileOut ".rtf", 1								; move RTF to the final directory
+		FileMove, %binDir%temp.rtf, % reportDir fileOut ".rtf", 1								; move RTF to the final directory
 		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
 		if (pat_meta) {
 			FileCopy, % pat_meta, % complDir fileOut ".meta", 1							; copy BNK to complete directory
