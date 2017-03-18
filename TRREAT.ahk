@@ -9,14 +9,14 @@ FileInstall, pdftotext.exe, pdftotext.exe
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
-	binDir := ".\"
+	binDir := ".\bin\"
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
-	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
+	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\bin\"
 	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
 	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
@@ -2279,11 +2279,11 @@ filecheck() {
 
 eventlog(event,ch:="") {
 	global user, binDir, chipDir
-	dir := (ch="C") ? chipDir : binDir 
+	dir := (ch="C") ? chipDir "logs\" : binDir "..\logs\"
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyy.MM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
-	name := dir "logs\" . sessdate . ".log"
+	name := dir . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
 	filePrepend(txt,name)
 }
