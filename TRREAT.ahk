@@ -22,6 +22,8 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	chipDir := "\\childrens\files\HCChipotle\"
 	pdfDir := ".\"
 }
+user := A_UserName
+eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
 	ExitApp
@@ -35,7 +37,6 @@ if !FileExist(chipDir) {
 	ExitApp
 }
 
-user := A_UserName
 newTxt := Object()
 blk := Object()
 blk2 := Object()
@@ -61,11 +62,13 @@ if (%0%) {																		; For each parameter:
 }
 
 if instr(role,"Sign") {
+	eventLog("SIGN module")
 	xl := new XML(worklist)									; otherwise load existing worklist
 	gosub signScan
 }
 
 if instr(role,"Parse") {
+	eventLog("PARSE module")
 	Gui, Parse:Destroy
 	Gui, Parse:Add, Listview, w600 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Parse:Default
@@ -86,6 +89,7 @@ if instr(role,"Parse") {
 		Loop, %0%
 		{
 			SplitPath, %A_Index%, fileIn 
+			eventlog("DROPPED FILE: " fileIn)
 			gosub fileLoop
 		}
 	} else {																	; otherwise scan the folders
@@ -94,6 +98,7 @@ if instr(role,"Parse") {
 }
 
 WinWaitClose, TRREAT Reports
+eventLog("<<<<< Session ended.")
 ExitApp
 
 readList:
@@ -106,13 +111,16 @@ readList:
 		xl.addElement("work", "root", {ed: A_Now})
 		xl.addElement("done", "root", {ed: A_Now})
 		xl.save(worklist)
+		eventlog("New worklist.xml created.")
 	} else {
 		xl := new XML(worklist)													; otherwise load existing worklist
+		eventlog("Worklist.xml loaded.")
 	}
 	Loop, % (w_id := xl.selectNodes("/root/work/id")).length					; scan through each <id>
 	{
 		k := w_id.item(A_Index-1)												; put it into k
 		if !IsObject(k) {														; skip if empty
+			eventlog("Empty node skipped.")
 			continue
 		}
 		tmp["date"] := k.getAttribute("date")
@@ -131,6 +139,7 @@ readList:
 			LV_Modify(fileNum,"col3", "[DONE]")
 			archNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")		; copy ID node to DONE
 			xl.save(worklist)
+			eventlog("Node " tmp.date "/" tmp.ser "/" tmp.name " archived.")
 			continue
 		}
 		
@@ -151,6 +160,7 @@ readList:
 	LV_ModifyCol(4, "Autohdr")
 	LV_ModifyCol(5, "Autohdr")
 	LV_ModifyCol(6, "Autohdr")
+	eventlog("Parse listview generated.")
 return
 }
 
@@ -177,6 +187,7 @@ readFiles:
 				tmp.max := k													; new kmax
 				tmp.file := i													; set patPDF as this new max (for when exits)
 				tmp.maxstr .= i "`n"											; add to string of files to subsequently ignore
+				eventlog("MDT: newer version of " j " _" k )
 			}
 		}
 		tmp.name := strX(tmp.file,"",1,0,"_",1,1,n)
@@ -187,6 +198,7 @@ readFiles:
 		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
+			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
 			continue															; skip reprocessing in WORK list
 		}
 		if (xl.selectSingleNode("/root/done/" tmp.node)) {
@@ -194,6 +206,7 @@ readFiles:
 			LV_Add("", tmp.date)
 			LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
+			eventlog("MDT: File " tmp.file " already DONE.")
 			continue
 		}
 		
@@ -225,6 +238,7 @@ readFiles:
 			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
 			
 			if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
+				eventlog("SJM: Skipping " DateDir "\" tmp.ser ", already in worklist.")
 				continue														; skip reprocessing in WORK list
 			}
 			if IsObject(xl.selectSingleNode("/root/done/" tmp.node)) {
@@ -232,6 +246,7 @@ readFiles:
 				LV_Add("", tmp.date)
 				LV_Modify(fileNum,"col2", tmp.name)								; add marker line if in DONE list
 				LV_Modify(fileNum,"col3", "[DONE]")
+				eventlog("SJM: File " DateDir "\" tmp.ser " already DONE.")
 				continue
 			}
 			
@@ -245,9 +260,11 @@ readFiles:
 					k := RegExReplace(A_LoopFileName,".log")
 					if InStr(tmp.ser,k) {
 						tmp.meta := pdfDir k ".log"
+						eventlog("SJM: " tmp.file " metafile " k ".log found")
 					}
 				}
 				if !(tmp.meta) {
+					eventlog("SJM: " tmp.file " has no metafile, skipping.")
 					continue
 				}
 				fileNum += 1													; Add a row to the LV
@@ -273,6 +290,7 @@ readFiles:
 		loop, files, % patDir "\*.bnk"											; Find the current nnnnnn.bnk file (inactive files are .bn_ files)
 		{
 			tmp.bnk := patDir "\" A_LoopFileName
+			eventlog("BSC: Metafile " A_LoopFileName " found.")
 		}
 		FileRead, bscBnk, % tmp.bnk												; need bscBnk for readBnk
 		td := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))		; get the DATE array
@@ -283,6 +301,7 @@ readFiles:
 		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
+			eventlog("BSC: Skipping " tmp.date "\" tmp.ser ", already in worklist.")
 			continue															; skip reprocessing in WORK list
 		}
 		if IsObject(xl.selectSingleNode("/root/done/ " tmp.node)) {
@@ -290,12 +309,14 @@ readFiles:
 			LV_Add("", tmp.date)
 			LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
+			eventlog("BSC: File " tmp.date "\" tmp.ser " already DONE.")
 			continue
 		}
 		
 		Loop, files, % patDir "\report\Combined*" td.MMM "-" td.DD "-" td.YYYY "*.pdf"
 		{
 			tmp.file := A_LoopFileFullPath										; find the appropriate PDF matching this .bnk file
+			eventlog("BSC: " A_LoopFileName " found.")
 		}
 		
 		fileNum += 1															; Add a row to the LV
@@ -341,6 +362,7 @@ parsePat:
 	LV_GetText(fileIn,fileNum,7)
 	LV_GetText(pat_meta,fileNum,8)
 	LV_GetText(pat_report,fileNum,9)
+	eventlog(pat_date " " pat_name " selected.")
 	
 	if (pat_report) {
 		pat_node := "/root/work/id[@date='" pat_date "'][@ser='" pat_ser "']"
@@ -353,18 +375,22 @@ parsePat:
 		}
 		if instr(tmp,"Modify") {
 			RunWait, % "WordPad.exe """ pat_report """"						; launch fileNam in WordPad
+			eventlog(pat_report " modified.")
 			return
 		}
 		if instr(tmp,"Regenerate") {
 			removeNode(pat_node)
 			xl.save(worklist)
+			eventlog("Node " pat_node " removed from worklist.")
 			FileDelete, % pat_report
+			eventlog("File " pat_report " deleted.")
 			gosub fileLoop
 			return
 		}
 		if instr(tmp,"PaceArt") {
 			xl.setText(pat_node "/paceart","True")
 			xl.save(worklist)
+			eventlog("PaceArt marked true.")
 			gosub readList
 			gosub readFiles
 			return
@@ -388,20 +414,25 @@ fileLoop:
 	FileDelete, %binDir%temp.txt
 	SplitPath, fileIn,,,,fileOut
 	RunWait, pdftotext.exe -table "%fileIn%" "%binDir%temp.txt" , , hide
+	eventlog("pdftotext " fileIn " -> " binDir "temp.txt")
 	FileRead, maintxt, %binDir%temp.txt
 	cleanlines(maintxt)
 	
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+		eventlog("Medtronic identified.")
 		gosub Medtronic
 	}
 	else if (maintxt~="Boston Scientific Corporation") {
+		eventlog("Boston Scientific identified.")
 		gosub BSCI
 	}
 	else if instr(pat_dev,"SJM") {												; SJM device clicked from LV
+		eventlog("St Jude identified.")
 		gosub SJM
 	} 
 	else {
-		MsgBox No match!`nAttempt OCR on PDF?
+		eventlog("No file match.")
+		MsgBox No match!														; Attempt OCR on PDF?
 	}
 	
 	return
@@ -416,7 +447,7 @@ SignScan:
 	{
 		fileNam := RegExReplace(A_LoopFileName,"i)\.rtf")						; fileNam is name only without extension, no path
 		fileIn := A_LoopFileFullPath											; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
-				
+		
 		l_user := strX(fileNam,"",1,0,"-",1)										; Get assigned EP from filename
 		l_mrn  := strX(fileNam,"-",1,1," ",1,1)
 		l_name := stregX(fileNam,"-\d+ ",1,1," #",1)		
@@ -431,6 +462,7 @@ SignScan:
 			, date:l_date
 			, ser:l_ser}
 	}
+	eventlog("Report RTF dir scanned.")
 	gosub signGUI
 	
 Return
@@ -468,9 +500,11 @@ SignGUI:
 }
 
 ParseGuiClose:
+eventlog("<<<<< Parse session closed.")
 ExitApp
 
 SignGUIClose:
+eventlog("<<<<< Sign session closed.")
 ExitApp
 
 SignRep:
@@ -485,6 +519,7 @@ SignRep:
 	LV_GetText(l_ser,l_row,2)													; get hidden serial number
 	LV_GetText(l_date,l_row,3)
 	
+	eventlog("Selected '" fileNam "'")
 	gosub SignActGUI
 	Gui, Sign:Show
 Return	
@@ -514,6 +549,7 @@ ActPDF:
 {
 	pdfNam := complDir fileNam ".pdf"
 	run, % pdfNam
+	eventlog("PDF opened.")
 Return
 }
 
@@ -537,17 +573,22 @@ ActSign:
 				, "Attending Phy #\tab <9:" docs[l_usr] ">\par")
 			FileDelete, % reportDir fileNam ".rtf"
 			FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
+			eventlog(l_tab " report signed by " l_usr ".") 
 		} else {
+			eventlog("Oops. Don't sign " l_tab "'s report.")
 			return																; not signing this report, return
 		}
 	}
 	if !(isDevt) {
 		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
+		eventlog("Sent to HIS.")
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
 	
 	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
 	xl.save(worklist)
+	
+	eventlog("Worklist.xml updated.")
 	
 	Gosub signScan																; regenerate file list
 Return
@@ -571,11 +612,14 @@ Return
 
 Medtronic:
 {
-	if (maintxt~="Adapta|Sensia") {													; Scan Adapta family of devices
+	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
+		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="Final:\s+Session Summary") {										; or scan more current QuickLook II reports
+	} else if (maintxt~="Final:\s+Session Summary") {							; or scan more current QuickLook II reports
+		eventlog("QuickLookII report.")
 		gosub mdtQuickLookII
 	} else {																	; or something else
+		eventlog("No match.")
 		MsgBox NO MATCH
 		return
 	}
@@ -606,7 +650,6 @@ return
 
 mdtQuickLookII:
 {
-	;~ iniRep := strX(columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\("),"",1,0,"Pacing",1,0)
 	inirep := columns(maintxt,"Clinical Status","Therapy Summary",0,"Cardiac Compass")
 	
 	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
@@ -1532,17 +1575,21 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	dt.YYYY dt.MM dt.DD
 	
-	FileDelete, %binDir%temp.rtf															; delete and generate RTF fileOut.rtf
+	FileDelete, %binDir%temp.rtf														; delete and generate RTF fileOut.rtf
 	FileAppend, %rtfOut%, %binDir%temp.rtf
 	
-	RunWait, % "WordPad.exe " binDir "temp.rtf"												; launch fileNam in WordPad
+	eventlog("Print output generated in " binDir)
+	
+	RunWait, % "WordPad.exe " binDir "temp.rtf"											; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		FileMove, %binDir%temp.rtf, % reportDir fileOut ".rtf", 1								; move RTF to the final directory
+		FileMove, %binDir%temp.rtf, % reportDir fileOut ".rtf", 1						; move RTF to the final directory
 		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
+		eventlog("RTF, PDF copied to " complDir)
 		if (pat_meta) {
 			FileCopy, % pat_meta, % complDir fileOut ".meta", 1							; copy BNK to complete directory
+			eventlog("META copied to " complDir)
 		}
 		
 		t_now := A_Now
@@ -1556,15 +1603,18 @@ PrintOut:
 			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
 		xl.save(worklist)
+		eventlog("Record added to worklist.xml")
 		
 		if !(isDevt) {
 			whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")							; initialize http request in object whr
-			whr.Open("GET"															; set the http verb to GET file "change"
+			whr.Open("GET"																; set the http verb to GET file "change"
 				, "https://depts.washington.edu/pedcards/change/direct.php?" 
 					. "do=trreat" 
 					. "&to=" enc_MD
 				, true)
-			whr.Send()																; SEND the command to the address
+			whr.Send()																	; SEND the command to the address
+			eventlog("Notification email sent to " enc_MD)
+			MsgBox, 64,, % "Email sent to " enc_MD
 			;~ whr.WaitForResponse()	
 			;~ err := whr.ResponseText													; the http response
 		}
@@ -1920,19 +1970,13 @@ FetchDem:
 		dx := k.parentNode
 		id := dx.parentNode
 		fldval["dev-MRN"] := id.getAttribute("mrn")								; set dev-MRN based on device SN
-		
+		eventlog("Device " fldval["dev-IPG_SN"] " found in currlist (" fldval["dev-MRN"] ").")
 	} else if IsObject(k := yArch.selectSingleNode(SNstring)) {					; Look in yArch if not in y
 		dx := k.parentNode
 		id := dx.parentNode
 		fldval["dev-MRN"] := id.getAttribute("mrn")
+		eventlog("Device " fldval["dev-IPG_SN"] " found in archlist (" fldval["dev-MRN"] ").")
 	}
-	
-	/*	set test vals
-	*/
-		;~ fldval["dev-MRN"] := 746275
-		;~ fldval["dev-Enc"] := 98224013
-	/*
-	*/
 	
 	getDem := true
 	fetchQuit := false
@@ -1947,12 +1991,15 @@ FetchDem:
 			if !ErrorLevel {															; parseClip {field:value} matches valid data
 				if (clk.field = "Account Number") {
 					fldval["dev-Enc"] := clk.value
+					eventlog("CLK: Account number " clk.value)
 				}
 				if (clk.field = "MRN") {
 					fldval["dev-MRN"] := clk.value
+					eventlog("CLK: MRN " clk.value)
 				}
 				if (clk.field = "Name") {
 					fldval["dev-Name"] := clk.value
+					eventlog("CLK: Name " clk.value)
 				}
 			}
 			gosub fetchGUI							; Update GUI with new info
@@ -2054,6 +2101,7 @@ saveChip:
 	yID := y.selectSingleNode(MRNstring)
 	if IsObject(yDev := yID.selectSingleNode("diagnoses/device")) {				; Clear out any existing Device node
 		yDev.parentNode.removeChild(yDev)
+		eventlog("Removed existing <device> node from currlist.")
 	}
 	y.addElement("device"
 		,MRNstring "/diagnoses"
@@ -2076,6 +2124,7 @@ saveChip:
 		y.addElement("Vp", pmNowString, leads["RV","output"])
 		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
 	WriteOut(MRNstring "/diagnoses", "device")
+	eventlog("Add new <device> node to currlist.")
 	
 	return
 }
@@ -2087,13 +2136,11 @@ makeReport:
 		summ := "This represents a normal device check. The patient denies any device related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. "
+		eventlog("Normal summary template selected.")
 	} else {
 		summ := ""
+		eventlog("Blank report summary.")
 	}
-	;~ InputBox, summ, Enter SUMMARY text..., % ck,,,,,,,,% ck
-	;~ if ErrorLevel {
-		;~ MsgBox clicked CANCEL
-	;~ }
 	
 	gosub checkEP
 	
@@ -2110,6 +2157,7 @@ checkEP:
 	yID := y.selectSingleNode(MRNstring)
 	
 	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {						; Assign a primary EP in prov if it does not exist
+		eventlog("No primary EP found.")
 		yEP := cMsgBox("No associated EP found"
 						,"Assign a primary EP`nClose [x] if none"
 						,"T. Chun|J. Salerno|S. Seslar"
@@ -2118,7 +2166,7 @@ checkEP:
 			yID.selectSingleNode("prov").setAttribute("EP", yEP)
 			yID.selectSingleNode("prov").setAttribute("au", A_UserName)
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
-			
+			eventlog(yEP " set as primary EP.")
 			writeOut(MRNstring,"prov")
 		} 
 	}
@@ -2134,6 +2182,7 @@ checkEP:
 	if (enc_MD="Close") {
 		enc_MD := ""
 	}
+	eventlog("Report assigned to " enc_MD ".")
 	
 	Return
 }
@@ -2195,6 +2244,7 @@ WriteOut(path,node) {
 	zPath.replaceChild(clone,zNode)												; replace existing zNode with node clone
 	
 	z.save(chipDir "currlist.xml")												; write z into currlist
+	eventlog("CHIPOTLE currlist updated.")
 	y := z																		; make Y match Z, don't need a file op
 	FileDelete, % chipDir ".currlock"											; release lock file.
 	return
@@ -2232,7 +2282,6 @@ eventlog(event,ch:="") {
 	name := dir "logs\" . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
 	filePrepend(txt,name)
-;	FileAppend, % timenow " ["  user "/" comp "] " event "`n", % "logs/" . sessdate . ".log"
 }
 
 FilePrepend( Text, Filename ) { 
