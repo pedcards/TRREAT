@@ -1483,10 +1483,10 @@ PrintOut:
 	}
 	if (ctLeads = 1) {
 		enc_type := "Single"
+	} else if (ctLeads = 2) {
+		enc_type := "Dual"
 	} else if (ctLeads > 2) {
 		enc_type := "Multi"
-	} else {
-		enc_type := "Dual"
 	}
 	enc_type := (instr(leads["RV","imp"],"Defib"))
 		? "ICD " enc_type
