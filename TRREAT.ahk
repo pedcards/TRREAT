@@ -2281,7 +2281,7 @@ eventlog(event,ch:="") {
 	global user, binDir, chipDir
 	dir := (ch="C") ? chipDir "logs\" : binDir "..\logs\"
 	comp := A_ComputerName
-	FormatTime, sessdate, A_Now, yyyy.MM
+	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
 	name := dir . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
