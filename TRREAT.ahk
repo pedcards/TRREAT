@@ -4,7 +4,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%
-FileInstall, pdftotext.exe, pdftotext.exe
+;~ FileInstall, pdftotext.exe, pdftotext.exe
 #Include includes
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
@@ -413,7 +413,7 @@ fileLoop:
 	Run, %fileIn%
 	FileDelete, %binDir%temp.txt
 	SplitPath, fileIn,,,,fileOut
-	RunWait, pdftotext.exe -table "%fileIn%" "%binDir%temp.txt" , , hide
+	RunWait, %binDir%pdftotext.exe -table "%fileIn%" "%binDir%temp.txt" , , hide
 	eventlog("pdftotext " fileIn " -> " binDir "temp.txt")
 	FileRead, maintxt, %binDir%temp.txt
 	cleanlines(maintxt)
@@ -2281,7 +2281,7 @@ eventlog(event,ch:="") {
 	global user, binDir, chipDir
 	dir := (ch="C") ? chipDir "logs\" : binDir "..\logs\"
 	comp := A_ComputerName
-	FormatTime, sessdate, A_Now, yyyy.MM
+	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
 	name := dir . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
