@@ -650,13 +650,13 @@ return
 
 mdtQuickLookII:
 {
-	inirep := columns(maintxt,"Clinical Status","Therapy Summary",0,"Cardiac Compass")
+	inirep := columns(maintxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
 	
 	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
 	labels[1] := ["VF","VTNS","VT","ATAF"]
 	scanParams(stregX(inirep,"Monitored",1,0,"Therapy",1),1,"event",1)
 	
-	inirep := columns(maintxt,"Therapy Summary","Medtronic, Inc",0,"Pacing\s+\(")
+	inirep := columns(maintxt,"Therapy Summary|(\s+)?Pacing","Medtronic, Inc",0,"Pacing\s+\(")
 	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
 				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
 	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
@@ -664,18 +664,18 @@ mdtQuickLookII:
 	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"event",1)
 	
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
-	if instr(iniRep,"Sensed") {
+	if instr(iniRep,"Sensed") {															; No chamber specified
 		fields[2] := ["Sensed","Paced"]
 		labels[2] := ["Sensed","Paced"]
 	} else {
-		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
-		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
+		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","^AS","^AP","^VS","^VP"]
+		labels[2] := ["AsVs","AsVp","ApVs","ApVp","As","Ap","Vs","Vp"]
 	}
 	scanParams(iniRep,2,"dev",1)
 	
 	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
 	
-	dev := stregX(fintxt,"Session Summary",1,1,"initial interrogation\)",0,n)
+	dev := stregX(fintxt,"Session Summary",1,1,"Parameter Summary",1,n)
 	fields[1] := ["Device","Serial Number","Date of Visit"
 				, "Patient","ID","Physician","`n"
 				, "Device Information","`n"
@@ -701,7 +701,9 @@ mdtQuickLookII:
 	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
 	
-	fintbl := stregX(fintxt,"",n+1,0,"Parameter Summary",1,n)
+	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	fintbl := stregX(fintbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
+	fintbl := stregX(fintbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
 				, "Atrial.*-Pacing Impedance"
 				, "Atrial.*-Capture Threshold"
@@ -709,6 +711,7 @@ mdtQuickLookII:
 				, "Atrial.*-In-Office Threshold"
 				, "Atrial.*-Programmed Amplitude"
 				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-In-Office .*Wave"
 				, "Atrial.*-Programmed Sensitivity"
 			, "RV.*-Lead Impedance"
 				, "RV.*-Pacing Impedance"
@@ -718,6 +721,7 @@ mdtQuickLookII:
 				, "RV.*-In-Office Threshold"
 				, "RV.*-Programmed Amplitude"
 				, "RV.*-Measured .*Wave"
+				, "RV.*-In-Office .*Wave"
 				, "RV.*-Programmed Sensitivity"
 			, "LV.*-Lead Impedance"
 				, "LV.*-Pacing Impedance"
@@ -727,8 +731,8 @@ mdtQuickLookII:
 				, "LV.*-Programmed Amplitude"
 				, "LV.*-Measured .*Wave"
 				, "LV.*-Programmed Sensitivity"]
-	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_sensitivity"
-				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
 				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
 	scanParams(parseTable(fintbl),2,"leads",1)
 	
@@ -1560,7 +1564,8 @@ PrintOut:
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
 	. enc_dt "\par\par\fs22 `n"
 	. "\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
-	. "Device interrogation " enc_type "\par\par\fs22 `n"
+	. "Device interrogation " enc_type "\par `n"
+	. "Perfomed by " tech ".\par\par\fs22 `n"
 	. rtfBody . "\fs22\par `n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
 	. summ . "\par `n"
@@ -2133,6 +2138,8 @@ saveChip:
 
 makeReport:
 {
+	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
+	
 	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
 	if instr(summ,"normal") {
 		summ := "This represents a normal device check. The patient denies any device related symptoms. "
