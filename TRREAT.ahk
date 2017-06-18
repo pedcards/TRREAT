@@ -1564,7 +1564,8 @@ PrintOut:
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
 	. enc_dt "\par\par\fs22 `n"
 	. "\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
-	. "Device interrogation " enc_type "\par\par\fs22 `n"
+	. "Device interrogation " enc_type "\par `n"
+	. "Perfomed by " tech ".\par\par\fs22 `n"
 	. rtfBody . "\fs22\par `n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
 	. summ . "\par `n"
@@ -2137,6 +2138,8 @@ saveChip:
 
 makeReport:
 {
+	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
+	
 	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
 	if instr(summ,"normal") {
 		summ := "This represents a normal device check. The patient denies any device related symptoms. "
