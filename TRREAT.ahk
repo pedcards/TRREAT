@@ -664,12 +664,12 @@ mdtQuickLookII:
 	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"event",1)
 	
 	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
-	if instr(iniRep,"Sensed") {
+	if instr(iniRep,"Sensed") {															; No chamber specified
 		fields[2] := ["Sensed","Paced"]
 		labels[2] := ["Sensed","Paced"]
 	} else {
-		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
-		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
+		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","^AS","^AP","^VS","^VP"]
+		labels[2] := ["AsVs","AsVp","ApVs","ApVp","As","Ap","Vs","Vp"]
 	}
 	scanParams(iniRep,2,"dev",1)
 	
