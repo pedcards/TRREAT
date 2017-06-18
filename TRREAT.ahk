@@ -675,7 +675,7 @@ mdtQuickLookII:
 	
 	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
 	
-	dev := stregX(fintxt,"Session Summary",1,1,"initial interrogation\)",0,n)
+	dev := stregX(fintxt,"Session Summary",1,1,"Parameter Summary",1,n)
 	fields[1] := ["Device","Serial Number","Date of Visit"
 				, "Patient","ID","Physician","`n"
 				, "Device Information","`n"
