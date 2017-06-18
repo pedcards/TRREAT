@@ -711,6 +711,7 @@ mdtQuickLookII:
 				, "Atrial.*-In-Office Threshold"
 				, "Atrial.*-Programmed Amplitude"
 				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-In-Office .*Wave"
 				, "Atrial.*-Programmed Sensitivity"
 			, "RV.*-Lead Impedance"
 				, "RV.*-Pacing Impedance"
@@ -720,6 +721,7 @@ mdtQuickLookII:
 				, "RV.*-In-Office Threshold"
 				, "RV.*-Programmed Amplitude"
 				, "RV.*-Measured .*Wave"
+				, "RV.*-In-Office .*Wave"
 				, "RV.*-Programmed Sensitivity"
 			, "LV.*-Lead Impedance"
 				, "LV.*-Pacing Impedance"
@@ -729,8 +731,8 @@ mdtQuickLookII:
 				, "LV.*-Programmed Amplitude"
 				, "LV.*-Measured .*Wave"
 				, "LV.*-Programmed Sensitivity"]
-	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_sensitivity"
-				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_sensitivity"
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
 				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
 	scanParams(parseTable(fintbl),2,"leads",1)
 	
