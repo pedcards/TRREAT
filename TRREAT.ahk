@@ -615,7 +615,7 @@ Medtronic:
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="Final:\s+Session Summary") {							; or scan more current QuickLook II reports
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {							; or scan more current QuickLook II reports
 		eventlog("QuickLookII report.")
 		gosub mdtQuickLookII
 	} else {																	; or something else
