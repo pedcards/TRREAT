@@ -650,13 +650,93 @@ return
 
 mdtQuickLookII:
 {
-	inirep := columns(maintxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
+/*	INITIAL INTERROGATION: QUICK LOOK II
+	- Arrhythmia counters
+	- Therapy counters
+	- Pacing counters
+*/
+	qltxt := stregX(maintxt,"Quick Look II",1,0,"Observations\s+\(",1)
+	inirep := stregX(qltxt,"Quick Look II",1,1,"Device Status",1,n)
+	fields[1] := ["Device","Serial Number","Date of Visit"
+				, "Patient","ID","Physician","`n"]
+	labels[1] := ["IPG","IPG_SN","Encounter"
+				, "Name","MRN","Physician","null"]
+	fieldvals(inirep,1,"dev")
+	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
+		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
+	}
+	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
+	
+	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
+	fields[1] := ["\(Implanted: ","\)"
+				, "Battery Voltage","`n"
+				, "Remaining Longevity","`n"]
+	labels[1] := ["IPG_impl","null"
+				, "IPG_voltage","null"
+				, "IPG_longevity","null"]
+	fieldvals(inirep,1,"dev")
+	
+	qltbl := stregX(qltxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	qltbl := stregX(qltbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
+	qltbl := stregX(qltbl "<<<", "   ",1,0,"<<<",1)
+	fields[2] := ["Atrial.*-Lead Impedance"
+				, "Atrial.*-Pacing Impedance"
+				, "Atrial.*-Capture Threshold"
+				, "Atrial.*-Measured On"
+				, "Atrial.*-In-Office Threshold"
+				, "Atrial.*-Programmed Amplitude"
+				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-In-Office .*Wave"
+				, "Atrial.*-Programmed Sensitivity"
+			, "RV.*-Lead Impedance"
+				, "RV.*-Pacing Impedance"
+				, "RV.*-Defibrillation Impedance"
+				, "RV.*-Capture Threshold"
+				, "RV.*-Measured On"
+				, "RV.*-In-Office Threshold"
+				, "RV.*-Programmed Amplitude"
+				, "RV.*-Measured .*Wave"
+				, "RV.*-In-Office .*Wave"
+				, "RV.*-Programmed Sensitivity"
+			, "LV.*-Lead Impedance"
+				, "LV.*-Pacing Impedance"
+				, "LV.*-Capture Threshold"
+				, "LV.*-Measured On"
+				, "LV.*-In-Office Threshold"
+				, "LV.*-Programmed Amplitude"
+				, "LV.*-Measured .*Wave"
+				, "LV.*-Programmed Sensitivity"]
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
+				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
+	scanParams(parseTable(qltbl),2,"leads",1)
+	
+	inirep := stregX(qltxt,"Parameter Summary",1,1,"Clinical Status",1)
+	qltbl := stregX(inirep,"Mode",1,0,"Detection",0)
+	qltbl := columns(qltbl,"Mode","Detection",0,"Lower\s+Rate",(qltbl~="Paced AV")?"Paced AV":"")
+	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
+	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
+	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
+	fields[2] := ["Mode Switch","Mode","V. Pacing","AdaptivCRT"
+				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
+				, "Paced AV","Sensed AV"]
+	labels[2] := ["Mode Switch","Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV"]
+	scanParams(qltbl,2,"par",1)
+	
+	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
+	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
+				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
+	labels[2] := ["AT/AF","VF","FVT","VT"
+				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	scanParams(parseTable(qltbl),2,"detect",1)
+	
+	inirep := columns(qltxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
 	
 	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
 	labels[1] := ["VF","VTNS","VT","ATAF"]
-	scanParams(stregX(inirep,"Monitored",1,0,"Therapy",1),1,"event",1)
+	scanParams(stregX(inirep,"Monitored",1,0,"Therapy|Pacing",1),1,"event",1)
 	
-	inirep := columns(maintxt,"Therapy Summary|(\s+)?Pacing","Medtronic, Inc",0,"Pacing\s+\(")
+	inirep := columns(qltxt "<<<","Therapy Summary|(\s+)?Pacing","<<<",0,"Pacing\s+\(")
 	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
 				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
 	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
@@ -673,6 +753,14 @@ mdtQuickLookII:
 	}
 	scanParams(iniRep,2,"dev",1)
 	
+	qlObs := stregX(maintxt,"Observations\s+\(",1,0,"\d+ Software Version",1)
+	fldfill("event-Obs",qlObs)
+	
+/*	FINAL: SESSION SUMMARY
+	- Device info, implant info
+	- Lead parameters and measurements
+	- Detections
+*/
 	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
 	
 	dev := stregX(fintxt,"Session Summary",1,1,"Parameter Summary",1,n)
@@ -743,6 +831,10 @@ mdtQuickLookII:
 				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
 	scanParams(parseTable(fintbl),2,"detect",1)
 	
+/*	FINAL: PARAMETERS
+	- Modes, timing values
+	- Programmed thresholds and outputs
+*/
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
