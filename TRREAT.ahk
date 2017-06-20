@@ -675,6 +675,7 @@ mdtQuickLookII:
 				, "IPG_voltage","null"
 				, "IPG_longevity","null"]
 	fieldvals(inirep,1,"dev")
+	fldfill("IPG_longevity",cleanspace(strX(inirep,"Remaining Longevity",1,19,"`n",1)))
 	
 	qltbl := stregX(qltxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
 	qltbl := RegExReplace(qltbl,"\s+RRT.*years")
@@ -785,32 +786,26 @@ mdtQuickLookII:
 	
 	dev := stregX(fintxt,"Session Summary",1,1,"Parameter Summary",1,n)
 	fields[1] := ["Device","Serial Number","Date of Visit"
-				, "Patient","ID","Physician","`n"
-				, "Device Information","`n"
-				, "Device", "Implanted","`n"
-				, "Atrial", "Implanted","`n"
-				, "RV", "Implanted","`n"
-				, "LV", "Implanted","`n"
-				, "Device Status", "Battery Voltage","Remaining Longevity","`n"]
+				, "Patient","ID","Physician","`n"]
 	labels[1] := ["IPG","IPG_SN","Encounter"
-				, "Name","MRN","Physician","null"
-				, "null","null"
-				, "IPG0", "IPG_impl","null"
-				, "Alead", "Alead_impl","null"
-				, "RVlead", "RVlead_impl","null"
-				, "LVlead", "LVlead_impl","null"
-				, "IPG_stat", "IPG_voltage","IPG_longevity","null"]
+				, "Name","MRN","Physician","null"]
 	fieldvals(dev,1,"dev")
 	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
 	}
+	
+	dev := stregX(fintxt,"Device Status",1,1,"Parameter Summary",1)
+	fields[1] := ["Device Status", "Battery Voltage","Remaining Longevity","`n"]
+	labels[1] := ["IPG_stat", "IPG_voltage","IPG_longevity","null"]
+	fieldvals(dev,1,"dev")
+	fldfill("IPG_longevity",cleanspace(strX(dev,"Remaining Longevity",1,19,"`n",1)))
+	
+	dev := stregX(fintxt,"Device Information",1,1,"Device Status",1)
+	scanDevInfo(dev)
 	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 	fldfill("dev-Alead", RegExReplace(fldval["dev-Alead"],"---"))
 	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
-	
-	dev := stregX(fintxt,"Device Information",1,1,"Device Status",1)
-	scanDevInfo(dev)
 	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
 	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
