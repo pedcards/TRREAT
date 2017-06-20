@@ -677,6 +677,8 @@ mdtQuickLookII:
 	fieldvals(inirep,1,"dev")
 	
 	qltbl := stregX(qltxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	qltbl := RegExReplace(qltbl,"\s+RRT.*years")
+	qltbl := RegExReplace(qltbl,"\s+\(based on initial interrogation\)")
 	qltbl := stregX(qltbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
 	qltbl := stregX(qltbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
@@ -808,6 +810,8 @@ mdtQuickLookII:
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
 	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
+	fintbl := RegExReplace(fintbl,"\s+\(based on initial interrogation\)")
 	fintbl := stregX(fintbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
 	fintbl := stregX(fintbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
