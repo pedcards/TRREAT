@@ -1350,12 +1350,12 @@ parseTable(txt) {
 			{
 				pos := RegExMatch(i "  ","(?<=(\s{2}))[^\s]",,lastpos)			; get position of next column from lastpos
 				
-				col.Push(pos)													; add position to col[] array (0 when no more matches)
-				pre.Push(strX(substr(i,pos),"",1,0,"  ",1,2))					; add header value
-				
 				if !(pos) {														; break out when no more headers
 					break
 				}
+				
+				col.Push(pos)													; add position to col[] array (0 when no more matches)
+				pre.Push(strX(substr(i,pos),"",1,0,"  ",1,2))					; add header value
 				
 				lastpos := pos+1												; new starting pos for next search
 			}
