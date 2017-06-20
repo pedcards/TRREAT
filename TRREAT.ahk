@@ -809,6 +809,9 @@ mdtQuickLookII:
 	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
 	
+	dev := stregX(fintxt,"Device Information",1,1,"Device Status",1)
+	scanDevInfo(dev)
+	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
 	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
 	fintbl := RegExReplace(fintbl,"\s+\(based on initial interrogation\)")
@@ -1482,6 +1485,30 @@ scanParams(txt,blk,pre:="par",rx:="") {
 			
 		;~ MsgBox % pre "-" labels[blk,val] ": " res
 		fldfill(pre "-" labels[blk,val], res)
+	}
+	return
+}
+
+scanDevInfo(txt) {
+	global fldval
+	fields := ["Device","Atrial","RA","RV","LV"]
+	labels := ["IPG","Alead","Alead","RVlead","LVlead"]
+	Loop, parse, txt, `n,`r
+	{
+		i := trim(A_LoopField)
+		set := strX(i,"",1,0,"   ",1,3,n)
+		val := objHasValue(fields,set)
+		
+		if !(val) {
+			continue
+		}
+		
+		res := substr(i,n)
+		model := cleanspace(strX(res,"",1,0,"Implanted:",1,10))
+		date := trim(strx(i,"Implanted:",1,10,"",0))
+		
+		fldfill("dev-" labels[val], model)
+		fldfill("dev-" labels[val] "_impl", date)
 	}
 	return
 }
