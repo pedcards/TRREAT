@@ -615,7 +615,7 @@ Medtronic:
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="Final:\s+Session Summary") {							; or scan more current QuickLook II reports
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {							; or scan more current QuickLook II reports
 		eventlog("QuickLookII report.")
 		gosub mdtQuickLookII
 	} else {																	; or something else
@@ -650,13 +650,114 @@ return
 
 mdtQuickLookII:
 {
-	inirep := columns(maintxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
+/*	INITIAL INTERROGATION: QUICK LOOK II
+	- Arrhythmia counters
+	- Therapy counters
+	- Pacing counters
+*/
+	qltxt := stregX(maintxt,"Quick Look II",1,0,"Observations\s+\(",1)
+	inirep := stregX(qltxt,"Quick Look II",1,1,"Device Status",1,n)
+	fields[1] := ["Device","Serial Number","Date of Visit"
+				, "Patient","ID","Physician","`n"]
+	labels[1] := ["IPG","IPG_SN","Encounter"
+				, "Name","MRN","Physician","null"]
+	fieldvals(inirep,1,"dev")
+	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
+		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
+	}
+	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
+	
+	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
+	fields[1] := ["\(Implanted: ","\)"
+				, "Battery Voltage","`n"
+				, "Remaining Longevity","`n"]
+	labels[1] := ["IPG_impl","null"
+				, "IPG_voltage","null"
+				, "IPG_longevity","null"]
+	fieldvals(inirep,1,"dev")
+	fldfill("IPG_longevity",cleanspace(strX(inirep,"Remaining Longevity",1,19,"`n",1)))
+	
+	qltbl := stregX(qltxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	qltbl := RegExReplace(qltbl,"\s+RRT.*years")
+	qltbl := RegExReplace(qltbl,"\s+\(based on initial interrogation\)")
+	qltbl := stregX(qltbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
+	qltbl := stregX(qltbl "<<<", "   ",1,0,"<<<",1)
+	fields[2] := ["Atrial.*-Lead Impedance"
+				, "Atrial.*-Pacing Impedance"
+				, "Atrial.*-Capture Threshold"
+				, "Atrial.*-Measured On"
+				, "Atrial.*-In-Office Threshold"
+				, "Atrial.*-Programmed Amplitude"
+				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-In-Office .*Wave"
+				, "Atrial.*-Programmed Sensitivity"
+			, "RV.*-Lead Impedance"
+				, "RV.*-Pacing Impedance"
+				, "RV.*-Defibrillation Impedance"
+				, "RV.*-Capture Threshold"
+				, "RV.*-Measured On"
+				, "RV.*-In-Office Threshold"
+				, "RV.*-Programmed Amplitude"
+				, "RV.*-Measured .*Wave"
+				, "RV.*-In-Office .*Wave"
+				, "RV.*-Programmed Sensitivity"
+			, "LV.*-Lead Impedance"
+				, "LV.*-Pacing Impedance"
+				, "LV.*-Capture Threshold"
+				, "LV.*-Measured On"
+				, "LV.*-In-Office Threshold"
+				, "LV.*-Programmed Amplitude"
+				, "LV.*-Measured .*Wave"
+				, "LV.*-Programmed Sensitivity"]
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
+				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
+	scanParams(parseTable(qltbl),2,"leads",1)
+	if (fldval["leads-A_imp"]||fldval["leads-A_cap"]||fldval["leads-A_Sthr"]) {
+		normLead("RA"
+				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+				,fldval["leads-A_imp"],fldval["leads-A_cap"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
+				,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
+	}
+	if (fldval["leads-RV_imp"]||fldval["leads-RV_cap"]||fldval["leads-RV_Sthr"]) {
+		normLead("RV"
+				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
+				,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
+				,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+	}
+	if (fldval["leads-LV_imp"]||fldval["leads-LV_cap"]||fldval["leads-LV_Sthr"]) {
+		normLead("LV"
+				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
+				,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+				,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
+	}
+	
+	inirep := stregX(qltxt,"Parameter Summary",1,1,"Clinical Status",1)
+	qltbl := stregX(inirep,"Mode",1,0,"Detection",0)
+	qltbl := columns(qltbl,"Mode","Detection",0,"Lower\s+Rate",(qltbl~="Paced AV")?"Paced AV":"")
+	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
+	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
+	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
+	fields[2] := ["Mode Switch","Mode","V. Pacing","AdaptivCRT"
+				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
+				, "Paced AV","Sensed AV"]
+	labels[2] := ["Mode Switch","Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV"]
+	scanParams(qltbl,2,"par",1)
+	
+	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
+	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
+				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
+	labels[2] := ["AT/AF","VF","FVT","VT"
+				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	scanParams(parseTable(qltbl),2,"detect",1)
+	
+	inirep := columns(qltxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
 	
 	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
 	labels[1] := ["VF","VTNS","VT","ATAF"]
-	scanParams(stregX(inirep,"Monitored",1,0,"Therapy",1),1,"event",1)
+	scanParams(stregX(inirep,"Monitored",1,0,"Therapy|Pacing",1),1,"event",1)
 	
-	inirep := columns(maintxt,"Therapy Summary|(\s+)?Pacing","Medtronic, Inc",0,"Pacing\s+\(")
+	inirep := columns(qltxt "<<<","Therapy Summary|(\s+)?Pacing","<<<",0,"Pacing\s+\(")
 	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
 				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
 	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
@@ -673,35 +774,59 @@ mdtQuickLookII:
 	}
 	scanParams(iniRep,2,"dev",1)
 	
+	qlObs := stregX(maintxt,"Observations\s+\(",1,0,"\d+ Software Version",1)
+	fldfill("event-Obs",qlObs)
+	
+/*	Pacing Threshold Test Report
+	- Atrial, RV, LV amplitude threshold test
+	- to Capture Management
+*/
+	ptr := 1
+	While (i := stregX(maintxt,"Pacing Threshold Test Report",ptr,1,"Medtronic, Inc",1,ptr)) {
+		thrTest := stregX(i,"\w+\s+Amplitude Threshold Test",1,0,"Capture Management",0)
+		thrLead := stregX(thrTest,"\w+",1,0,"\s+Amplitude",1)
+		thrTbl := parseTable(stregX(thrTest "<<<","   ",1,0,"<<<",1))
+		fields[1] := ["Threshold-.*Amplitude","Threshold-.*Pulse Width"]
+		labels[1] := ["Amp","PW"]
+		scanParams(thrTbl,1,"tmp",1)
+		if (thrVal := fldval["tmp-Amp"] printQ(fldval["tmp-PW"]," / ###")) {
+			leads[(thrLead="Atrial")?"RA":thrLead,"cap"] := thrVal
+		}
+	}
+	
+/*	FINAL: SESSION SUMMARY
+	- Device info, implant info
+	- Lead parameters and measurements
+	- Detections
+*/
 	fintxt := stregX(maintxt,"Final: Session Summary",1,0,"Medtronic, Inc.",0)
 	
 	dev := stregX(fintxt,"Session Summary",1,1,"Parameter Summary",1,n)
 	fields[1] := ["Device","Serial Number","Date of Visit"
-				, "Patient","ID","Physician","`n"
-				, "Device Information","`n"
-				, "Device", "Implanted","`n"
-				, "Atrial", "Implanted","`n"
-				, "RV", "Implanted","`n"
-				, "LV", "Implanted","`n"
-				, "Device Status", "Battery Voltage","Remaining Longevity","`n"]
+				, "Patient","ID","Physician","`n"]
 	labels[1] := ["IPG","IPG_SN","Encounter"
-				, "Name","MRN","Physician","null"
-				, "null","null"
-				, "IPG0", "IPG_impl","null"
-				, "Alead", "Alead_impl","null"
-				, "RVlead", "RVlead_impl","null"
-				, "LVlead", "LVlead_impl","null"
-				, "IPG_stat", "IPG_voltage","IPG_longevity","null"]
+				, "Name","MRN","Physician","null"]
 	fieldvals(dev,1,"dev")
 	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
 		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
 	}
+	
+	dev := stregX(fintxt,"Device Status",1,1,"Parameter Summary",1)
+	fields[1] := ["Device Status", "Battery Voltage","Remaining Longevity","`n"]
+	labels[1] := ["IPG_stat", "IPG_voltage","IPG_longevity","null"]
+	fieldvals(dev,1,"dev")
+	fldfill("IPG_longevity",cleanspace(strX(dev,"Remaining Longevity",1,19,"`n",1)))
+	
+	dev := stregX(fintxt,"Device Information",1,1,"Device Status",1)
+	scanDevInfo(dev)
 	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 	fldfill("dev-Alead", RegExReplace(fldval["dev-Alead"],"---"))
 	fldfill("dev-RVlead", RegExReplace(fldval["dev-RVlead"],"---"))
 	fldfill("dev-LVlead", RegExReplace(fldval["dev-LVlead"],"---"))
 	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
+	fintbl := RegExReplace(fintbl,"\s+\(based on initial interrogation\)")
 	fintbl := stregX(fintbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
 	fintbl := stregX(fintbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
@@ -743,6 +868,10 @@ mdtQuickLookII:
 				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
 	scanParams(parseTable(fintbl),2,"detect",1)
 	
+/*	FINAL: PARAMETERS
+	- Modes, timing values
+	- Programmed thresholds and outputs
+*/
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
@@ -1258,12 +1387,12 @@ parseTable(txt) {
 			{
 				pos := RegExMatch(i "  ","(?<=(\s{2}))[^\s]",,lastpos)			; get position of next column from lastpos
 				
-				col.Push(pos)													; add position to col[] array (0 when no more matches)
-				pre.Push(strX(substr(i,pos),"",1,0,"  ",1,2))					; add header value
-				
 				if !(pos) {														; break out when no more headers
 					break
 				}
+				
+				col.Push(pos)													; add position to col[] array (0 when no more matches)
+				pre.Push(strX(substr(i,pos),"",1,0,"  ",1,2))					; add header value
 				
 				lastpos := pos+1												; new starting pos for next search
 			}
@@ -1368,6 +1497,30 @@ scanParams(txt,blk,pre:="par",rx:="") {
 			
 		;~ MsgBox % pre "-" labels[blk,val] ": " res
 		fldfill(pre "-" labels[blk,val], res)
+	}
+	return
+}
+
+scanDevInfo(txt) {
+	global fldval
+	fields := ["Device","Atrial","RA","RV","LV"]
+	labels := ["IPG","Alead","Alead","RVlead","LVlead"]
+	Loop, parse, txt, `n,`r
+	{
+		i := trim(A_LoopField)
+		set := strX(i,"",1,0,"   ",1,3,n)
+		val := objHasValue(fields,set)
+		
+		if !(val) {
+			continue
+		}
+		
+		res := substr(i,n)
+		model := cleanspace(strX(res,"",1,0,"Implanted:",1,10))
+		date := trim(strx(i,"Implanted:",1,10,"",0))
+		
+		fldfill("dev-" labels[val], model)
+		fldfill("dev-" labels[val] "_impl", date)
 	}
 	return
 }
@@ -1513,6 +1666,7 @@ printEvents()
 	. printQ(fldval["event-A_Paced"]?fldval["event-A_Paced"]:"","### AT episodes pace-terminated. ")
 	. printQ(fldval["event-A_Shocked"]?fldval["event-A_Shocked"]:"","### AT/AF episodes shock-terminated. ")
 	. printQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
+	. printQ(fldval["event-Obs"],"\par ### ")
 	
 	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18 `n###\par `n") 
 return	
