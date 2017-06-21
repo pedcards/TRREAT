@@ -777,6 +777,23 @@ mdtQuickLookII:
 	qlObs := stregX(maintxt,"Observations\s+\(",1,0,"\d+ Software Version",1)
 	fldfill("event-Obs",qlObs)
 	
+/*	Pacing Threshold Test Report
+	- Atrial, RV, LV amplitude threshold test
+	- to Capture Management
+*/
+	ptr := 1
+	While (i := stregX(maintxt,"Pacing Threshold Test Report",ptr,1,"Medtronic, Inc",1,ptr)) {
+		thrTest := stregX(i,"\w+\s+Amplitude Threshold Test",1,0,"Capture Management",0)
+		thrLead := stregX(thrTest,"\w+",1,0,"\s+Amplitude",1)
+		thrTbl := parseTable(stregX(thrTest "<<<","   ",1,0,"<<<",1))
+		fields[1] := ["Threshold-.*Amplitude","Threshold-.*Pulse Width"]
+		labels[1] := ["Amp","PW"]
+		scanParams(thrTbl,1,"tmp",1)
+		if (thrVal := fldval["tmp-Amp"] printQ(fldval["tmp-PW"]," / ###")) {
+			leads[(thrLead="Atrial")?"RA":thrLead,"cap"] := thrVal
+		}
+	}
+	
 /*	FINAL: SESSION SUMMARY
 	- Device info, implant info
 	- Lead parameters and measurements
