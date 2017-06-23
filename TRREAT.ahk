@@ -993,6 +993,12 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null"]
 			fieldvals(finRep,1,"dev")
+			
+			finBlk := stregX(finRep,"Patient Name",1,0,"Pacemaker Status",0)
+			finBlk := stregX(finBlk,"Pacemaker Model",1,0,"Pacemaker Status",1)
+			scanDevInfo(finBlk)
+			fldval["dev-IPG"] := RegExReplace(fldval["dev-IPG"],fldval["dev-IPG_SN"])
+			
 		}
 		
 	}
