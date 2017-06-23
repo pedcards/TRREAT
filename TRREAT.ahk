@@ -1014,6 +1014,13 @@ mdtAdapta:
 						, "Ventricular.*-Pace Polarity"]
 			labels[1] := ["A_imp","A_pol","V_imp","V_pol"]
 			scanParams(finBlk,1,"leads",1)
+			
+			finBlk := stregX(finRep "<<<","In-Office Threshold",1,0,"<<<",0)
+			finBlk := columns(finBlk,"In-Office Threshold","<<<",0,"\w+ Sensing Threshold") "<<<"
+			finFld := stregX(finBlk,"Atrial Pacing Threshold",1,1,"<<<|Ventricular Pacing Threshold",1)
+			fldfill("leads-A_cap",parseStrDur(finFld))
+			finFld := stregX(finBlk,"Ventricular Pacing Threshold",1,1,"<<<",1)
+			fldfill("leads-V_cap",parseStrDur(finFld))
 		}
 		
 	}
