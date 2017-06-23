@@ -985,22 +985,17 @@ mdtAdapta:
 		}
 	}
 	
-	
-	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
-	fields[1] := ["Atrial High Rate.*","Ventricular High Rate.*"]
-	labels[1] := ["AHR","VHR"]
-	scanParams(RegExReplace(inirep,"Episodes: ","Episodes:  "),1,"event",1)
-	
-	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
-	if instr(iniRep,"Sensed") {
-		fields[2] := ["Sensed","Paced"]
-		labels[2] := ["Sensed","Paced"]
-	} else {
-		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
-		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
+	ptr := 1
+	while (finRep := stregX(maintxt,"Final Report",ptr,0,"Medtronic Software",1,ptr)) {
+		if instr(finRep,"Pacemaker Status") {
+			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","`n"
+						, "Patient Name","ID","Physician","`n"]
+			labels[1] := ["IPG","IPG_SN","Encounter","null"
+						, "Name","MRN","Physician","null"]
+			fieldvals(finRep,1,"dev")
+		}
+		
 	}
-	scanParams(iniRep,2,"dev",1)
-	
 	splTxt := "Final Report"
 	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
 	Loop, % fin.length()
