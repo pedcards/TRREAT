@@ -965,6 +965,18 @@ mdtAdapta:
 						, "LRL","URL","USR"
 						, "SearchAV","PAV","SAV"]
 			scanParams(iniTbl,1,"par")
+			
+			iniBlk := stregX(inirep "<<<","Clinical Status",1,0,"<<<",0)
+			iniBlk := columns(iniBlk,"Clinical Status","<<<",0,"Pacing\s+\(")
+			fields[1] := ["Atrial High Rate Episodes","Ventricular High Rate Episodes"]
+			labels[1] := ["AHR","VHR"]
+			scanParams(iniBlk,1,"event",1)
+			iniTbl := stregX(iniBlk "<<<","Pacing\s+\(",1,0,"<<<",1)
+			iniTbl := instr(iniTbl,"Event Counters") ? oneCol(iniTbl) : iniTbl
+			fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","Sensed","Paced"]
+			labels[2] := ["AsVs","AsVp","ApVs","ApVp","Sensed","Paced"]
+			scanParams(iniTbl,2,"dev",1)
+			
 		}
 	}
 	
