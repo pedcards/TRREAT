@@ -999,6 +999,11 @@ mdtAdapta:
 			scanDevInfo(finBlk)
 			fldval["dev-IPG"] := RegExReplace(fldval["dev-IPG"],fldval["dev-IPG_SN"])
 			
+			finBlk := stregX(finRep,"Pacemaker Status",1,0,"Lead Status",1)
+			fields[1] := ["Battery Status","Voltage"]
+			labels[1] := ["IPG_stat","IPG_voltage"]
+			scanParams(finBlk,1,"dev",1)
+			
 		}
 		
 	}
