@@ -922,9 +922,9 @@ mdtAdapta:
 						, "Name","MRN","Physician","null","History","null","IPG_impl","null"]
 			fieldvals(inirep,1,"dev")
 			
-			iniRep := stregX(inirep,"Pacemaker Status",1,0,"Parameter Summary",1)
+			iniBlk := stregX(inirep,"Pacemaker Status",1,0,"Parameter Summary",1)
 			
-			iniTbl := columns(inirep "<<<","Pacemaker Status","<<<",0,"Battery Status")
+			iniTbl := columns(iniBlk "<<<","Pacemaker Status","<<<",0,"Battery Status")
 			iniFld := stregX(iniTbl,"Battery Status",1,0,"Lead Summary",1)
 			fields[1] := ["Estimated.*longevity","Voltage.Impedance"]
 			labels[1] := ["IPG_longevity","IPG_voltage"]
