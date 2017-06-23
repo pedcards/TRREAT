@@ -977,6 +977,10 @@ mdtAdapta:
 			labels[2] := ["AsVs","AsVp","ApVs","ApVp","Sensed","Paced"]
 			scanParams(iniTbl,2,"dev",1)
 			
+			iniTbl := stregX(iniTbl "<<<","Event Counters",1,0,"<<<",1)
+			fields[3] := ["PVC singles","PVC runs","PAC runs"]
+			labels[3] := ["PVC","PVCruns","PACruns"]
+			scanParams(iniTbl,3,"event",1)
 		}
 	}
 	
