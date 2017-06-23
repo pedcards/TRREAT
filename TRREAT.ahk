@@ -1004,6 +1004,16 @@ mdtAdapta:
 			labels[1] := ["IPG_stat","IPG_voltage"]
 			scanParams(finBlk,1,"dev",1)
 			
+			finBlk := stregX(finRep,"Lead Status",1,0,".. Capture Management|Sensing Assurance",1)
+			finBlk := stregX(finBlk "<<<","[\r\n]+   ",1,0,"<<<",1)
+			finBlk := stregX(finBlk "<<<","   ",1,0,"<<<",1)
+			finBlk := parseTable(finBlk)
+			fields[1] := ["Atrial.*-Measured Impedance"
+						, "Atrial.*-Pace Polarity"
+						, "Ventricular.*-Measured Impedance"
+						, "Ventricular.*-Pace Polarity"]
+			labels[1] := ["A_imp","A_pol","V_imp","V_pol"]
+			scanParams(finBlk,1,"leads",1)
 		}
 		
 	}
