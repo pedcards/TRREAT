@@ -954,6 +954,17 @@ mdtAdapta:
 			labels[1] := ["A_cap","A_date","A_output","A_mgt","A_Sthr","A_sensitivity","A_imp","A_stat","A_model","A_impl"
 						, "V_cap","V_date","V_output","V_mgt","V_Sthr","V_sensitivity","V_imp","V_stat","V_model","V_impl"]
 			scanParams(iniTbl,1,"leads",1)
+			
+			iniBlk := stregX(inirep,"Parameter Summary",1,1,"Clinical Status",1)
+			iniTbl := stregX(iniBlk "<<<","Mode",1,0,"<<<",1)
+			iniTbl := columns(iniTbl "<<<","Mode","<<<",0,"Lower Rate","Paced AV")
+			fields[1] := ["Mode","Mode Switch","Detection Rate"
+						, "Lower Rate","Upper Tracking Rate","Upper Sensor Rate"
+						, "Search AV+","Paced AV","Sensed AV"]
+			labels[1] := ["Mode","ModeSwitch","ModeSwitchRate"
+						, "LRL","URL","USR"
+						, "SearchAV","PAV","SAV"]
+			scanParams(iniTbl,1,"par")
 		}
 	}
 	
