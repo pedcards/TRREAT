@@ -929,6 +929,31 @@ mdtAdapta:
 			fields[1] := ["Estimated.*longevity","Voltage.Impedance"]
 			labels[1] := ["IPG_longevity","IPG_voltage"]
 			scanParams(iniFld,1,"dev",1)
+			
+			iniTbl := parseTable(stregX(iniTbl "<<<","Lead Summary",1,0,"<<<",1))
+			fields[1] := ["Atrial-Measured Threshold"
+						, "Atrial-Date Measured"
+						, "Atrial-Programmed Output"
+						, "Atrial-Capture"
+						, "Atrial-Measured.*Wave"
+						, "Atrial-Programmed Sensitivity"
+						, "Atrial-Measured Impedance"
+						, "Atrial-Lead Status"
+						, "Atrial-Lead Model"
+						, "Atrial-Implanted"
+						, "Ventricular-Measured Threshold"
+						, "Ventricular-Date Measured"
+						, "Ventricular-Programmed Output"
+						, "Ventricular-Capture"
+						, "Ventricular-Measured.*Wave"
+						, "Ventricular-Programmed Sensitivity"
+						, "Ventricular-Measured Impedance"
+						, "Ventricular-Lead Status"
+						, "Ventricular-Lead Model"
+						, "Ventricular-Implanted"]
+			labels[1] := ["A_cap","A_date","A_output","A_mgt","A_Sthr","A_sensitivity","A_imp","A_stat","A_model","A_impl"
+						, "V_cap","V_date","V_output","V_mgt","V_Sthr","V_sensitivity","V_imp","V_stat","V_model","V_impl"]
+			scanParams(iniTbl,1,"leads",1)
 		}
 	}
 	
