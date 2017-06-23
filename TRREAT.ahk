@@ -911,6 +911,7 @@ return
 
 mdtAdapta:
 {
+	isAdapta := true
 	ptr := 1
 	While (iniRep := stregX(maintxt,"Initial Interrogation Report",ptr,0,"Medtronic Software",1,ptr)) {
 		if instr(iniRep,"Pacemaker Status") {
@@ -1083,6 +1084,7 @@ mdtAdapta:
 					,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
 		}
 	}
+	isAdapta := 
 return
 }
 
@@ -1576,9 +1578,13 @@ scanParams(txt,blk,pre:="par",rx:="") {
 }
 
 scanDevInfo(txt) {
-	global fldval
+	global fldval,isAdapta
 	fields := ["Device","Atrial","RA","RV","LV"]
 	labels := ["IPG","Alead","Alead","RVlead","LVlead"]
+	if (isAdapta) {
+		fields := ["Pacemaker Model:","Atrial Lead:","Ventricular Lead:"]
+		labels := ["IPG","Alead","Vlead"]
+	}
 	Loop, parse, txt, `n,`r
 	{
 		i := trim(A_LoopField)
