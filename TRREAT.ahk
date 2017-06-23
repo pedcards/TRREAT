@@ -970,7 +970,7 @@ mdtAdapta:
 			iniBlk := columns(iniBlk,"Clinical Status","<<<",0,"Pacing\s+\(")
 			fields[1] := ["Atrial High Rate Episodes","Ventricular High Rate Episodes"]
 			labels[1] := ["AHR","VHR"]
-			scanParams(iniBlk,1,"event",1)
+			scanParams(RegExReplace(iniBlk,"Episodes: ","Episodes:  "),1,"event",1)
 			iniTbl := stregX(iniBlk "<<<","Pacing\s+\(",1,0,"<<<",1)
 			iniTbl := instr(iniTbl,"Event Counters") ? oneCol(iniTbl) : iniTbl
 			fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","Sensed","Paced"]
