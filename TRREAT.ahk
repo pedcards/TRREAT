@@ -911,6 +911,20 @@ return
 
 mdtAdapta:
 {
+	ptr := 1
+	While (iniRep := stregX(maintxt,"Initial Interrogation Report",ptr,0,"Medtronic Software",1,ptr)) {
+		if instr(iniRep,"Pacemaker Status") {
+			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","`n"
+						, "Patient Name","ID","Physician","`n"
+						, "History","`n"
+						, "Implanted","\)"]
+			labels[1] := ["IPG","IPG_SN","Encounter","null"
+						, "Name","MRN","Physician","null","History","null","IPG_impl","null"]
+			fieldvals(inirep,1,"dev")
+		}
+	}
+	
+	
 	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
 	fields[1] := ["Atrial High Rate.*","Ventricular High Rate.*"]
 	labels[1] := ["AHR","VHR"]
