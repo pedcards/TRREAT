@@ -911,71 +911,122 @@ return
 
 mdtAdapta:
 {
-	iniRep := columns(maintxt,"Clinical Status","Medtronic, Inc",0,"Pacing \(")
-	fields[1] := ["Atrial High Rate.*","Ventricular High Rate.*"]
-	labels[1] := ["AHR","VHR"]
-	scanParams(RegExReplace(inirep,"Episodes: ","Episodes:  "),1,"event",1)
-	
-	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
-	if instr(iniRep,"Sensed") {
-		fields[2] := ["Sensed","Paced"]
-		labels[2] := ["Sensed","Paced"]
-	} else {
-		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP"]
-		labels[2] := ["AsVs","AsVp","ApVs","ApVp"]
-	}
-	scanParams(iniRep,2,"dev",1)
-	
-	splTxt := "Final Report"
-	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
-	Loop, % fin.length()
-	{
-		fintxt := fin[A_index]
-		if (fintxt~=splTxt ".*Pacemaker Status") {
-			dev := strX(fintxt,"Final Report",1,0,"Lead Status:",1,0)
-			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit"
-						, "Patient Name", "ID", "Physician","`n"
-						, "Pacemaker Model", "Implanted"
-						, "Atrial Lead", "Implanted"
-						, "Ventricular Lead", "Implanted"
-						, "Pacemaker Status", "Estimated remaining longevity"
-						, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
-			labels[1] := ["IPG","IPG_SN","Encounter"
-						,"Name", "MRN", "Physician","null"
-						, "IPG0", "IPG_impl"
-						, "Alead", "Alead_impl"
-						, "Vlead", "Vlead_impl"
-						, "IPG_stat", "IPG_longevity"
-						, "Battery_stat", "IPG_voltage", "Current", "Impedance", "null"]
-			fieldvals(dev,1,"dev")
-			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-				fldval["dev-Physician"] := "Dr. " . trim(tmp)
-			}
-			fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
-			fldfill("dev-Name",RegExReplace(fldval["dev-Name"],"i)DOB.*"))
-			fldfill("dev-Alead",RegExReplace(fldval["dev-Alead"],"---"))
-			fldfill("dev-RVlead",RegExReplace(fldval["dev-RVlead"],"---"))
+	isAdapta := true
+	ptr := 1
+	While (iniRep := stregX(maintxt,"Initial Interrogation Report",ptr,0,"Medtronic Software",1,ptr)) {
+		if instr(iniRep,"Pacemaker Status") {
+			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","`n"
+						, "Patient Name","ID","Physician","`n"
+						, "History","`n"
+						, "Implanted","\)"]
+			labels[1] := ["IPG","IPG_SN","Encounter","null"
+						, "Name","MRN","Physician","null","History","null","IPG_impl","null"]
+			fieldvals(inirep,1,"dev")
 			
-			finleads := stregX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-			finleads := columns(finleads,"Lead Status:","In-Office Threshold",0,"Sensing Assurance")
-			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
-						, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
-						, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
-						, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
-			labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
-						, "V_output","V_curr","V_imp","V_pol","null"]
-			fldfill("leads-date",strX(finleads,"Lead Status: ",1,13,"`n",1,0,n))
-			tbl := stregX(substr(finleads,n),"",1,0,"In-Office Threshold",1)
-			scanParams(parseTable(tbl),2,"leads")
+			iniBlk := stregX(inirep,"Pacemaker Status",1,0,"Parameter Summary",1)
 			
-			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
-			fldfill("leads-AP_thr",parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0))))
-			fldfill("leads-VP_thr",parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0))))
-			fldfill("leads-AS_thr",trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n"))
-			fldfill("leads-VS_thr",trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n"))
+			iniTbl := columns(iniBlk "<<<","Pacemaker Status","<<<",0,"Battery Status")
+			iniFld := stregX(iniTbl,"Battery Status",1,0,"Lead Summary",1)
+			fields[1] := ["Estimated.*longevity","Voltage.Impedance"]
+			labels[1] := ["IPG_longevity","IPG_voltage"]
+			scanParams(iniFld,1,"dev",1)
+			
+			iniTbl := parseTable(stregX(iniTbl "<<<","Lead Summary",1,0,"<<<",1))
+			fields[1] := ["Atrial-Measured Threshold"
+						, "Atrial-Date Measured"
+						, "Atrial-Programmed Output"
+						, "Atrial-Capture"
+						, "Atrial-Measured.*Wave"
+						, "Atrial-Programmed Sensitivity"
+						, "Atrial-Measured Impedance"
+						, "Atrial-Lead Status"
+						, "Atrial-Lead Model"
+						, "Atrial-Implanted"
+						, "Ventricular-Measured Threshold"
+						, "Ventricular-Date Measured"
+						, "Ventricular-Programmed Output"
+						, "Ventricular-Capture"
+						, "Ventricular-Measured.*Wave"
+						, "Ventricular-Programmed Sensitivity"
+						, "Ventricular-Measured Impedance"
+						, "Ventricular-Lead Status"
+						, "Ventricular-Lead Model"
+						, "Ventricular-Implanted"]
+			labels[1] := ["A_cap","A_date","A_output","A_mgt","A_Sthr","A_sensitivity","A_imp","A_stat","A_model","A_impl"
+						, "V_cap","V_date","V_output","V_mgt","V_Sthr","V_sensitivity","V_imp","V_stat","V_model","V_impl"]
+			scanParams(iniTbl,1,"leads",1)
+			
+			iniBlk := stregX(inirep,"Parameter Summary",1,1,"Clinical Status",1)
+			iniTbl := stregX(iniBlk "<<<","Mode",1,0,"<<<",1)
+			iniTbl := columns(iniTbl "<<<","Mode","<<<",0,"Lower Rate",instr(iniTbl,"Paced AV")?"Paced AV":"")
+			fields[1] := ["Mode","Mode Switch","Detection Rate"
+						, "Lower Rate","Upper Tracking Rate","Upper Sensor Rate"
+						, "Search AV+","Paced AV","Sensed AV"]
+			labels[1] := ["Mode","ModeSwitch","ModeSwitchRate"
+						, "LRL","URL","USR"
+						, "SearchAV","PAV","SAV"]
+			scanParams(iniTbl,1,"par")
+			
+			iniBlk := stregX(inirep "<<<","Clinical Status",1,0,"<<<",0)
+			iniBlk := columns(iniBlk,"Clinical Status","<<<",0,"Pacing\s+\(")
+			fields[1] := ["Atrial High Rate Episodes","Ventricular High Rate Episodes"]
+			labels[1] := ["AHR","VHR"]
+			scanParams(RegExReplace(iniBlk,"Episodes: ","Episodes:  "),1,"event",1)
+			iniTbl := stregX(iniBlk "<<<","Pacing\s+\(",1,0,"<<<",1)
+			iniTbl := instr(iniTbl,"Event Counters") ? oneCol(iniTbl) : iniTbl
+			fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","Sensed","Paced"]
+			labels[2] := ["AsVs","AsVp","ApVs","ApVp","Sensed","Paced"]
+			scanParams(iniTbl,2,"dev",1)
+			
+			iniTbl := stregX(iniTbl "<<<","Event Counters",1,0,"<<<",1)
+			fields[3] := ["PVC singles","PVC runs","PAC runs"]
+			labels[3] := ["PVC","PVCruns","PACruns"]
+			scanParams(iniTbl,3,"event",1)
 		}
-		if (fintxt~=splTxt ".*Permanent Parameters") {
-			perm := oneCol(stregX(fintxt,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
+	}
+	
+	ptr := 1
+	while (finRep := stregX(maintxt,"Final Report",ptr,0,"Medtronic Software",1,ptr)) {
+		if instr(finRep,"Pacemaker Status") {
+			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","`n"
+						, "Patient Name","ID","Physician","`n"]
+			labels[1] := ["IPG","IPG_SN","Encounter","null"
+						, "Name","MRN","Physician","null"]
+			fieldvals(finRep,1,"dev")
+			
+			finBlk := stregX(finRep,"Patient Name",1,0,"Pacemaker Status",0)
+			finBlk := stregX(finBlk,"Pacemaker Model",1,0,"Pacemaker Status",1)
+			scanDevInfo(finBlk)
+			fldval["dev-IPG"] := RegExReplace(fldval["dev-IPG"],fldval["dev-IPG_SN"])
+			
+			finBlk := stregX(finRep,"Pacemaker Status",1,0,"Lead Status",1)
+			fields[1] := ["Battery Status","Voltage"]
+			labels[1] := ["IPG_stat","IPG_voltage"]
+			scanParams(finBlk,1,"dev",1)
+			
+			finBlk := stregX(finRep,"Lead Status",1,0,".. Capture Management|Sensing Assurance",1)
+			finBlk := stregX(finBlk "<<<","[\r\n]+   ",1,0,"<<<",1)
+			finBlk := stregX(finBlk "<<<","   ",1,0,"<<<",1)
+			finBlk := parseTable(finBlk)
+			fields[1] := ["Atrial.*-Measured Impedance"
+						, "Atrial.*-Pace Polarity"
+						, "Ventricular.*-Measured Impedance"
+						, "Ventricular.*-Pace Polarity"]
+			labels[1] := ["A_imp","A_pol","V_imp","V_pol"]
+			scanParams(finBlk,1,"leads",1)
+			
+			finBlk := stregX(finRep "<<<","In-Office Threshold",1,0,"<<<",0)
+			finBlk := columns(finBlk,"In-Office Threshold","<<<",0,"\w+ Sensing Threshold") "<<<"
+			finFld := stregX(finBlk,"Atrial Pacing Threshold",1,1,"(<<<)|(Ventricular Pacing Threshold)",1)
+			fldfill("leads-A_cap",parseStrDur(finFld))
+			finFld := stregX(finBlk,"Ventricular Pacing Threshold",1,1,"<<<",1)
+			fldfill("leads-V_cap",parseStrDur(finFld))
+			fields[1] := ["P-wave","R-wave"]
+			labels[1] := ["AS_thr","VS_thr"]
+			scanParams(finBlk,1,"leads",1)
+		}
+		if instr(finRep,"Permanent Parameters") {
+			perm := oneCol(stregX(finRep,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
 			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
@@ -991,24 +1042,24 @@ mdtAdapta:
 			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_V,3,"Vlead")
 		}
-		
-		if (fldval["dev-Alead_impl"]) {
-			normLead("RA"
-					,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-					,fldval["leads-A_imp"],fldval["leads-AP_thr"]
-					,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-					,fldval["Alead-Pol_pace"]
-					,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
-		}
-		if (fldval["dev-Vlead_impl"]) {
-			normLead("RV"
-					,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
-					,fldval["leads-V_imp"],fldval["leads-VP_thr"]
-					,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
-					,fldval["Vlead-Pol_pace"]
-					,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
-		}
 	}
+	if (fldval["dev-Alead_impl"]) {
+		normLead("RA"
+				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+				,fldval["leads-A_imp"],fldval["leads-A_cap"]
+				,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
+				,fldval["Alead-Pol_pace"]
+				,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
+	}
+	if (fldval["dev-Vlead_impl"]) {
+		normLead("RV"
+				,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
+				,fldval["leads-V_imp"],fldval["leads-V_cap"]
+				,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
+				,fldval["Vlead-Pol_pace"]
+				,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
+	}
+	isAdapta := 
 return
 }
 
@@ -1350,17 +1401,11 @@ parseStrDur(txt) {
 /*	Parse a block of text for Strength Duration values
 	and return as a formatted string
 */
-	if !instr(txt,"Strength Duration") {										; must be a Strength Duration block
-		return Error
-	}
 	n := 1
-	txt := stregX(txt,"Strength Duration",1,1,">>>end",1)
-	loop
-	{
-		RegExMatch(txt,"O)\d+[.]\d+ V(.*?)\d+[.]\d+ ms",val,n)					; find "0.50 V @ 0.4 ms"
+	While (pos:=RegExMatch(txt,"O)\d+[.]\d+ V(.*?)\d+[.]\d+ ms",val,n)) {		; find "0.50 V @ 0.4 ms"
 		res := ((res) ? res " and " : "") . val.value()							; append to RES (if RES already exists, prepend "and")
-		n+=val.Len()															; starting point for next instance
-	} until (A_index > val.count())
+		n+=pos+val.Len()														; starting point for next instance
+	}
 	
 return res
 }
@@ -1502,9 +1547,13 @@ scanParams(txt,blk,pre:="par",rx:="") {
 }
 
 scanDevInfo(txt) {
-	global fldval
+	global fldval,isAdapta
 	fields := ["Device","Atrial","RA","RV","LV"]
 	labels := ["IPG","Alead","Alead","RVlead","LVlead"]
+	if (isAdapta) {
+		fields := ["Pacemaker Model:","Atrial Lead:","Ventricular Lead:"]
+		labels := ["IPG","Alead","Vlead"]
+	}
 	Loop, parse, txt, `n,`r
 	{
 		i := trim(A_LoopField)
