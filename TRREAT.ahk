@@ -958,7 +958,7 @@ mdtAdapta:
 			
 			iniBlk := stregX(inirep,"Parameter Summary",1,1,"Clinical Status",1)
 			iniTbl := stregX(iniBlk "<<<","Mode",1,0,"<<<",1)
-			iniTbl := columns(iniTbl "<<<","Mode","<<<",0,"Lower Rate","Paced AV")
+			iniTbl := columns(iniTbl "<<<","Mode","<<<",0,"Lower Rate",instr(iniTbl,"Paced AV")?"Paced AV":"")
 			fields[1] := ["Mode","Mode Switch","Detection Rate"
 						, "Lower Rate","Upper Tracking Rate","Upper Sensor Rate"
 						, "Search AV+","Paced AV","Sensed AV"]
