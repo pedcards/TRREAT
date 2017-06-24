@@ -1025,58 +1025,8 @@ mdtAdapta:
 			labels[1] := ["AS_thr","VS_thr"]
 			scanParams(finBlk,1,"leads",1)
 		}
-		
-	}
-	splTxt := "Final Report"
-	fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
-	Loop, % fin.length()
-	{
-		fintxt := fin[A_index]
-		if (fintxt~=splTxt ".*Pacemaker Status") {
-			dev := strX(fintxt,"Final Report",1,0,"Lead Status:",1,0)
-			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit"
-						, "Patient Name", "ID", "Physician","`n"
-						, "Pacemaker Model", "Implanted"
-						, "Atrial Lead", "Implanted"
-						, "Ventricular Lead", "Implanted"
-						, "Pacemaker Status", "Estimated remaining longevity"
-						, "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
-			labels[1] := ["IPG","IPG_SN","Encounter"
-						,"Name", "MRN", "Physician","null"
-						, "IPG0", "IPG_impl"
-						, "Alead", "Alead_impl"
-						, "Vlead", "Vlead_impl"
-						, "IPG_stat", "IPG_longevity"
-						, "Battery_stat", "IPG_voltage", "Current", "Impedance", "null"]
-			fieldvals(dev,1,"dev")
-			if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-				fldval["dev-Physician"] := "Dr. " . trim(tmp)
-			}
-			fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
-			fldfill("dev-Name",RegExReplace(fldval["dev-Name"],"i)DOB.*"))
-			fldfill("dev-Alead",RegExReplace(fldval["dev-Alead"],"---"))
-			fldfill("dev-RVlead",RegExReplace(fldval["dev-RVlead"],"---"))
-			
-			finleads := stregX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
-			finleads := columns(finleads,"Lead Status:","In-Office Threshold",0,"Sensing Assurance")
-			fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
-						, "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
-						, "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
-						, "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
-			labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
-						, "V_output","V_curr","V_imp","V_pol","null"]
-			fldfill("leads-date",strX(finleads,"Lead Status: ",1,13,"`n",1,0,n))
-			tbl := stregX(substr(finleads,n),"",1,0,"In-Office Threshold",1)
-			scanParams(parseTable(tbl),2,"leads")
-			
-			thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
-			fldfill("leads-AP_thr",parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0))))
-			fldfill("leads-VP_thr",parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0))))
-			fldfill("leads-AS_thr",trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n"))
-			fldfill("leads-VS_thr",trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n"))
-		}
-		if (fintxt~=splTxt ".*Permanent Parameters") {
-			perm := oneCol(stregX(fintxt,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
+		if instr(finRep,"Permanent Parameters") {
+			perm := oneCol(stregX(finRep,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
 			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
@@ -1092,24 +1042,106 @@ mdtAdapta:
 			labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
 			scanParams(param_V,3,"Vlead")
 		}
-		
-		if (fldval["dev-Alead_impl"]) {
-			normLead("RA"
-					,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-					,fldval["leads-A_imp"],fldval["leads-AP_thr"]
-					,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-					,fldval["Alead-Pol_pace"]
-					,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
-		}
-		if (fldval["dev-Vlead_impl"]) {
-			normLead("RV"
-					,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
-					,fldval["leads-V_imp"],fldval["leads-VP_thr"]
-					,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
-					,fldval["Vlead-Pol_pace"]
-					,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
-		}
 	}
+	if (fldval["dev-Alead_impl"]) {
+		normLead("RA"
+				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+				,fldval["leads-A_imp"],fldval["leads-A_cap"]
+				,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
+				,fldval["Alead-Pol_pace"]
+				,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
+	}
+	if (fldval["dev-Vlead_impl"]) {
+		normLead("RV"
+				,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
+				,fldval["leads-V_imp"],fldval["leads-V_cap"]
+				,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
+				,fldval["Vlead-Pol_pace"]
+				,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
+	}
+	;~ splTxt := "Final Report"
+	;~ fin := StrSplit(StrReplace(maintxt,splTxt, "``" splTxt),"``")
+	;~ Loop, % fin.length()
+	;~ {
+		;~ fintxt := fin[A_index]
+		;~ if (fintxt~=splTxt ".*Pacemaker Status") {
+			;~ dev := strX(fintxt,"Final Report",1,0,"Lead Status:",1,0)
+			;~ fields[1] := ["Pacemaker Model","Serial Number","Date of Visit"
+						;~ , "Patient Name", "ID", "Physician","`n"
+						;~ , "Pacemaker Model", "Implanted"
+						;~ , "Atrial Lead", "Implanted"
+						;~ , "Ventricular Lead", "Implanted"
+						;~ , "Pacemaker Status", "Estimated remaining longevity"
+						;~ , "Battery Status", "Voltage", "Current", "Impedance", "Lead Status"]
+			;~ labels[1] := ["IPG","IPG_SN","Encounter"
+						;~ ,"Name", "MRN", "Physician","null"
+						;~ , "IPG0", "IPG_impl"
+						;~ , "Alead", "Alead_impl"
+						;~ , "Vlead", "Vlead_impl"
+						;~ , "IPG_stat", "IPG_longevity"
+						;~ , "Battery_stat", "IPG_voltage", "Current", "Impedance", "null"]
+			;~ fieldvals(dev,1,"dev")
+			;~ if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
+				;~ fldval["dev-Physician"] := "Dr. " . trim(tmp)
+			;~ }
+			;~ fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
+			;~ fldfill("dev-Name",RegExReplace(fldval["dev-Name"],"i)DOB.*"))
+			;~ fldfill("dev-Alead",RegExReplace(fldval["dev-Alead"],"---"))
+			;~ fldfill("dev-RVlead",RegExReplace(fldval["dev-RVlead"],"---"))
+			
+			;~ finleads := stregX(fintxt,"Lead Status:",1,0,"Capture Management",1,21)
+			;~ finleads := columns(finleads,"Lead Status:","In-Office Threshold",0,"Sensing Assurance")
+			;~ fields[2] := ["Atrial lead-Output Energy","Atrial Lead-Measured Current"
+						;~ , "Atrial lead-Measured Impedance","Atrial Lead-Pace Polarity","endcolumn"
+						;~ , "Ventricular lead-Output Energy","Ventricular Lead-Measured Current"
+						;~ , "Ventricular lead-Measured Impedance","Ventricular Lead-Pace Polarity","endcolumn"]
+			;~ labels[2] := ["A_output","A_curr","A_imp","A_pol","null"
+						;~ , "V_output","V_curr","V_imp","V_pol","null"]
+			;~ fldfill("leads-date",strX(finleads,"Lead Status: ",1,13,"`n",1,0,n))
+			;~ tbl := stregX(substr(finleads,n),"",1,0,"In-Office Threshold",1)
+			;~ scanParams(parseTable(tbl),2,"leads")
+			
+			;~ thresh := onecol(stregX(fintxt,"Threshold Test Results.",1,1,"Medtronic Software",1))
+			;~ fldfill("leads-AP_thr",parseStrDur(oneCol(stregx(thresh,"Atrial Pacing Threshold",1,1,"\n\n",0))))
+			;~ fldfill("leads-VP_thr",parseStrDur(oneCol(stregx(thresh,"Ventricular Pacing Threshold",1,1,"\n\n",0))))
+			;~ fldfill("leads-AS_thr",trim(stregx(thresh,"P-wave",1,1,"\n\n",0)," `r`n"))
+			;~ fldfill("leads-VS_thr",trim(stregx(thresh,"R-wave",1,1,"\n\n",0)," `r`n"))
+		;~ }
+		;~ if (fintxt~=splTxt ".*Permanent Parameters") {
+			;~ perm := oneCol(stregX(fintxt,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
+			;~ param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
+			;~ fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
+			;~ labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
+			;~ scanParams(fintxt,1,"par")
+			
+			;~ param_A := stregX(perm,"Atrial Lead",1,0,"(Ventricular Lead)|(Additional/Interventions)|(Additional Features)",1)
+			;~ fields[2] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
+			;~ labels[2] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
+			;~ scanParams(param_A,2,"Alead")
+			
+			;~ param_V := stregX(perm,"Ventricular Lead",1,0,"(Additional/Interventions)|(Additional Features)|(>>>end)",1)
+			;~ fields[3] := ["Amplitude","Pulse Width","Sensitivity","Pace Polarity","Sense Polarity","Capture Management"]
+			;~ labels[3] := ["Amp","PW","Sens","Pol_pace","Pol_sens","Cap_Mgt"]
+			;~ scanParams(param_V,3,"Vlead")
+		;~ }
+		
+		;~ if (fldval["dev-Alead_impl"]) {
+			;~ normLead("RA"
+					;~ ,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+					;~ ,fldval["leads-A_imp"],fldval["leads-AP_thr"]
+					;~ ,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
+					;~ ,fldval["Alead-Pol_pace"]
+					;~ ,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
+		;~ }
+		;~ if (fldval["dev-Vlead_impl"]) {
+			;~ normLead("RV"
+					;~ ,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
+					;~ ,fldval["leads-V_imp"],fldval["leads-VP_thr"]
+					;~ ,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
+					;~ ,fldval["Vlead-Pol_pace"]
+					;~ ,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
+		;~ }
+	;~ }
 	isAdapta := 
 return
 }
