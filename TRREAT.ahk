@@ -1021,6 +1021,9 @@ mdtAdapta:
 			fldfill("leads-A_cap",parseStrDur(finFld))
 			finFld := stregX(finBlk,"Ventricular Pacing Threshold",1,1,"<<<",1)
 			fldfill("leads-V_cap",parseStrDur(finFld))
+			fields[1] := ["P-wave","R-wave"]
+			labels[1] := ["AS_thr","VS_thr"]
+			scanParams(finBlk,1,"leads",1)
 		}
 		
 	}
