@@ -1017,7 +1017,7 @@ mdtAdapta:
 			
 			finBlk := stregX(finRep "<<<","In-Office Threshold",1,0,"<<<",0)
 			finBlk := columns(finBlk,"In-Office Threshold","<<<",0,"\w+ Sensing Threshold") "<<<"
-			finFld := stregX(finBlk,"Atrial Pacing Threshold",1,1,"<<<|Ventricular Pacing Threshold",1)
+			finFld := stregX(finBlk,"Atrial Pacing Threshold",1,1,"(<<<)|(Ventricular Pacing Threshold)",1)
 			fldfill("leads-A_cap",parseStrDur(finFld))
 			finFld := stregX(finBlk,"Ventricular Pacing Threshold",1,1,"<<<",1)
 			fldfill("leads-V_cap",parseStrDur(finFld))
@@ -1449,17 +1449,11 @@ parseStrDur(txt) {
 /*	Parse a block of text for Strength Duration values
 	and return as a formatted string
 */
-	if !instr(txt,"Strength Duration") {										; must be a Strength Duration block
-		return Error
-	}
 	n := 1
-	txt := stregX(txt,"Strength Duration",1,1,">>>end",1)
-	loop
-	{
-		RegExMatch(txt,"O)\d+[.]\d+ V(.*?)\d+[.]\d+ ms",val,n)					; find "0.50 V @ 0.4 ms"
+	While (pos:=RegExMatch(txt,"O)\d+[.]\d+ V(.*?)\d+[.]\d+ ms",val,n)) {		; find "0.50 V @ 0.4 ms"
 		res := ((res) ? res " and " : "") . val.value()							; append to RES (if RES already exists, prepend "and")
-		n+=val.Len()															; starting point for next instance
-	} until (A_index > val.count())
+		n+=pos+val.Len()														; starting point for next instance
+	}
 	
 return res
 }
