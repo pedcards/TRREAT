@@ -103,7 +103,6 @@ ExitApp
 
 readList:
 {
-	tmp := []
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
 	if !FileExist(worklist) {
@@ -123,6 +122,7 @@ readList:
 			eventlog("Empty node skipped.")
 			continue
 		}
+		tmp := []
 		tmp["date"] := k.getAttribute("date")
 		tmp["name"] := k.selectSingleNode("name").text
 		tmp["dev"]  := k.selectSingleNode("dev").text
@@ -168,9 +168,9 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	tmp := []
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
+		tmp := []
 		tmp.file := A_LoopFileName												; next file in PDFdir
 		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
