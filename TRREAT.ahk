@@ -103,7 +103,6 @@ ExitApp
 
 readList:
 {
-	tmp := []
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
 	if !FileExist(worklist) {
@@ -123,6 +122,7 @@ readList:
 			eventlog("Empty node skipped.")
 			continue
 		}
+		tmp := []
 		tmp["date"] := k.getAttribute("date")
 		tmp["name"] := k.selectSingleNode("name").text
 		tmp["dev"]  := k.selectSingleNode("dev").text
@@ -168,9 +168,9 @@ readFiles:
 {
 /*	Read root - usually MEDT files
 */
-	tmp := []
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
+		tmp := []
 		tmp.file := A_LoopFileName												; next file in PDFdir
 		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
@@ -915,8 +915,8 @@ mdtAdapta:
 	ptr := 1
 	While (iniRep := stregX(maintxt,"Initial Interrogation Report",ptr,0,"Medtronic Software",1,ptr)) {
 		if instr(iniRep,"Pacemaker Status") {
-			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","`n"
-						, "Patient Name","ID","Physician","`n"
+			fields[1] := ["Pacemaker\s+Model","Serial\s+Number","Date\s+of\s+Visit","`n"
+						, "Patient\s+Name","ID","Physician","`n"
 						, "History","`n"
 						, "Implanted","\)"]
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
