@@ -915,8 +915,8 @@ mdtAdapta:
 	ptr := 1
 	While (iniRep := stregX(maintxt,"Initial Interrogation Report",ptr,0,"Medtronic Software",1,ptr)) {
 		if instr(iniRep,"Pacemaker Status") {
-			fields[1] := ["Pacemaker Model","Serial Number","Date of Visit","`n"
-						, "Patient Name","ID","Physician","`n"
+			fields[1] := ["Pacemaker\s+Model","Serial\s+Number","Date\s+of\s+Visit","`n"
+						, "Patient\s+Name","ID","Physician","`n"
 						, "History","`n"
 						, "Implanted","\)"]
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
