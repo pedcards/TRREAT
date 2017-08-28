@@ -1640,6 +1640,9 @@ normLead(lead				; RA, RV, LV
 		,S_sens				; Sensing programmed sensitivity
 		,S_pol)				; Sensing polarity
 {
+	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol) {			; ALL parameters in pre or post are NULL
+		return error																	; Do not populate leads[]
+	}
 	global leads, fldval
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
