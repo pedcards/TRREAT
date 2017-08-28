@@ -1043,22 +1043,18 @@ mdtAdapta:
 			scanParams(param_V,3,"Vlead")
 		}
 	}
-	if (fldval["dev-Alead_impl"]) {
-		normLead("RA"
-				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-				,fldval["leads-A_imp"],fldval["leads-A_cap"]
-				,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
-				,fldval["Alead-Pol_pace"]
-				,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
-	}
-	if (fldval["dev-Vlead_impl"]) {
-		normLead("RV"
-				,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
-				,fldval["leads-V_imp"],fldval["leads-V_cap"]
-				,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
-				,fldval["Vlead-Pol_pace"]
-				,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
-	}
+	normLead("RA"
+			,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+			,fldval["leads-A_imp"],fldval["leads-A_cap"]
+			,(fldval["Alead-Amp"]) ? fldval["Alead-Amp"] " at " fldval["Alead-PW"] : ""
+			,fldval["Alead-Pol_pace"]
+			,fldval["leads-AS_thr"],fldval["Alead-Sens"],fldval["Alead-Pol_sens"])
+	normLead("RV"
+			,fldval["dev-Vlead"],fldval["dev-Vlead_impl"]
+			,fldval["leads-V_imp"],fldval["leads-V_cap"]
+			,(fldval["Vlead-Amp"]) ? fldval["Vlead-Amp"] " at " fldval["Vlead-PW"] : ""
+			,fldval["Vlead-Pol_pace"]
+			,fldval["leads-VS_thr"],fldval["Vlead-Sens"],fldval["Vlead-Pol_sens"])
 	isAdapta := 
 return
 }
