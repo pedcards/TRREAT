@@ -713,24 +713,19 @@ mdtQuickLookII:
 				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
 				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
 	scanParams(parseTable(qltbl),2,"leads",1)
-	if (fldval["leads-A_imp"]||fldval["leads-A_cap"]||fldval["leads-A_Sthr"]) {
-		normLead("RA"
-				,fldval["dev-Alead"],fldval["dev-Alead_impl"]
-				,fldval["leads-A_imp"],fldval["leads-A_cap"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
-				,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
-	}
-	if (fldval["leads-RV_imp"]||fldval["leads-RV_cap"]||fldval["leads-RV_Sthr"]) {
-		normLead("RV"
-				,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
-				,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
-				,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
-	}
-	if (fldval["leads-LV_imp"]||fldval["leads-LV_cap"]||fldval["leads-LV_Sthr"]) {
-		normLead("LV"
-				,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
-				,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
-				,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
-	}
+	
+	normLead("RA"
+			,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+			,fldval["leads-A_imp"],fldval["leads-A_cap"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
+			,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
+	normLead("RV"
+			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
+			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+	normLead("LV"
+			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
+			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+			,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
 	
 	inirep := stregX(qltxt,"Parameter Summary",1,1,"Clinical Status",1)
 	qltbl := stregX(inirep,"Mode",1,0,"Detection",0)
