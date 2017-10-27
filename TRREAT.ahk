@@ -1735,6 +1735,7 @@ PrintOut:
 			. "Surgery Date\tab "		"<6:" enc_dt "> \par `n"
 			. "Attending Phy #\tab "	"<9:" docs[enc_MD] "> \par `n"
 			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
+			. "Job No Search\tab "		"<JobNoSearch:NONE> \par `n"
 			. "<EndOfHeader>\par `n"
 			. "\par `n"
 	
