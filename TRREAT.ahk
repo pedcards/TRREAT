@@ -2283,20 +2283,24 @@ saveChip:
 		FetchNode("demog")
 		FetchNode("diagnoses")													; Check for existing node in Archlist,
 		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
+		FetchNode("data")
+	}
+	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
+		y.addElement("data",MRNstring)
 	}
 	yID := y.selectSingleNode(MRNstring)
-	if IsObject(yDev := yID.selectSingleNode("diagnoses/device")) {				; Clear out any existing Device node
+	if IsObject(yDev := yID.selectSingleNode("data/device")) 	{				; Clear out any existing Device node
 		yDev.parentNode.removeChild(yDev)
-		eventlog("Removed existing <device> node.","C")
-		eventlog("Removed existing <device> node from currlist.")
+		eventlog("Removed existing <device> node.","C")							; chipotle\logs
+		eventlog("Removed existing <device> node from currlist.")				; trreat\logs
 	}
 	y.addElement("device"
-		,MRNstring "/diagnoses"
+		,MRNstring "/data"
 		,{	au:A_UserName
 		,	ed:A_Now
 		,	model:fldval["dev-IPG"]
 		,	SN:fldval["dev-IPG_SN"]} )
-	pmNowString := MRNstring "/diagnoses/device"
+	pmNowString := MRNstring "/data/device"
 		y.addElement("mode", pmNowString, fldval["par-Mode"])
 		y.addElement("LRL", pmNowString, fldval["par-LRL"])
 		y.addElement("URL", pmNowString, fldval["par-URL"])
@@ -2310,7 +2314,7 @@ saveChip:
 		y.addElement("As", pmNowString, leads["RA","sensitivity"])
 		y.addElement("Vp", pmNowString, leads["RV","output"])
 		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
-	WriteOut(MRNstring "/diagnoses", "device")
+	WriteOut(MRNstring "/data", "device")
 	eventlog("Add new <device> node.","C")
 	eventlog("Add new <device> node to currlist.")
 	
