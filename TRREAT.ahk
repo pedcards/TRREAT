@@ -2286,7 +2286,7 @@ saveChip:
 	if IsObject(q := yID.selectSingleNode("diagnoses/epdevice")) {				; Clear prior <epdevice>
 		q.parentNode.removeChild(q)
 	}
-	y.addElement("epdevice",MRNstring "/diagnoses")
+	y.addElement("epdevice", MRNstring "/diagnoses")
 	y.addElement("dependent", MRNstring "/diagnoses/epdevice", fldval["dependent"])
 	y.addElement("indication", MRNstring "/diagnoses/epdevice", fldval["indication"])
 	WriteOut(MRNstring "/diagnoses", "epdevice")
@@ -2336,6 +2336,9 @@ makeReport:
 	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
 		y.addElement("data",MRNstring)
 	}
+	
+	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
+	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
 	ciedGUI()
 	if (fetchQuit) {
 		return
