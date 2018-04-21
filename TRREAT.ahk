@@ -2390,11 +2390,10 @@ ciedGUI() {
 	
 	fldval["dependent"] := (depY) 
 		? "Yes"
-		: (depN)
+			: (depN)
 		? "No"
-		: ""
-		
-	MsgBox % fldVal.dependent
+			: ""
+	fldval["indication"] := Ind
 	
 	return
 }
