@@ -1584,7 +1584,7 @@ pmPrint:
 	if !(enc_MD) {
 		return
 	}
-	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n\fs18 "
+	rtfBody := "\fs22\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n\fs18 "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
 	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
@@ -1743,10 +1743,16 @@ PrintOut:
 	
 	rtfBody := "\tx1620\tx5220\tx7040" 
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
-	. enc_dt "\par\par\fs22 `n"
-	. "\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
+	. enc_dt "\par\par `n"
+	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
+	. printQ(fldval["indication"]
+		, "\b\ul INDICATION FOR DEVICE\ul0\b0\par\fs18 `n"
+		. "###\par\par\fs22 `n")
+	. printQ(fldval["dependent"]
+		, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par\fs18 `n"
+		. "###\par\par\fs22 `n")
 	. rtfBody . "\fs22\par `n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
 	. summ . "\par `n"
@@ -2151,7 +2157,7 @@ FetchDem:
 	}
 	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
-	SNstring := "/root/id/diagnoses/device[@SN='" fldval["dev-IPG_SN"] "']"
+	SNstring := "/root/id/data/device[@SN='" fldval["dev-IPG_SN"] "']"
 	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
 		dx := k.parentNode
 		id := dx.parentNode
@@ -2197,8 +2203,6 @@ FetchDem:
 	
 	EncNum := fldval["dev-Enc"]
 	EncMRN := fldval["dev-MRN"]
-	
-	gosub saveChip
 	
 	return
 }
@@ -2277,26 +2281,28 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 
 saveChip:
 {
-	MRNstring := "/root/id[@mrn='" EncMRN "']"
-	if !IsObject(y.selectSingleNode(MRNstring)) {
-		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
-		FetchNode("demog")
-		FetchNode("diagnoses")													; Check for existing node in Archlist,
-		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
-	}
 	yID := y.selectSingleNode(MRNstring)
-	if IsObject(yDev := yID.selectSingleNode("diagnoses/device")) {				; Clear out any existing Device node
+	
+	if IsObject(q := yID.selectSingleNode("diagnoses/epdevice")) {				; Clear prior <epdevice>
+		q.parentNode.removeChild(q)
+	}
+	y.addElement("epdevice", MRNstring "/diagnoses")
+	y.addElement("dependent", MRNstring "/diagnoses/epdevice", fldval["dependent"])
+	y.addElement("indication", MRNstring "/diagnoses/epdevice", fldval["indication"])
+	WriteOut(MRNstring "/diagnoses", "epdevice")
+	
+	if IsObject(yDev := yID.selectSingleNode("data/device")) 	{				; Clear out any existing Device node
 		yDev.parentNode.removeChild(yDev)
-		eventlog("Removed existing <device> node.","C")
-		eventlog("Removed existing <device> node from currlist.")
+		eventlog("Removed existing <device> node.","C")							; chipotle\logs
+		eventlog("Removed existing <device> node from currlist.")				; trreat\logs
 	}
 	y.addElement("device"
-		,MRNstring "/diagnoses"
+		,MRNstring "/data"
 		,{	au:A_UserName
 		,	ed:A_Now
 		,	model:fldval["dev-IPG"]
 		,	SN:fldval["dev-IPG_SN"]} )
-	pmNowString := MRNstring "/diagnoses/device"
+	pmNowString := MRNstring "/data/device"
 		y.addElement("mode", pmNowString, fldval["par-Mode"])
 		y.addElement("LRL", pmNowString, fldval["par-LRL"])
 		y.addElement("URL", pmNowString, fldval["par-URL"])
@@ -2310,7 +2316,7 @@ saveChip:
 		y.addElement("As", pmNowString, leads["RA","sensitivity"])
 		y.addElement("Vp", pmNowString, leads["RV","output"])
 		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
-	WriteOut(MRNstring "/diagnoses", "device")
+	WriteOut(MRNstring "/data", "device")
 	eventlog("Add new <device> node.","C")
 	eventlog("Add new <device> node to currlist.")
 	
@@ -2319,9 +2325,36 @@ saveChip:
 
 makeReport:
 {
+	MRNstring := "/root/id[@mrn='" EncMRN "']"
+	if !IsObject(y.selectSingleNode(MRNstring)) {
+		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
+		FetchNode("demog")
+		FetchNode("diagnoses")													; Check for existing node in Archlist,
+		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
+		FetchNode("data")
+	}
+	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
+		y.addElement("data",MRNstring)
+	}
+	
+	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
+	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
+	ciedGUI()
+	if (fetchQuit) {
+		return
+	}
+	
 	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
+	if (tech="Close") {
+		fetchQuit := true
+		return
+	}
 	
 	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
+	if (summ="Close") {
+		fetchQuit := true
+		return
+	}
 	if instr(summ,"normal") {
 		summ := "This represents a normal device check. The patient denies any device related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
@@ -2332,10 +2365,67 @@ makeReport:
 		eventlog("Blank report summary.")
 	}
 	
+	gosub saveChip
+	
 	gosub checkEP
 	
 	gosub pmPrint
 	
+	return
+}
+
+ciedGUI() {
+	global fldval, tmpBtn, fetchQuit
+	static DepY, DepN, DepX, Ind
+	tmpBtn := ""
+	
+	gui, cied:Destroy
+	gui, cied:Add, Text, , Pacemaker dependent?
+	gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
+	gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
+	gui, cied:Add, Radio, vDepX, Clear
+	gui, cied:Add, Text
+	gui, cied:Add, Text, , Indication for device
+	gui, cied:Add, Edit, r3 w200 vInd, % fldval["indication"]
+	gui, cied:Add, Text
+	gui, cied:Add, Button, w100 h30, OK
+	
+	gui, cied:Show, AutoSize
+	
+	loop
+	{
+		if (tmpBtn) {
+			break
+		}
+	}
+	gui, cied:Submit, NoHide
+	gui, cied:Destroy
+	
+	if (tmpBtn="x") {
+		fetchQuit := true
+		return
+	}
+	
+	fldval["dependent"] := (depY) 
+		? "Yes"
+			: (depN)
+		? "No"
+			: ""
+	fldval["indication"] := Ind
+	
+	return
+}
+
+ciedGuiEscape:
+ciedGuiClose:
+{
+	tmpBtn := "x"
+	return
+}
+
+ciedButtonOK:
+{
+	tmpBtn := "ok"
 	return
 }
 
