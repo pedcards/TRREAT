@@ -2275,17 +2275,6 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 
 saveChip:
 {
-	MRNstring := "/root/id[@mrn='" EncMRN "']"
-	if !IsObject(y.selectSingleNode(MRNstring)) {
-		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
-		FetchNode("demog")
-		FetchNode("diagnoses")													; Check for existing node in Archlist,
-		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
-		FetchNode("data")
-	}
-	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
-		y.addElement("data",MRNstring)
-	}
 	yID := y.selectSingleNode(MRNstring)
 	if IsObject(yDev := yID.selectSingleNode("data/device")) 	{				; Clear out any existing Device node
 		yDev.parentNode.removeChild(yDev)
@@ -2321,6 +2310,17 @@ saveChip:
 
 makeReport:
 {
+	MRNstring := "/root/id[@mrn='" EncMRN "']"
+	if !IsObject(y.selectSingleNode(MRNstring)) {
+		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
+		FetchNode("demog")
+		FetchNode("diagnoses")													; Check for existing node in Archlist,
+		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
+		FetchNode("data")
+	}
+	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
+		y.addElement("data",MRNstring)
+	}
 	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
 	
 	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
