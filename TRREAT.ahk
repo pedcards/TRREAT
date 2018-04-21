@@ -1743,10 +1743,16 @@ PrintOut:
 	
 	rtfBody := "\tx1620\tx5220\tx7040" 
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
-	. enc_dt "\par\par\fs22 `n"
-	. "\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
+	. enc_dt "\par\par `n"
+	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
+	. printQ(fldval["indication"]
+		, "\b\ul INDICATION FOR DEVICE\ul0\b0\par\fs18 `n"
+		. "###\par\par\fs22 `n")
+	. printQ(fldval["dependent"]
+		, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par\fs18 `n"
+		. "###\par\par\fs22 `n")
 	. rtfBody . "\fs22\par `n" 
 	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
 	. summ . "\par `n"
