@@ -2198,8 +2198,6 @@ FetchDem:
 	EncNum := fldval["dev-Enc"]
 	EncMRN := fldval["dev-MRN"]
 	
-	gosub saveChip
-	
 	return
 }
 
@@ -2335,6 +2333,8 @@ makeReport:
 		summ := ""
 		eventlog("Blank report summary.")
 	}
+	
+	gosub saveChip
 	
 	gosub checkEP
 	
