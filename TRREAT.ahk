@@ -2276,6 +2276,15 @@ demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
 saveChip:
 {
 	yID := y.selectSingleNode(MRNstring)
+	
+	if IsObject(q := yID.selectSingleNode("diagnoses/epdevice")) {				; Clear prior <epdevice>
+		q.parentNode.removeChild(q)
+	}
+	y.addElement("epdevice",MRNstring "/diagnoses")
+	y.addElement("dependent", MRNstring "/diagnoses/epdevice", fldval["dependent"])
+	y.addElement("indication", MRNstring "/diagnoses/epdevice", fldval["indication"])
+	WriteOut(MRNstring "/diagnoses", "epdevice")
+	
 	if IsObject(yDev := yID.selectSingleNode("data/device")) 	{				; Clear out any existing Device node
 		yDev.parentNode.removeChild(yDev)
 		eventlog("Removed existing <device> node.","C")							; chipotle\logs
