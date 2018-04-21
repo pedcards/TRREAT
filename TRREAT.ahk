@@ -2322,9 +2322,21 @@ makeReport:
 		y.addElement("data",MRNstring)
 	}
 	ciedGUI()
+	if (fetchQuit) {
+		return
+	}
+	
 	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
+	if (tech="Close") {
+		fetchQuit := true
+		return
+	}
 	
 	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
+	if (summ="Close") {
+		fetchQuit := true
+		return
+	}
 	if instr(summ,"normal") {
 		summ := "This represents a normal device check. The patient denies any device related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
