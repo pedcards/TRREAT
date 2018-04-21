@@ -1584,7 +1584,7 @@ pmPrint:
 	if !(enc_MD) {
 		return
 	}
-	rtfBody := "\fs22\b\ul DEVICE INFORMATION\ul0\b0\par`n\fs18 "
+	rtfBody := "\fs22\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n\fs18 "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
 	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
