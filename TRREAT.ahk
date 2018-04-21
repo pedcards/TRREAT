@@ -2321,6 +2321,7 @@ makeReport:
 	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
 		y.addElement("data",MRNstring)
 	}
+	ciedGUI()
 	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
 	
 	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
@@ -2340,6 +2341,62 @@ makeReport:
 	
 	gosub pmPrint
 	
+	return
+}
+
+ciedGUI() {
+	global fldval, tmpBtn, fetchQuit
+	static DepY, DepN, DepX, Ind
+	tmpBtn := ""
+	
+	gui, cied:Destroy
+	gui, cied:Add, Text, , Pacemaker dependent?
+	gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
+	gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
+	gui, cied:Add, Radio, vDepX, Clear
+	gui, cied:Add, Text
+	gui, cied:Add, Text, , Indication for device
+	gui, cied:Add, Edit, r3 w200 vInd, % fldval["indication"]
+	gui, cied:Add, Text
+	gui, cied:Add, Button, w100 h30, OK
+	
+	gui, cied:Show, AutoSize
+	
+	loop
+	{
+		if (tmpBtn) {
+			break
+		}
+	}
+	gui, cied:Submit, NoHide
+	gui, cied:Destroy
+	
+	if (tmpBtn="x") {
+		fetchQuit := true
+		return
+	}
+	
+	fldval["dependent"] := (depY) 
+		? "Yes"
+		: (depN)
+		? "No"
+		: ""
+		
+	MsgBox % fldVal.dependent
+	
+	return
+}
+
+ciedGuiEscape:
+ciedGuiClose:
+{
+	tmpBtn := "x"
+	return
+}
+
+ciedButtonOK:
+{
+	tmpBtn := "ok"
 	return
 }
 
