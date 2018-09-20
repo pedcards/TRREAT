@@ -13,6 +13,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
+	hisDir := ".\3mhis\"
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
@@ -20,6 +21,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
 	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
+	hisDir := "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" 
 	pdfDir := ".\"
 }
 user := A_UserName
@@ -580,7 +582,7 @@ ActSign:
 		}
 	}
 	if !(isDevt) {
-		FileCopy, % reportDir fileNam ".rtf", % "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" . fileNam . ".rtf"
+		FileCopy, % reportDir fileNam ".rtf", % hisDir . fileNam . ".rtf"
 		eventlog("Sent to HIS.")
 	}
 	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
