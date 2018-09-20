@@ -38,6 +38,10 @@ if !FileExist(chipDir) {
 	MsgBox % "Requires CHIPOTLE dir`n""" chipDir """"
 	ExitApp
 }
+if !FileExist(hisDir) {
+	MsgBox % "Requires 3M HIS dir`n""" hisDir """"
+	ExitApp
+}
 
 newTxt := Object()
 blk := Object()
