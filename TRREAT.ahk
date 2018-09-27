@@ -212,7 +212,7 @@ readFiles:
 			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
 			continue															; skip reprocessing in WORK list
 		}
-		if (xl.selectSingleNode("/root/done/" tmp.node)) {
+		if IsObject(xl.selectSingleNode("/root/done/" tmp.node)) {
 			fileNum += 1
 			LV_Add("", tmp.date)
 			LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
