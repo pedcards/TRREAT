@@ -6,9 +6,12 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%
 ;~ FileInstall, pdftotext.exe, pdftotext.exe
 #Include includes
+
+Progress,100,Checking paths...,TRREAT
 IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
+	trreatDir := ".\"
 	binDir := ".\bin\"
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
@@ -17,12 +20,16 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	pdfDir := ".\USB\"
 } else {
 	isDevt := false
-	binDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\bin\"
-	reportDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\pending\"
-	complDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\completed\"
+	trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
+	binDir := trreatDir "bin\"
+	reportDir := trreatDir "pending\"
+	complDir := trreatDir "completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
 	hisDir := "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" 
 	pdfDir := ".\"
+	if !FileExist(hisDir) {														; dir exists if launched from Citrix envt
+		hisDir := trreatDir "spool\"											; otherwise target is spool dir
+	}
 }
 user := A_UserName
 eventLog(">>>>> Session started...")
@@ -38,10 +45,8 @@ if !FileExist(chipDir) {
 	MsgBox % "Requires CHIPOTLE dir`n""" chipDir """"
 	ExitApp
 }
-if !FileExist(hisDir) {
-	MsgBox % "Requires 3M HIS dir`n""" hisDir """"
-	ExitApp
-}
+
+Progress, off
 
 newTxt := Object()
 blk := Object()
