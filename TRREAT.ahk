@@ -177,8 +177,25 @@ return
 
 readFiles:
 {
+	readFilesMDT()
+	readFilesSJM()
+	readFilesBSCI()
+	
+	LV_ModifyCol(1, "Autohdr")
+	LV_ModifyCol(2, "Autohdr")
+	LV_ModifyCol(3, "Autohdr")
+	LV_ModifyCol(4, "Autohdr")
+	LV_ModifyCol(5, "Autohdr")
+	LV_ModifyCol(6, "Autohdr")
+	WinActivate, TRREAT Reports
+return
+}
+
+readFilesMDT() {
 /*	Read root - usually MEDT files
 */
+	global xl, pdfDir
+	
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
@@ -231,9 +248,15 @@ readFiles:
 		LV_Modify(fileNum,"col7", tmp.file)
 		LV_Modify(fileNum,"col8", "")
 	}
+	
+	return
+}
 
+readFilesSJM() {
 /* Read SJM "PDFs" folder
 */
+	global xl, pdfDir
+	
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
@@ -290,7 +313,11 @@ readFiles:
 			}
 		}
 	}
+	
+	return
+}
 
+readFilesBSCI() {
 /* Read BSCI "bsc" folder
 */
 	tmp := []
@@ -341,14 +368,7 @@ readFiles:
 		LV_Modify(fileNum,"col8", tmp.bnk)
 	}
 	
-	LV_ModifyCol(1, "Autohdr")
-	LV_ModifyCol(2, "Autohdr")
-	LV_ModifyCol(3, "Autohdr")
-	LV_ModifyCol(4, "Autohdr")
-	LV_ModifyCol(5, "Autohdr")
-	LV_ModifyCol(6, "Autohdr")
-	WinActivate, TRREAT Reports
-return
+	return
 }
 
 parsePat:
