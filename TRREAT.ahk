@@ -196,7 +196,7 @@ return
 readFilesMDT() {
 /*	Read root - usually MEDT files
 */
-	global xl, pdfDir
+	global 
 	
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
@@ -257,7 +257,7 @@ readFilesMDT() {
 readFilesSJM() {
 /* Read SJM "PDFs" folder
 */
-	global xl, pdfDir
+	global 
 	
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
@@ -322,6 +322,8 @@ readFilesSJM() {
 readFilesBSCI() {
 /* Read BSCI "bsc" folder
 */
+	global 
+	
 	tmp := []
 	bscDir := pdfDir "bsc\patientData\"
 	loop, Files, % bscDir "*", D												; Loop through subdirs of patientData
