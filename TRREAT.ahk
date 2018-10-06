@@ -182,6 +182,7 @@ readFiles:
 	readFilesMDT()
 	readFilesSJM()
 	readFilesBSCI()
+	readFilesPaceart()
 	
 	LV_ModifyCol(1, "Autohdr")
 	LV_ModifyCol(2, "Autohdr")
@@ -373,6 +374,15 @@ readFilesBSCI() {
 	}
 	
 	return
+}
+
+readFilesPaceart() {
+/*	read exported PDF reports from Paceart
+	in .\paceart\ folder
+*/
+	global
+	
+	return	
 }
 
 parsePat:
