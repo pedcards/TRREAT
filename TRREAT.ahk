@@ -97,7 +97,7 @@ parseGUI:
 {
 	Gui, Parse:Destroy
 	Gui, Parse:Default
-	Gui, Add, Tab3,,Interrogations|PaceArt saves
+	Gui, Add, Tab3,,Interrogations|Paceart saves
 	Gui, Tab, Interr
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
@@ -384,7 +384,7 @@ readFilesPaceart() {
 */
 	global paceartDir
 	
-	Gui, Tab, PaceArt
+	Gui, Tab, Paceart
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	
 	loop, files, % paceartDir "*.pdf"
