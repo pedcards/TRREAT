@@ -96,9 +96,10 @@ MainLoop:
 parseGUI:
 {
 	Gui, Parse:Destroy
-	Gui, Parse:Add, Listview, w600 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Parse:Default
-	Gui, Show,, TRREAT Reports and File Manager
+	Gui, Add, Tab3,,Interrogations|PaceArt saves
+	Gui, Tab, Interr
+	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
 	LV_ModifyCol(2, "Autohdr")
 	LV_ModifyCol(3, "Autohdr")
@@ -192,13 +193,6 @@ readFiles:
 	readFilesBSCI()
 	readFilesPaceart()
 	
-	LV_ModifyCol(1, "Autohdr")
-	LV_ModifyCol(2, "Autohdr")
-	LV_ModifyCol(3, "Autohdr")
-	LV_ModifyCol(4, "Autohdr")
-	LV_ModifyCol(5, "Autohdr")
-	LV_ModifyCol(6, "Autohdr")
-	WinActivate, TRREAT Reports
 return
 }
 
@@ -388,7 +382,10 @@ readFilesPaceart() {
 /*	read exported PDF reports from Paceart
 	in .\paceart\ folder
 */
-	global paceartDir, filenum
+	global paceartDir
+	
+	Gui, Tab, PaceArt
+	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	
 	loop, files, % paceartDir "*.pdf"
 	{
@@ -419,13 +416,22 @@ readFilesPaceart() {
 		fileNum += 1																	; Add a row to the LV
 		LV_Add("", dem.encdate)															; col1 is date
 		LV_Modify(fileNum,"col2", dem.nameL)
-		LV_Modify(fileNum,"col3", "Paceart report")
-		LV_Modify(fileNum,"col4", "")
-		LV_Modify(fileNum,"col5", "")
-		LV_Modify(fileNum,"col6", "")
+		;~ LV_Modify(fileNum,"col3", "")
+		;~ LV_Modify(fileNum,"col4", "")
+		;~ LV_Modify(fileNum,"col5", "")
+		;~ LV_Modify(fileNum,"col6", "")
 		LV_Modify(fileNum,"col7", fileIn)
-		LV_Modify(fileNum,"col8", "")
+		;~ LV_Modify(fileNum,"col8", "")
 	}
+	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
+	LV_ModifyCol(2, "Autohdr")
+	LV_ModifyCol(3, "0")
+	LV_ModifyCol(4, "0")
+	LV_ModifyCol(5, "0")
+	LV_ModifyCol(6, "0")
+	LV_ModifyCol(7, "0")														; hide the filename col
+	LV_ModifyCol(8, "0")														; hide the metadata col
+	LV_ModifyCol(9, "0")														; hide the report col
 
 	return	
 }
