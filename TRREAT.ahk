@@ -109,10 +109,16 @@ parseGUI:
 	LV_ModifyCol(8, "0")														; hide the metadata col
 	LV_ModifyCol(9, "0")														; hide the report col
 	
+	progress,,,Scanning files
+	
 	gosub readList																; read the worklist
 	
 	gosub readFiles																; scan the folders
 	
+	progress, off
+	
+	Gui, Show,, TRREAT Reports and File Manager
+	WinActivate, TRREAT Reports
 	return
 }
 
