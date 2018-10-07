@@ -33,6 +33,8 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 		hisDir := trreatDir "spool\"											; send RTF to spool dir
 	}
 }
+
+worklist := reportDir "worklist.xml"
 user := A_UserName
 eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
@@ -50,38 +52,48 @@ if !FileExist(chipDir) {
 
 Progress, off
 
-newTxt := Object()
-blk := Object()
-blk2 := Object()
-;~ docs := Object()
-worklist := reportDir "worklist.xml"
-docs := {"TC":"783118","JS":"343079","SS":"358945"
-		, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
+/*	Main part ==================================================================
+*/
+MainLoop:
+{
+	newTxt := Object()
+	blk := Object()
+	blk2 := Object()
+	docs := {"TC":"783118","JS":"343079","SS":"358945"
+			, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
+	if ObjHasKey(docs,substr(user,1,2)) {												; User is in docs[]
+		role := "Sign"																	; set role to "Sign"
+	} else {
+		role := "Parse"
+	}
+	if instr(user,"TC") {																; But if is TC
+		role := cMsgBox("Administrator"													; offer to either PARSE or SIGN
+			, "Enter ROLE:"
+			, "*&Parse PDFs|&Sign reports"
+			, "Q","")
+	}
+	
+	if instr(role,"Sign") {
+		eventLog("SIGN module")
+		xl := new XML(worklist)									; otherwise load existing worklist
+		gosub signScan
+	}
 
-if ObjHasKey(docs,substr(user,1,2)) {											; User is in docs[]
-	role := "Sign"																; set role to "Sign"
-} else {
-	role := "Parse"
+	if instr(role,"Parse") {
+		eventLog("PARSE module")
+		gosub parseGUI
+	}
+	
+	WinWaitClose, TRREAT Reports
+	eventLog("<<<<< Session ended.")
+	ExitApp
+	
+/*	End Main part ==============================================================
+*/
 }
 
-if (%0%) {																		; For each parameter: 
-  fileArg := true																; Gets parameter passed to script/exe. 
-  role := "Parse"
-} else if instr(user,"TC") {													; But if is TC
-	role := cMsgBox("Administrator"												; offer to either PARSE or SIGN
-		, "Enter ROLE:"
-		, "*&Parse PDFs|&Sign reports"
-		, "Q","")
-}
-
-if instr(role,"Sign") {
-	eventLog("SIGN module")
-	xl := new XML(worklist)									; otherwise load existing worklist
-	gosub signScan
-}
-
-if instr(role,"Parse") {
-	eventLog("PARSE module")
+parseGUI:
+{
 	Gui, Parse:Destroy
 	Gui, Parse:Add, Listview, w600 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Parse:Default
@@ -108,11 +120,9 @@ if instr(role,"Parse") {
 	} else {																	; otherwise scan the folders
 		gosub readFiles
 	}
+	
+	return
 }
-
-WinWaitClose, TRREAT Reports
-eventLog("<<<<< Session ended.")
-ExitApp
 
 readList:
 {
