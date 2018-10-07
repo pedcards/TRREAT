@@ -380,29 +380,43 @@ readFilesPaceart() {
 /*	read exported PDF reports from Paceart
 	in .\paceart\ folder
 */
-	global paceartDir
+	global paceartDir, filenum
 	
 	loop, files, % paceartDir "*.pdf"
 	{
-		fileIn := A_LoopFileName
+		fileIn := paceartDir A_LoopFileName
 		dem := []
 		if (fileIn~="WQ.pdf$") {
-			fnam := StrSplit(RegExReplace(fileIn,"WQ.pdf$"),"_")
-			
+			fnam := StrSplit(RegExReplace(A_LoopFileName,"WQ.pdf$"),"_")
+			dem.mrn := fnam.1
+			dem.nameL := fnam.2
+			dem.encdate := fnam.3
 		} else {
-			filenam := paceartDir . RegExReplace(fileIn,".pdf$",".txt")
-			runwait, .\bin\pdftotext.exe -table -l 1 "%paceArtDir%%fileIn%" "%filenam%",,min
-			FileRead, txt, %filenam%
-			dem.name := strval(txt,"Patient Name","Referring")
+			filetxt := RegExReplace(fileIn,".pdf$",".txt")
+			runwait, .\bin\pdftotext.exe -table -l 1 "%fileIn%" "%filetxt%",,min
+			FileRead, txt, %filetxt%
+			dem.nameL := parseName(strval(txt,"Patient Name","Referring")).last
 			dem.mrn := strval(txt,"Patient ID","\R")
 			dem.devtype := strval(txt,"Device Type","\R")
-			dem.encdate := strval(txt,"Encounter date","\R")
-			;~ model := strval(txt,"Manufacturer and model","Device Type")
-			;~ sernum := strval(txt,"Serial number","Battery Voltage")
-			if !(dem.name && dem.mrn && dem.devtype) {
-				continue
+			dt := parseDate(strval(txt,"Encounter date","\R"))
+			dem.encdate := dt.yyyy dt.mm dt.dd
+			if !(dem.nameL && dem.mrn && dem.devtype) {									; probably not a Paceart report
+				continue																; skip it
 			}
+			fileOut := paceartDir . dem.mrn "_" dem.nameL "_" dem.encdate "WQ.pdf"
+			FileMove, %fileIn%, %fileOut%, 1
+			FileDelete, %filetxt%
+			fileIn := fileOut
 		}
+		fileNum += 1																	; Add a row to the LV
+		LV_Add("", dem.encdate)															; col1 is date
+		LV_Modify(fileNum,"col2", dem.nameL)
+		LV_Modify(fileNum,"col3", "Paceart report")
+		LV_Modify(fileNum,"col4", "")
+		LV_Modify(fileNum,"col5", "")
+		LV_Modify(fileNum,"col6", "")
+		LV_Modify(fileNum,"col7", fileIn)
+		LV_Modify(fileNum,"col8", "")
 	}
 
 	return	
