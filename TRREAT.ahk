@@ -380,8 +380,31 @@ readFilesPaceart() {
 /*	read exported PDF reports from Paceart
 	in .\paceart\ folder
 */
-	global
+	global paceartDir
 	
+	loop, files, % paceartDir "*.pdf"
+	{
+		fileIn := A_LoopFileName
+		dem := []
+		if (fileIn~="WQ.pdf$") {
+			fnam := StrSplit(RegExReplace(fileIn,"WQ.pdf$"),"_")
+			
+		} else {
+			filenam := paceartDir . RegExReplace(fileIn,".pdf$",".txt")
+			runwait, .\bin\pdftotext.exe -table -l 1 "%paceArtDir%%fileIn%" "%filenam%",,min
+			FileRead, txt, %filenam%
+			dem.name := strval(txt,"Patient Name","Referring")
+			dem.mrn := strval(txt,"Patient ID","\R")
+			dem.devtype := strval(txt,"Device Type","\R")
+			dem.encdate := strval(txt,"Encounter date","\R")
+			;~ model := strval(txt,"Manufacturer and model","Device Type")
+			;~ sernum := strval(txt,"Serial number","Battery Voltage")
+			if !(dem.name && dem.mrn && dem.devtype) {
+				continue
+			}
+		}
+	}
+
 	return	
 }
 
