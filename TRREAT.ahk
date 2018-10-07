@@ -59,6 +59,7 @@ MainLoop:
 	newTxt := Object()
 	blk := Object()
 	blk2 := Object()
+	
 	docs := {"TC":"783118","JS":"343079","SS":"358945"
 			, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
 	if ObjHasKey(docs,substr(user,1,2)) {												; User is in docs[]
@@ -110,16 +111,7 @@ parseGUI:
 	
 	gosub readList																; read the worklist
 	
-	if (fileArg) {																; process files dropped on TRREAT icon
-		Loop, %0%
-		{
-			SplitPath, %A_Index%, fileIn 
-			eventlog("DROPPED FILE: " fileIn)
-			gosub fileLoop
-		}
-	} else {																	; otherwise scan the folders
-		gosub readFiles
-	}
+	gosub readFiles																; scan the folders
 	
 	return
 }
@@ -757,19 +749,6 @@ Medtronic:
 		return
 	}
 	
-	if (fileArg) {
-		fileNum += 1
-		LV_Add("", fldval["dev-date"])
-		LV_Modify(filenum,"col2",fldval["dev-Name"])
-		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
-		LV_Modify(fileNum,"col4",fldval["dev-IPG_SN"])
-		LV_ModifyCol(1,"AutoHdr")
-		LV_ModifyCol(2,"AutoHdr")
-		LV_ModifyCol(3,"AutoHdr")
-		LV_ModifyCol(4,"AutoHdr")
-		Gui, Show
-	}
-	
 	gosub fetchDem
 	
 	if (fetchQuit) {
@@ -1188,18 +1167,6 @@ BSCI:
 		FileRead, bscbnk, % pat_meta
 	}
 	gosub bsciZoomView
-	if (fileArg) {
-		fileNum += 1
-		LV_Add("", fldval["dev-date"])
-		LV_Modify(filenum,"col2",fldval["dev-Name"])
-		LV_Modify(fileNum,"col3",fldval["dev-IPG"])
-		LV_Modify(fileNum,"col4",fldval["dev-IPG_SN"])
-		LV_ModifyCol(1,"AutoHdr")
-		LV_ModifyCol(2,"AutoHdr")
-		LV_ModifyCol(3,"AutoHdr")
-		LV_ModifyCol(4,"AutoHdr")
-		Gui, Show
-	}
 	
 	gosub fetchDem
 	
