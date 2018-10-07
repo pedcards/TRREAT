@@ -2284,11 +2284,13 @@ fetchGUI:
 }
 
 fetchGuiClose:
+{
 	Gui, fetch:destroy
 	getDem := false																	; break out of fetchDem loop
 	fetchQuit := true
 	eventlog("Manual [x] out of fetchDem.")
 Return
+}
 
 parseClip(clip) {
 /*	If clip matches "val1:val2" format, and val1 in demVals[], return field:val
