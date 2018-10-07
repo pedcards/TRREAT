@@ -2623,31 +2623,53 @@ FilePrepend( Text, Filename ) {
     File.Close()
 }
 
-parseDate(x) {
-; Disassembles "2/9/2015" or "2/9/2015 8:31" into Yr=2015 Mo=02 Da=09 Hr=08 Min=31
+ParseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-	if (x~="i)(\d{1,2})[\-\s\.](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\-\s\.](\d{2,4})") {		; 03 Jan 2016
-		StringSplit, DT, x, %A_Space%-.
-		return {"DD":zDigit(DT1), "MM":zDigit(objHasValue(mo,DT2)), "MMM":DT2, "YYYY":year4dig(DT3)}
+	moStr := "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
+	dSep := "[ \-_/]"
+	date := []
+	time := []
+	x := RegExReplace(x,"[,\(\)]")
+	if RegExMatch(x,"i)(\d{1,2})" dSep "(" moStr ")" dSep "(\d{4}|\d{2})",d) {			; 03-Jan-2015
+		date.dd := zdigit(d1)
+		date.mmm := d2
+		date.mm := zdigit(objhasvalue(mo,d2))
+		date.yyyy := d3
+		date.date := trim(d)
 	}
-	if (x~="\d{1,2}_\d{1,2}_\d{2,4}") {											; 03_06_17 or 03_06_2017
-		StringSplit, DT, x, _
-		return {"MM":zDigit(DT1), "DD":zDigit(DT2), "MMM":mo[DT2], "YYYY":year4dig(DT3)}
+	else if RegExMatch(x,"i)(" moStr "|\d{1,2})" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
+		date.dd := zdigit(d2)
+		date.mmm := objhasvalue(mo,d1) 
+			? d1
+			: mo[d1]
+		date.mm := objhasvalue(mo,d1)
+			? zdigit(objhasvalue(mo,d1))
+			: zdigit(d1)
+		date.yyyy := (d3~="\d{4}")
+			? d3
+			: (d3>50)
+				? "19" d3
+				: "20" d3
+		date.date := trim(d)
 	}
-	if (x~="\d{4}-\d{2}-\d{2}") {												; 2017-02-11
-		StringSplit, DT, x, -
-		return {"YYYY":DT1, "MM":DT2, "DD":DT3}
+	else if RegExMatch(x,"\b(\d{4})-?(\d{2})-?(\d{2})\b",d) {								; 20150103 or 2015-01-03
+		date.yyyy := d1
+		date.mm := d2
+		date.mmm := mo[d2]
+		date.dd := d3
+		date.date := trim(d)
 	}
-	if (x~="i)^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4}") {			; Mar 9, 2015 (8:33 am)?
-		StringSplit, DT, x, %A_Space%
-		StringSplit, DHM, DT4, :
-		return {"MM":zDigit(objHasValue(mo,DT1)),"DD":zDigit(trim(DT2,",")),"YYYY":DT3
-			,	hr:zDigit((DT5~="i)p")?(DHM1+12):DHM1),min:DHM2}
+	
+	if RegExMatch(x,"i)(\d{1,2}):(\d{2})(:\d{2})?(.*AM|PM)?",t) {						; 17:42 PM
+		time.hr := zdigit(t1)
+		time.min := t2
+		time.sec := trim(t3," :")
+		time.ampm := trim(t4)
+		time.time := trim(t)
 	}
-	StringSplit, DT, x, %A_Space%
-	StringSplit, DY, DT1, /
-	StringSplit, DHM, DT2, :
-	return {"MM":zDigit(DY1), "DD":zDigit(DY2), "YYYY":year4dig(DY3), "hr":zDigit(DHM1), "min":zDigit(DHM2), "Date":DT1, "Time":DT2}
+
+	return {yyyy:date.yyyy, mm:date.mm, mmm:date.mmm, dd:date.dd, date:date.date
+			, hr:time.hr, min:time.min, sec:time.sec, ampm:time.ampm, time:time.time}
 }
 
 niceDate(x) {
