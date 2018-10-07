@@ -422,6 +422,47 @@ readFilesPaceart() {
 	return	
 }
 
+ParseName(x) {
+/*	Determine first and last name
+*/
+	x := trim(x)																		; trim edges
+	x := RegExReplace(x," \w "," ")														; remove middle initial: Troy A Johnson => Troy Johnson
+	x := RegExReplace(x,"i),?( JR| III| IV)$")											; Filter out name suffixes
+	x := RegExReplace(x,"\s+"," ",ct)													; Count " "
+	
+	if instr(x,",") 																	; Last, First
+	{
+		last := trim(strX(x,"",1,0,",",1,1))
+		first := trim(strX(x,",",1,1,"",0))
+	}
+	else if (ct=1)																		; First Last
+	{
+		first := strX(x,"",1,0," ",1)
+		last := strX(x," ",1,1,"",0)
+	}
+	else																				; James Jacob Jingleheimer Schmidt
+	{
+		x0 := x																			; make a copy to disassemble
+		n := 1
+		Loop
+		{
+			x0 := strX(x0," ",n,1,"",0)													; cut from first " " to end
+			if (x0="") {
+				q := trim(q,"|")
+				break
+			}
+			q .= x0 "|"																	; add to button q
+		}
+		last := cmsgbox("Name check",x "`n" RegExReplace(x,".","--") "`nWhat is the patient's`nLAST NAME?",q)
+		if (last~="close|xClose") {
+			return {first:"",last:x}
+		}
+		first := RegExReplace(x," " last)
+	}
+	
+	return {first:first,last:last}
+}
+
 parsePat:
 {
 	if !(fileNum := LV_GetNext()) {
