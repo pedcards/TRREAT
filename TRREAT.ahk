@@ -27,8 +27,8 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	chipDir := "\\childrens\files\HCChipotle\"
 	hisDir := "\\PPWHIS11\apps$\3mhisprd\SCRIPT\impunst\crd.imp\" 
 	pdfDir := ".\"
-	if !FileExist(hisDir) {														; dir exists if launched from Citrix envt
-		hisDir := trreatDir "spool\"											; otherwise target is spool dir
+	if (A_ComputerName~="EWCS") {												; EWCS=local, PPWC=Citrix
+		hisDir := trreatDir "spool\"											; send RTF to spool dir
 	}
 }
 user := A_UserName
