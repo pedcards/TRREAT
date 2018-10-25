@@ -27,7 +27,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	complDir := trreatDir "completed\"
 	paceartDir := trreatDir "paceart\"
 	chipDir := "\\childrens\files\HCChipotle\"
-	hisDir := "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" 
+	hisDir := "\\PPWHIS11\apps$\3mhisprd\SCRIPT\impunst\crd.imp\" 
 	pdfDir := ".\"
 	if (A_ComputerName~="EWCS") {												; EWCS=local, PPWC=Citrix
 		hisDir := trreatDir "spool\"											; send RTF to spool dir
