@@ -25,7 +25,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	reportDir := trreatDir "pending\"
 	complDir := trreatDir "completed\"
 	chipDir := "\\childrens\files\HCChipotle\"
-	hisDir := "\\PPWHIS01\Apps$\3mhisprd\Script\impunst\crd.imp\" 
+	hisDir := "\\PPWHIS11\apps$\3mhisprd\SCRIPT\impunst\crd.imp\" 
 	pdfDir := ".\"
 	if !FileExist(hisDir) {														; dir exists if launched from Citrix envt
 		hisDir := trreatDir "spool\"											; otherwise target is spool dir
