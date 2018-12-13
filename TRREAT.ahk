@@ -15,7 +15,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	binDir := ".\bin\"
 	reportDir := ".\pending\"													; generated files pending signature
 	complDir := ".\completed\"													; archive signed files and original PDF files
-	paceartDir := ".\PaceArt\"													; PDF reports saved from PaceArt
+	paceartDir := ".\paceart\"													; PDF reports saved from PaceArt
 	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
 	hisDir := ".\3mhis\"
 	pdfDir := ".\USB\"
@@ -25,7 +25,7 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 	binDir := trreatDir "bin\"
 	reportDir := trreatDir "pending\"
 	complDir := trreatDir "completed\"
-	paceartDir := trreatDir "PaceArt\"
+	paceartDir := trreatDir "paceart\"
 	chipDir := "\\childrens\files\HCChipotle\"
 	hisDir := "\\PPWHIS11\apps$\3mhisprd\SCRIPT\impunst\crd.imp\" 
 	pdfDir := ".\"
