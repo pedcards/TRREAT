@@ -2699,7 +2699,7 @@ FilePrepend( Text, Filename ) {
 ParseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	moStr := "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
-	dSep := "[ \-_/]"
+	dSep := "[\-_/]"																	; separation characters "-", "_", "/"
 	date := []
 	time := []
 	x := RegExReplace(x,"[,\(\)]")
