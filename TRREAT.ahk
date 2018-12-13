@@ -548,11 +548,11 @@ fileLoop:
 	leads := Object()
 	summBl := summ := sjmLog := ""
 	Run, %fileIn%
-	FileDelete, %binDir%temp.txt
 	SplitPath, fileIn,,,,fileOut
-	RunWait, %binDir%pdftotext.exe -table "%fileIn%" "%binDir%temp.txt" , , hide
-	eventlog("pdftotext " fileIn " -> " binDir "temp.txt")
-	FileRead, maintxt, %binDir%temp.txt
+	FileDelete, %binDir%%fileOut%.txt
+	RunWait, %binDir%pdftotext.exe -table "%fileIn%" "%binDir%%fileOut%.txt" , , hide
+	eventlog("pdftotext " fileIn " -> " binDir fileOut ".txt")
+	FileRead, maintxt, %binDir%%fileOut%.txt
 	cleanlines(maintxt)
 	
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
@@ -1879,16 +1879,16 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	dt.YYYY dt.MM dt.DD
 	
-	FileDelete, %binDir%temp.rtf														; delete and generate RTF fileOut.rtf
-	FileAppend, %rtfOut%, %binDir%temp.rtf
+	FileDelete, %binDir%%fileOut%.rtf														; delete and generate RTF fileOut.rtf
+	FileAppend, %rtfOut%, %binDir%%fileOut%.rtf
 	
 	eventlog("Print output generated in " binDir)
 	
-	RunWait, % "WordPad.exe " binDir "temp.rtf"											; launch fileNam in WordPad
+	RunWait, % "WordPad.exe " binDir fileOut ".rtf"											; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		FileMove, %binDir%temp.rtf, % reportDir fileOut ".rtf", 1						; move RTF to the final directory
+		FileMove, %binDir%%fileOut%.rtf, % reportDir fileOut ".rtf", 1						; move RTF to the final directory
 		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
 		eventlog("RTF, PDF copied to " complDir)
 		if (pat_meta) {
