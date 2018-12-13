@@ -400,11 +400,11 @@ readFilesPaceart() {
 			filetxt := RegExReplace(fileIn,".pdf$",".txt")
 			runwait, .\bin\pdftotext.exe -table -l 1 "%fileIn%" "%filetxt%",,min
 			FileRead, txt, %filetxt%
-			dem.nameL := parseName(strval(txt,"Patient Name","Referring")).last
-			dem.mrn := strval(txt,"Patient ID","([a-zA-Z]|\R)")
-			dem.devtype := strval(txt,"Device Type","\R")
-			dt := parseDate(strval(txt,"Encounter date","\R"))
-			dem.encdate := dt.yyyy dt.mm dt.dd
+			txt := columns(txt,"\s+Patient\s+Information","\s+Encounter\s+Summary",,"R[AV]\s+Capture\s+Amplitude")
+			dem.nameL := parseName(strval(txt,"Patient Information","Encounter:")).last
+			dem.encdate := parseDate(strval(txt,"Encounter:","(Remote|\R)")).YMD
+			dem.mrn := strval(txt,"Patient ID:","([a-zA-Z]|\R)")
+			dem.devtype := strval(txt,"Device Type:","\R")
 			if !(dem.nameL && dem.mrn && dem.devtype) {									; probably not a Paceart report
 				continue																; skip it
 			}
