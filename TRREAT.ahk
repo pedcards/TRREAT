@@ -401,7 +401,7 @@ readFilesPaceart() {
 			runwait, .\bin\pdftotext.exe -table -l 1 "%fileIn%" "%filetxt%",,min
 			FileRead, txt, %filetxt%
 			dem.nameL := parseName(strval(txt,"Patient Name","Referring")).last
-			dem.mrn := strval(txt,"Patient ID","\R")
+			dem.mrn := strval(txt,"Patient ID","([a-zA-Z]|\R)")
 			dem.devtype := strval(txt,"Device Type","\R")
 			dt := parseDate(strval(txt,"Encounter date","\R"))
 			dem.encdate := dt.yyyy dt.mm dt.dd
