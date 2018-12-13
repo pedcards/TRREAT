@@ -541,6 +541,8 @@ Return
 
 fileLoop:
 {
+/*	Read PDF file from clicked LV entry
+*/
 	blocks := Object()
 	fields := Object()
 	labels := Object()
