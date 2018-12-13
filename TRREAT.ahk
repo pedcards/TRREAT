@@ -2714,7 +2714,7 @@ ParseDate(x) {
 		date.yyyy := d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"i)(" moStr "|\d{1,2})" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
+	else if RegExMatch(x,"i)\b(" moStr "|\d{1,2})\b" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
 		date.dd := zdigit(d2)
 		date.mmm := objhasvalue(mo,d1) 
 			? d1
