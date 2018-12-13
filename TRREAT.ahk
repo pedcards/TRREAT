@@ -566,6 +566,10 @@ fileLoop:
 	else if instr(pat_dev,"SJM") {												; SJM device clicked from LV
 		eventlog("St Jude identified.")
 		gosub SJM
+	} else if (maintxt~="Seattle Children's") {
+		eventlog("Paceart report.")
+		;~ gosub 
+		
 	} 
 	else {
 		eventlog("No file match.")
