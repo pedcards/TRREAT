@@ -1488,7 +1488,7 @@ PaceartXml:
 	
 	if (fldval.devtype="IPG") {
 		eventlog("Paceart PM report.")
-		;~ gosub PaceartPM
+		gosub PaceartPM
 	}
 	else if (fldval.devtype="ICD") {
 		eventlog("Paceart ICD report.")
@@ -1509,6 +1509,68 @@ PaceartXml:
 	gosub makeReport
 	
 return	
+}
+
+PaceartPM:
+{
+	base := "//PatientRecord"
+	fields[1] := ["IDs/ID[Type='MRN']/Value"
+				, "Demographics/FirstName"
+				, "Demographics/LastName"
+				, "Diagnoses/PatientDiagnosis/Diagnosis/Code"
+				, "Diagnoses/PatientDiagnosis/Diagnosis/Description"
+				. ""]
+	labels[1] := ["MRN"
+				, "nameF"
+				, "nameL"
+				, "dx_code"
+				, "dx_desc"
+				. ""]
+	xmlFld(base,1,"dev")
+	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
+	fldfill("indication",printQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
+	
+	fields[1] := ["Device/Manufacturer"
+				, "Device/Model"
+				, "Device/Type"
+				, "ImplantDate"
+				, "FirstImplantingProvider/LastName"
+				. ""]
+	labels[1] := ["manufacturer"
+				, "model"
+				, "type"
+				, "IPG_impl"
+				, "Physician"
+				. ""]
+	xmlFld(base "/ActiveDevices/PatientActiveDevice[Status='ACTIVE']",1,"dev")
+	
+	fields[1] := ["Session/Timestamp"
+				, "Session/Device/Model"
+				, "Session/Device/SerialNumber"
+				, "Statistics/Battery/Status[@nonconformingData]"
+				, "Statistics/Battery/RemainingLongevity"
+				, "Statistics/Battery/Voltage"
+				, "Statistics/Battery/Impedance"
+				. ""]
+	labels[1] := ["Encounter"
+				, "model"
+				, "IPG_SN"
+				, "Battery_stat"
+				, "IPG_Longevity"
+				, "IPG_voltage"
+				, "IPG_impedance"
+				. ""]
+	xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData",1,"dev")
+	fldfill("dev-IPG",fldval["dev-manufacturer"] " " fldval["dev-model"])
+	fldfill("dev-IPG_Longevity",fldval["dev-IPG_Longevity"] " months")
+	fldfill("dev-IPG_voltage",fldval["dev-IPG_voltage"] " V")
+	
+	fields[1] := [
+				. ""]
+	labels[1] := [
+				. ""]
+	;~ xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData",1,"dev")
+	return
 }
 
 xmlFld(base,blk,pre="") {
