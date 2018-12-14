@@ -1486,12 +1486,8 @@ PaceartXml:
 {
 	fldval.devtype := y.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
 	
-	if (fldval.devtype="IPG") {
-		eventlog("Paceart PM report.")
-		gosub PaceartReadXml
-	}
-	else if (fldval.devtype="ICD") {
-		eventlog("Paceart ICD report.")
+	if (fldval.devtype) {
+		eventlog("Paceart " fldval.devtype " report.")
 		gosub PaceartReadXml
 	}
 	else {
