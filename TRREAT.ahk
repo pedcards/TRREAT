@@ -1574,23 +1574,32 @@ PaceartPM:
 }
 
 xmlFld(base,blk,pre="") {
-	global y, fldval, fields, labels
+/*	Reads xxxxxx:yyyy from array
+		xxxxxx = xpath appended to base, if xxxxxx[@aaa] will getAttribute @aaa
+		yyyy = fldval[label], if yyyy[bbb] will append bbb units to result from xxxxxx 
+*/
+	global y, fldval, fields
 	
 	loop,
 	{
 		i := A_Index
-		fld := fields[blk][i]
-		lbl := labels[blk][i]
+		k := fields[blk][i]
+		fld := strX(k,"",1,0,":",1,1)
+		lbl := strX(k,":",1,1,"",0)
+		
 		if (fld="") {
 			break
 		}
 		if RegExMatch(fld,"\[@(.*)?\]$",d) {
-			fld := RegExReplace(fld,"\" d)
+			fld := strX(fld,"",1,0,"[@",1,2)
 			res := y.selectSingleNode(base "/" fld).getAttribute(d1)
 		} else {
 			res := y.selectSingleNode(base "/" fld).text
 		}
-		fldval[pre "-" lbl] := res
+		if RegExMatch(lbl,"\[(.*)?\]$",unit) {
+			lbl := strX(lbl,"",1,0,"[",1,1)
+		}
+		fldval[pre "-" lbl] := res . printQ(unit1," ###")
 	}
 	return
 }
