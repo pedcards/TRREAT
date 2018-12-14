@@ -1488,11 +1488,11 @@ PaceartXml:
 	
 	if (fldval.devtype="IPG") {
 		eventlog("Paceart PM report.")
-		gosub PaceartPM
+		gosub PaceartReadXml
 	}
 	else if (fldval.devtype="ICD") {
 		eventlog("Paceart ICD report.")
-		gosub PaceartPM
+		gosub PaceartReadXml
 	}
 	else {
 		eventlog("Paceart no match.")
@@ -1511,7 +1511,7 @@ PaceartXml:
 return	
 }
 
-PaceartPM:
+PaceartReadXml:
 {
 	fields[1] := ["IDs/ID[Type='MRN']/Value:MRN"
 				, "Demographics/FirstName:nameF"
@@ -1547,7 +1547,7 @@ PaceartPM:
 				, "TrackingRate:URL"
 				, "MaxSensorRate:USR"
 				, "RateModulation/ADLRate:ADL"
-				, "Pacing/PacingData[Chamber='RIGHT_VENTRICLE']/AdaptationMode:Cap_Mgt"
+				, "PacingData[Chamber='RIGHT_VENTRICLE']/AdaptationMode:Cap_Mgt"
 				, "AVDelay/Sensed:SAV"
 				, "AVDelay/Paced:PAV"
 				. ""]
