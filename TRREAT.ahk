@@ -1514,56 +1514,34 @@ return
 PaceartPM:
 {
 	base := "//PatientRecord"
-	fields[1] := ["IDs/ID[Type='MRN']/Value"
-				, "Demographics/FirstName"
-				, "Demographics/LastName"
-				, "Diagnoses/PatientDiagnosis/Diagnosis/Code"
-				, "Diagnoses/PatientDiagnosis/Diagnosis/Description"
-				. ""]
-	labels[1] := ["MRN"
-				, "nameF"
-				, "nameL"
-				, "dx_code"
-				, "dx_desc"
+	fields[1] := ["IDs/ID[Type='MRN']/Value:MRN"
+				, "Demographics/FirstName:nameF"
+				, "Demographics/LastName:nameL"
+				, "Diagnoses/PatientDiagnosis/Diagnosis/Code:dx_code"
+				, "Diagnoses/PatientDiagnosis/Diagnosis/Description:dx_desc"
 				. ""]
 	xmlFld(base,1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
 	fldfill("indication",printQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
 	
-	fields[1] := ["Device/Manufacturer"
-				, "Device/Model"
-				, "Device/Type"
-				, "ImplantDate"
-				, "FirstImplantingProvider/LastName"
-				. ""]
-	labels[1] := ["manufacturer"
-				, "model"
-				, "type"
-				, "IPG_impl"
-				, "Physician"
+	fields[1] := ["Device/Manufacturer:manufacturer"
+				, "Device/Model:model"
+				, "Device/Type:type"
+				, "ImplantDate:IPG_impl"
+				, "FirstImplantingProvider/LastName:Physician"
 				. ""]
 	xmlFld(base "/ActiveDevices/PatientActiveDevice[Status='ACTIVE']",1,"dev")
 	
-	fields[1] := ["Session/Timestamp"
-				, "Session/Device/Model"
-				, "Session/Device/SerialNumber"
-				, "Statistics/Battery/Status[@nonconformingData]"
-				, "Statistics/Battery/RemainingLongevity"
-				, "Statistics/Battery/Voltage"
-				, "Statistics/Battery/Impedance"
-				. ""]
-	labels[1] := ["Encounter"
-				, "model"
-				, "IPG_SN"
-				, "Battery_stat"
-				, "IPG_Longevity"
-				, "IPG_voltage"
-				, "IPG_impedance"
+	fields[1] := ["Session/Timestamp:Encounter"
+				, "Session/Device/Model:model"
+				, "Session/Device/SerialNumber:IPG_SN"
+				, "Statistics/Battery/Status[@nonconformingData]:Battery_stat"
+				, "Statistics/Battery/RemainingLongevity:IPG_Longevity[months]"
+				, "Statistics/Battery/Voltage:IPG_voltage[V]"
+				, "Statistics/Battery/Impedance:IPG_impedance[ohms]"
 				. ""]
 	xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData",1,"dev")
 	fldfill("dev-IPG",fldval["dev-manufacturer"] " " fldval["dev-model"])
-	fldfill("dev-IPG_Longevity",fldval["dev-IPG_Longevity"] " months")
-	fldfill("dev-IPG_voltage",fldval["dev-IPG_voltage"] " V")
 	
 	fields[1] := [
 				. ""]
