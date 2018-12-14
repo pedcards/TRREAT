@@ -97,9 +97,11 @@ parseGUI:
 {
 	Gui, Parse:Destroy
 	Gui, Parse:Default
-	Gui, Add, Tab3,,Interrogations|Paceart saves
+	Gui, Add, Tab3, vWQtab +HwndWQtab,Interrogations|Paceart saves
+	
 	Gui, Tab, Interr
-	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
+	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlv hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
+	Gui, ListView, WQlv
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
 	LV_ModifyCol(2, "Autohdr")
 	LV_ModifyCol(3, "Autohdr")
