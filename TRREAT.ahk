@@ -1543,11 +1543,17 @@ PaceartPM:
 	xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData",1,"dev")
 	fldfill("dev-IPG",fldval["dev-manufacturer"] " " fldval["dev-model"])
 	
-	fields[1] := [
+	fields[1] := ["PacingMode:Mode"
+				, "LowerRate:LRL"
+				, "TrackingRate:URL"
+				, "MaxSensorRate:USR"
+				, "RateModulation/ADLRate:ADL"
+				, "Pacing/PacingData[Chamber='RIGHT_VENTRICLE']/AdaptationMode:Cap_Mgt"
+				, "AVDelay/Sensed:SAV"
+				, "AVDelay/Paced:PAV"
 				. ""]
-	labels[1] := [
-				. ""]
-	;~ xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData",1,"dev")
+	xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData/Programming/Bradycardia",1,"par")
+	
 	return
 }
 
