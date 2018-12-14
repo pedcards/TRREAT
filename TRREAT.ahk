@@ -1513,14 +1513,13 @@ return
 
 PaceartPM:
 {
-	base := "//PatientRecord"
 	fields[1] := ["IDs/ID[Type='MRN']/Value:MRN"
 				, "Demographics/FirstName:nameF"
 				, "Demographics/LastName:nameL"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Code:dx_code"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Description:dx_desc"
 				. ""]
-	xmlFld(base,1,"dev")
+	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
 	fldfill("indication",printQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
 	
@@ -1530,7 +1529,7 @@ PaceartPM:
 				, "ImplantDate:IPG_impl"
 				, "FirstImplantingProvider/LastName:Physician"
 				. ""]
-	xmlFld(base "/ActiveDevices/PatientActiveDevice[Status='ACTIVE']",1,"dev")
+	xmlFld("//ActiveDevices/PatientActiveDevice[Status='ACTIVE']",1,"dev")
 	
 	fields[1] := ["Session/Timestamp:Encounter"
 				, "Session/Device/Model:model"
@@ -1540,7 +1539,7 @@ PaceartPM:
 				, "Statistics/Battery/Voltage:IPG_voltage[V]"
 				, "Statistics/Battery/Impedance:IPG_impedance[ohms]"
 				. ""]
-	xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData",1,"dev")
+	xmlFld("//InterrogatedDeviceData",1,"dev")
 	fldfill("dev-IPG",fldval["dev-manufacturer"] " " fldval["dev-model"])
 	
 	fields[1] := ["PacingMode:Mode"
