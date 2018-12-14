@@ -479,9 +479,12 @@ ParseName(x) {
 
 parsePat:
 {
+	agc := A_GuiControl
+	Gui, ListView, %agc%
 	if !(fileNum := LV_GetNext()) {
 		return
 	}
+	
 	pat_date:=
 	pat_name:=
 	pat_dev:=
