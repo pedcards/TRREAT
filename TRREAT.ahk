@@ -390,30 +390,27 @@ readFilesPaceart() {
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Listview, WQLVp
 	
-	loop, files, % paceartDir "*.pdf"
+	loop, files, % paceartDir "*.xml"
 	{
 		fileIn := paceartDir A_LoopFileName
 		dem := []
-		if (fileIn~="WQ.pdf$") {
-			fnam := StrSplit(RegExReplace(A_LoopFileName,"WQ.pdf$"),"_")
+		if (fileIn~="WQ.xml$") {
+			fnam := StrSplit(RegExReplace(A_LoopFileName,"WQ.xml$"),"_")
 			dem.mrn := fnam.1
 			dem.nameL := fnam.2
 			dem.encdate := fnam.3
-		} else {
-			filetxt := RegExReplace(fileIn,".pdf$",".txt")
-			runwait, .\bin\pdftotext.exe -table -l 1 "%fileIn%" "%filetxt%",,min
-			FileRead, txt, %filetxt%
-			txt := columns(txt,"\s+Patient\s+Information","\s+Encounter\s+Summary",,"R[AV]\s+Capture\s+Amplitude")
-			dem.nameL := parseName(strval(txt,"Patient Information","Encounter:")).last
-			dem.encdate := parseDate(strval(txt,"Encounter:","(Remote|\R)")).YMD
-			dem.mrn := strval(txt,"Patient ID:","([a-zA-Z]|\R)")
-			dem.devtype := strval(txt,"Device Type:","\R")
+		} 
+		else {
+			y := new XML(fileIn)
+			dem.nameL := y.selectSingleNode("//PatientRecord/Demographics/LastName").text
+			dem.mrn := y.selectSingleNode("//PatientRecord/IDs/ID[Type='MRN']/Value").text
+			dem.encdate := parseDate(y.selectSingleNode("//PatientRecord/Encounters/Encounter/Date").text).YMD
+			dem.devtype := y.selectSingleNode("//PatientRecord/ActiveDevices/PatientActiveDevice/Device/Type").text
 			if !(dem.nameL && dem.mrn && dem.devtype) {									; probably not a Paceart report
 				continue																; skip it
 			}
-			fileOut := paceartDir . dem.mrn "_" dem.nameL "_" dem.encdate "WQ.pdf"
+			fileOut := paceartDir . dem.mrn "_" dem.nameL "_" dem.encdate "WQ.xml"
 			FileMove, %fileIn%, %fileOut%, 1
-			FileDelete, %filetxt%
 			fileIn := fileOut
 		}
 		fileNum += 1																	; Add a row to the LV
