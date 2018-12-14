@@ -1551,7 +1551,25 @@ PaceartPM:
 				, "AVDelay/Sensed:SAV"
 				, "AVDelay/Paced:PAV"
 				. ""]
-	xmlFld(base "/Encounters/Encounter/InterrogatedDeviceData/Programming/Bradycardia",1,"par")
+	xmlFld("//Programming/Bradycardia",1,"par")
+	
+	fields[1] := ["APVPPercent:ApVp[%]"
+				, "ASVPPercent:AsVp[%]"
+				, "APVSPercent:ApVs[%]"
+				, "ASVSPercent:AsVs[%]"
+				. ""]
+	xmlFld("//BradycardiaCollection/Bradycardia",1,"dev")
+	
+	fields[1] := ["/Episode[Type='AF_AT']/Count:AT/AF"
+				, "/ATP/Delivered:Rx_AT/AF"
+				, "/Episode[Type='VF_VT']/Count:VT/VF"
+				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Delivered:V_Shocked"
+				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Aborted:V_Aborted"
+				, "/Episode[Type='SVT']/Count:SVT"
+				, "/Episode[Type='VT']/Count:VT"
+				, "/Episode[Type='FVT']/Count:FVT"
+				. ""]
+	xmlFld("//Statistics/Detections_Therapies",1,"detect")
 	
 	return
 }
