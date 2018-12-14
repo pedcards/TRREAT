@@ -1492,7 +1492,7 @@ PaceartXml:
 	}
 	else if (fldval.devtype="ICD") {
 		eventlog("Paceart ICD report.")
-		;~ gosub PaceartICD
+		gosub PaceartPM
 	}
 	else {
 		eventlog("Paceart no match.")
