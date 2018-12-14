@@ -1583,7 +1583,7 @@ xmlFld(base,blk,pre="") {
 		if RegExMatch(lbl,"\[(.*)?\]$",unit) {
 			lbl := strX(lbl,"",1,0,"[",1,1)
 		}
-		fldval[pre "-" lbl] := res . printQ(unit1," ###")
+		fldval[pre "-" lbl] := printQ(res, "###" . printQ(unit1," ###"))
 	}
 	return
 }
