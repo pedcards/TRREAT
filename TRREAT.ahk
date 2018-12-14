@@ -580,7 +580,6 @@ fileLoop:
 		gosub SJM
 	} 
 	else if IsObject(y) {
-		eventlog("Paceart report.")
 		gosub PaceartXml
 		
 	} 
@@ -1483,6 +1482,34 @@ SJM_meta:
 return
 }
 
+PaceartXml:
+{
+	fldval.devtype := y.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
+	
+	if (fldval.devtype="IPG") {
+		eventlog("Paceart PM report.")
+		;~ gosub PaceartPM
+	}
+	else if (fldval.devtype="ICD") {
+		eventlog("Paceart ICD report.")
+		;~ gosub PaceartICD
+	}
+	else {
+		eventlog("Paceart no match.")
+		MsgBox NO MATCH
+		return
+	}
+	
+	gosub fetchDem
+	
+	if (fetchQuit) {
+		return
+	}
+	
+	gosub makeReport
+	
+return	
+}
 
 fldfill(var,val) {
 /*	Nondestructively fill fields
