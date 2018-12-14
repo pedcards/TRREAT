@@ -564,6 +564,7 @@ fileLoop:
 	}
 	if (fileIn~="i).xml$") {
 		y := new XML(fileIn)
+		eventlog("Opened " fileIn)
 	}
 	
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
@@ -580,7 +581,7 @@ fileLoop:
 	} 
 	else if IsObject(y) {
 		eventlog("Paceart report.")
-		;~ gosub 
+		gosub PaceartXml
 		
 	} 
 	else {
