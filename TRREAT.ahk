@@ -1511,6 +1511,29 @@ PaceartXml:
 return	
 }
 
+xmlFld(base,blk,pre="") {
+	global y, fldval, fields, labels
+	
+	loop,
+	{
+		i := A_Index
+		fld := fields[blk][i]
+		lbl := labels[blk][i]
+		if (fld="") {
+			break
+		}
+		if RegExMatch(fld,"\[@(.*)?\]$",d) {
+			fld := RegExReplace(fld,"\" d)
+			res := y.selectSingleNode(base "/" fld).getAttribute(d1)
+		} else {
+			res := y.selectSingleNode(base "/" fld).text
+		}
+		fldval[pre "-" lbl] := res
+	}
+	return
+}
+
+
 fldfill(var,val) {
 /*	Nondestructively fill fields
 	If val is empty, return
