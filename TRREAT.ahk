@@ -387,7 +387,8 @@ readFilesPaceart() {
 	global paceartDir, WQlvP, WQlv, HLVp, HLV
 	
 	Gui, Tab, Paceart
-	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
+	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
+	Gui, Listview, WQLVp
 	
 	loop, files, % paceartDir "*.pdf"
 	{
