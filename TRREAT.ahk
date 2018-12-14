@@ -1546,24 +1546,36 @@ PaceartReadXml:
 				, "PacingData[Chamber='RIGHT_VENTRICLE']/AdaptationMode:Cap_Mgt"
 				, "AVDelay/Sensed:SAV"
 				, "AVDelay/Paced:PAV"
+				, "AutomaticModeSwitch/Status:ModeSwitch"
+				, "AutomaticModeSwitch/Detection/Criteria/Rate:AMSRate"
 				. ""]
 	xmlFld("//Programming/Bradycardia",1,"par")
+	fldval["par-AMS"] := fldval["par-ModeSwitch"]="ENABLED" ? fldval["par-AMSRate"] : "Off"
+	
+	fields[1] := ["/VentricularFirstChamberPaced:CRT_VP"
+				, "/VVDelay:CRT_VV[ms]"
+				. ""]
+	xmlFld("//Programming/HeartFailure",1,"par")
+	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV<LV"
 	
 	fields[1] := ["APVPPercent:ApVp[%]"
 				, "ASVPPercent:AsVp[%]"
 				, "APVSPercent:ApVs[%]"
 				, "ASVSPercent:AsVs[%]"
+				, "/PercentPaced[Chamber='RIGHT_ATRIUM']/Percent:AP[%]"
+				, "/PercentPaced[Chamber='RIGHT_VENTRICLE']/Percent:VP[%]"
+				, "/PercentPaced[Chamber='LEFT_VENTRICLE']/Percent:LVP[%]"
 				. ""]
 	xmlFld("//BradycardiaCollection/Bradycardia",1,"dev")
 	
 	fields[1] := ["/Episode[Type='AF_AT']/Count:AT/AF"
 				, "/ATP/Delivered:Rx_AT/AF"
 				, "/Episode[Type='VF_VT']/Count:VT/VF"
-				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Delivered:V_Shocked"
-				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Aborted:V_Aborted"
 				, "/Episode[Type='SVT']/Count:SVT"
 				, "/Episode[Type='VT']/Count:VT"
 				, "/Episode[Type='FVT']/Count:FVT"
+				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Delivered:V_Shocked"
+				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Aborted:V_Aborted"
 				. ""]
 	xmlFld("//Statistics/Detections_Therapies",1,"detect")
 	
