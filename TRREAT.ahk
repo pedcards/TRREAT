@@ -551,14 +551,20 @@ fileLoop:
 	labels := Object()
 	fldval := Object()
 	leads := Object()
-	summBl := summ := sjmLog := ""
-	Run, %fileIn%
-	SplitPath, fileIn,,,,fileOut
-	FileDelete, %binDir%%fileOut%.txt
-	RunWait, %binDir%pdftotext.exe -table "%fileIn%" "%binDir%%fileOut%.txt" , , hide
-	eventlog("pdftotext " fileIn " -> " binDir fileOut ".txt")
-	FileRead, maintxt, %binDir%%fileOut%.txt
-	cleanlines(maintxt)
+	y := maintxt := summBl := summ := sjmLog := ""
+	
+	if (fileIn~="i).pdf$") {
+		Run, %fileIn%
+		SplitPath, fileIn,,,,fileOut
+		FileDelete, %binDir%%fileOut%.txt
+		RunWait, %binDir%pdftotext.exe -table "%fileIn%" "%binDir%%fileOut%.txt" , , hide
+		eventlog("pdftotext " fileIn " -> " binDir fileOut ".txt")
+		FileRead, maintxt, %binDir%%fileOut%.txt
+		cleanlines(maintxt)
+	}
+	if (fileIn~="i).xml$") {
+		y := new XML(fileIn)
+	}
 	
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
 		eventlog("Medtronic identified.")
@@ -571,7 +577,8 @@ fileLoop:
 	else if instr(pat_dev,"SJM") {												; SJM device clicked from LV
 		eventlog("St Jude identified.")
 		gosub SJM
-	} else if (maintxt~="Seattle Children's") {
+	} 
+	else if IsObject(y) {
 		eventlog("Paceart report.")
 		;~ gosub 
 		
