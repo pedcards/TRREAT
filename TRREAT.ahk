@@ -201,7 +201,7 @@ return
 readFilesMDT() {
 /*	Read root - usually MEDT files
 */
-	global pdfDir, xl, filenum
+	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
@@ -262,7 +262,7 @@ readFilesMDT() {
 readFilesSJM() {
 /* Read SJM "PDFs" folder
 */
-	global pdfDir, xl, filenum
+	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
@@ -327,7 +327,7 @@ readFilesSJM() {
 readFilesBSCI() {
 /* Read BSCI "bsc" folder
 */
-	global xl, pdfDir, filenum, bscBnk
+	global xl, pdfDir, filenum, bscBnk, WQlvP, WQlv, HLVp, HLV
 	
 	tmp := []
 	bscDir := pdfDir "bsc\patientData\"
@@ -384,7 +384,7 @@ readFilesPaceart() {
 /*	read exported PDF reports from Paceart
 	in .\paceart\ folder
 */
-	global paceartDir
+	global paceartDir, WQlvP, WQlv, HLVp, HLV
 	
 	Gui, Tab, Paceart
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
