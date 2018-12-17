@@ -1621,7 +1621,7 @@ readXmlLead(k) {
 }
 
 xmlFld(base,blk,pre="") {
-/*	Reads xxxxxx:yyyy from array
+/*	Reads xxxxxx:yyyy from array blk
 		xxxxxx = xpath appended to base, if xxxxxx[@aaa] will getAttribute @aaa
 		yyyy = fldval[label], if yyyy[bbb] will append bbb units to result from xxxxxx 
 */
@@ -1647,6 +1647,10 @@ xmlFld(base,blk,pre="") {
 }
 
 readNodeVal(fld) {
+/*	Reads a result from Xpath node 'fld'
+	xxxxx returns text from node
+	xxxxx[@yyy] returns value from attribute yyy
+*/
 	global y
 	
 	if (fld="") {
