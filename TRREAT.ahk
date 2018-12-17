@@ -1592,6 +1592,31 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//Statistics/Detections_Therapies",1,"detect")
 	
+	loop, % (leads:=y.selectNodes("//PatientPassiveDevice[Status='ACTIVE']")).length
+	{
+		
+		k := readXmlLead(leads.item(A_Index-1))
+		
+	}
+	
+	return
+}
+
+readXmlLead(k) {
+	ser := k.selectSingleNode("SerialNumber").text
+	manu := k.selectSingleNode("Device/Manufacturer").text
+	model := k.selectSingleNode("Device/Model").text
+	impl := parseDate(k.selectSingleNode("ImplantDate").text).MDY
+	ch := k.selectSingleNode("Chamber").text
+	
+	node := "//Programming//PacingData[Chamber='" ch "']"
+	
+	pol := readNodeVal(node "//Polarity")
+	amp := readNodeVal(node "/Amplitude") " V"
+	pw := readNodeVal(node "/PulseWidth") " ms"
+	
+	ch := RegExReplace(ch,"(L|R).*?_(A|V).*?$","$1$2")
+	
 	return
 }
 
