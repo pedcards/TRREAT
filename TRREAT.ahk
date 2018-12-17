@@ -1614,14 +1614,14 @@ readXmlLead(k) {
 	ch := RegExReplace(chamb,"(L|R).*?_(A|V).*?$","$1$2")
 	
 	base := "//Programming//PacingData[Chamber='" chamb "']"
-	pol := printQ(readNodeVal(base "//Polarity"),"###")
-	amp := printQ(readNodeVal(base "/Amplitude"),"### V")
-	pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
-	adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
+	p_pol := printQ(readNodeVal(base "//Polarity"),"###")
+	p_amp := printQ(readNodeVal(base "/Amplitude"),"### V")
+	p_pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
+	p_adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
 	
 	base := "//Programming//SensingData[Chamber='" chamb "']"
-	pol_s := printQ(readNodeVal(base "//Polarity"),"###")
-	sens_thr := printQ(readNodeVal(base "//Amplitude"),"### mV")
+	s_pol := printQ(readNodeVal(base "//Polarity"),"###")
+	s_thr := printQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" chamb "']"
 	imp := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
