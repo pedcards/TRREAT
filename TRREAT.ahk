@@ -1633,24 +1633,34 @@ xmlFld(base,blk,pre="") {
 		k := fields[blk][i]
 		fld := strX(k,"",1,0,":",1,1)
 		lbl := strX(k,":",1,1,"",0)
-		
 		if (fld="") {
 			break
 		}
-		if RegExMatch(fld,"\[@(.*)?\]$",d) {
-			fld := strX(fld,"",1,0,"[@",1,2)
-			res := y.selectSingleNode(base "/" fld).getAttribute(d1)
-		} else {
-			res := y.selectSingleNode(base "/" fld).text
-		}
-		if RegExMatch(lbl,"\[(.*)?\]$",unit) {
-			lbl := strX(lbl,"",1,0,"[",1,1)
-		}
-		fldval[pre "-" lbl] := printQ(res, "###" . printQ(unit1," ###"))
+		
+		res := readNodeVal(base "/" fld)
+		unit := strX(lbl,"[",1,1,"]",0,1)
+		lbl := strX(lbl,"",1,0,"[",1,1)
+		
+		fldval[pre "-" lbl] := printQ(res, "###" . printQ(unit," ###"))
 	}
 	return
 }
 
+readNodeVal(fld) {
+	global y
+	
+	if (fld="") {
+		return error
+	}
+	if RegExMatch(fld,"\[@(.*)?\]$",d) {
+		fld := strX(fld,"",1,0,"[@",1,2)
+		res := y.selectSingleNode(fld).getAttribute(d1)
+	} else {
+		res := y.selectSingleNode(fld).text
+	}
+	
+	return res
+}
 
 fldfill(var,val) {
 /*	Nondestructively fill fields
