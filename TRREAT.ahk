@@ -1546,6 +1546,9 @@ PaceartReadXml:
 				, "PacingData[Chamber='RIGHT_VENTRICLE']/AdaptationMode:Cap_Mgt"
 				, "AVDelay/Sensed:SAV"
 				, "AVDelay/Paced:PAV"
+				, "/SensingData[Chamber='RIGHT_ATRIUM']"
+					. "//RefractoryPeriod[PreviousEventChamber='VENTRICLE']"
+					. "/Interval:PVARP"
 				, "AutomaticModeSwitch/Status:ModeSwitch"
 				, "AutomaticModeSwitch/Detection/Criteria/Rate:AMSRate"
 				. ""]
