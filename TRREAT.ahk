@@ -1614,19 +1614,22 @@ readXmlLead(k) {
 	ch := RegExReplace(chamb,"(L|R).*?_(A|V).*?$","$1$2")
 	
 	base := "//Programming//PacingData[Chamber='" chamb "']"
-	p_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	p_amp := printQ(readNodeVal(base "/Amplitude"),"### V")
-	p_pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
-	p_adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
+	pol := printQ(readNodeVal(base "//Polarity"),"###")
+	amp := printQ(readNodeVal(base "/Amplitude"),"### V")
+	pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
+	adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
 	
 	base := "//Programming//SensingData[Chamber='" chamb "']"
-	s_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	s_thr := printQ(readNodeVal(base "//Amplitude"),"### mV")
+	sens_pol := printQ(readNodeVal(base "//Polarity"),"###")
+	sens := printQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" chamb "']"
+	sens := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
 	imp := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
-	sens := printQ(readNodeVal(base "//Sensitivity//Amplitude"),"### mV") 
 	hvi := printQ(readNodeVal(base "/HighPowerChannel//Impedance//Value"),"### ohms")
+	cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
+	cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
+	
 	
 	return
 }
