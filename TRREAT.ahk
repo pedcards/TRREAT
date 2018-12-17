@@ -1568,12 +1568,25 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//BradycardiaCollection/Bradycardia",1,"dev")
 	
+	fields[1] := ["/Zone[Type='VENTRICULAR_FIBRILLATION']//Summary:VF"
+				, "/Zone[Type='VENTRICULAR_TACHYCARDIA']//Summary:VT"
+				, "/Zone[Type='VENTRICULAR_TACHYCARDIA_1']//Summary:VT1"
+				, "/Zone[Type='VENTRICULAR_TACHYCARDIA_2']//Summary:VT2"
+				, "/Zone[Type='ATRIAL_TACHYCARDIA']//Summary:AT"
+				, "/Zone[Type='ATRIAL_FIBRILLATION']//Summary:AF"
+				. ""]
+	xmlFld("//Programming/Tachycardia",1,"detect")
+	
 	fields[1] := ["/Episode[Type='AF_AT']/Count:AT/AF"
-				, "/ATP/Delivered:Rx_AT/AF"
 				, "/Episode[Type='VF_VT']/Count:VT/VF"
 				, "/Episode[Type='SVT']/Count:SVT"
+				, "/Episode[Type='V_NST']/Count:VNST"
 				, "/Episode[Type='VT']/Count:VT"
 				, "/Episode[Type='FVT']/Count:FVT"
+				, "/Therapy[Chamber='RIGHT_ATRIUM']/ATP/Delivered:Rx_AT/AF"
+				, "/Therapy[Chamber='RIGHT_ATRIUM']/Shocks/Delivered:A_Shocked"
+				, "/Therapy[Chamber='RIGHT_ATRIUM']/Shocks/Aborted:A_Aborted"
+				, "/Therapy[Chamber='RIGHT_VENTRICLE']/ATP/Delivered:Rx_VATP"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Delivered:V_Shocked"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Aborted:V_Aborted"
 				. ""]
