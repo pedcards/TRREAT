@@ -1624,11 +1624,11 @@ readXmlLead(k) {
 	sens := printQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" chamb "']"
+	cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
+	cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
 	sens := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
 	imp := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
 	hvi := printQ(readNodeVal(base "/HighPowerChannel//Impedance//Value"),"### ohms")
-	cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
-	cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
 	
 	
 	return
