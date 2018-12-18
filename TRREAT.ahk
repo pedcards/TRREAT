@@ -1486,8 +1486,8 @@ PaceartXml:
 {
 	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
 	
-	if (fldval.devtype) {
-		eventlog("Paceart " fldval.devtype " report.")
+	if (fldval["dev-type"]) {
+		eventlog("Paceart " fldval["dev-type"]" report.")
 		gosub PaceartReadXml
 	}
 	else {
