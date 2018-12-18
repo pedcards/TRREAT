@@ -1979,9 +1979,7 @@ normLead(lead				; RA, RV, LV
 	global leads, fldval
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
-	leads[lead,"imp"]  		:= P_imp 
-							. ((fldval["leads-" lead "_HVimp"]) 
-							? ". Defib impedance " fldval["leads-" lead "_HVimp"] : "")
+	leads[lead,"imp"]  		:= P_imp . printQ(fldval["leads-" lead "_HVimp"],". Defib impedance ###")
 	leads[lead,"cap"]  		:= P_thr
 	leads[lead,"output"]	:= P_out
 	leads[lead,"pace pol"] 	:= P_pol
@@ -2035,8 +2033,7 @@ PrintOut:
 {
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
 	FormatTime, enc_date, A_now, MM/dd/yyyy
-	dt := parseDate(fldval["dev-Encounter"])
-	enc_dt := dt.MM "/" dt.DD "/" dt.YYYY 
+	enc_dt := parseDate(fldval["dev-Encounter"]).MDY
 	for k in leads
 	{
 		ctLeads := A_Index
@@ -2051,6 +2048,7 @@ PrintOut:
 	enc_type := (instr(leads["RV","imp"],"Defib"))
 		? "ICD " enc_type
 		: "PM " enc_type
+	enc_type := (fldval["dev-EncType"]="REMOTE" ? "REMOTE " : "") . enc_type
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
