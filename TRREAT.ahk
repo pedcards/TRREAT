@@ -1598,41 +1598,50 @@ PaceartReadXml:
 	
 	loop, % (i:=yp.selectNodes("//PatientPassiveDevice[Status='ACTIVE']")).length
 	{
-		
-		k := readXmlLead(leads.item(A_Index-1))
-		
+		k := readXmlLead(i.item(A_Index-1))
+		normLead(k.ch
+			, printQ(k.manu, "### ") printQ(k.model, "###") printQ(k.ser,", serial ###"), k.impl
+			, k.pacing_imped
+			, k.cap_amp printQ(k.cap_pw," / ###")
+			, k.pacing_amp printQ(k.pacing_pw," / ###")
+			, k.pacing_pol
+			, k.sensing_thr
+			, k.sensitivity_amp
+			, k.sensitivity_pol)
 	}
 	
 	return
 }
 
 readXmlLead(k) {
-	ser := k.selectSingleNode("SerialNumber").text
-	manu := k.selectSingleNode("Device/Manufacturer").text
-	model := k.selectSingleNode("Device/Model").text
-	impl := parseDate(k.selectSingleNode("ImplantDate").text).MDY
-	chamb := k.selectSingleNode("Chamber").text
-	ch := RegExReplace(chamb,"(L|R).*?_(A|V).*?$","$1$2")
+	global fldval
 	
-	base := "//Programming//PacingData[Chamber='" chamb "']"
-	pol := printQ(readNodeVal(base "//Polarity"),"###")
-	amp := printQ(readNodeVal(base "/Amplitude"),"### V")
-	pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
-	adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
+	res := []
+	res.ser := k.selectSingleNode("SerialNumber").text
+	res.manu := k.selectSingleNode("Device/Manufacturer").text
+	res.model := k.selectSingleNode("Device/Model").text
+	res.impl := parseDate(k.selectSingleNode("ImplantDate").text).MDY
+	res.chamb := k.selectSingleNode("Chamber").text
+	res.ch := RegExReplace(res.chamb,"(L|R).*?_(A|V).*?$","$1$2")
 	
-	base := "//Programming//SensingData[Chamber='" chamb "']"
-	sens_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	sens := printQ(readNodeVal(base "//Amplitude"),"### mV")
+	base := "//Programming//PacingData[Chamber='" res.chamb "']"
+	res.pacing_pol := printQ(readNodeVal(base "//Polarity"),"###")
+	res.pacing_amp := printQ(readNodeVal(base "/Amplitude"),"### V")
+	res.pacing_pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
+	res.pacing_adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
 	
-	base := "//Statistics//Lead[Chamber='" chamb "']"
-	cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
-	cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
-	sens := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
-	imp := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
-	hvi := printQ(readNodeVal(base "/HighPowerChannel//Impedance//Value"),"### ohms")
+	base := "//Programming//SensingData[Chamber='" res.chamb "']"
+	res.sensitivity_pol := printQ(readNodeVal(base "//Polarity"),"###")
+	res.sensitivity_amp := printQ(readNodeVal(base "//Amplitude"),"### mV")
 	
+	base := "//Statistics//Lead[Chamber='" res.chamb "']"
+	res.cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
+	res.cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
+	res.sensing_thr := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
+	res.pacing_imped := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
+	fldval["leads-" lead "_HVimp"] := printQ(readNodeVal(base "/HighPowerChannel//Impedance//Value"),"### ohms")
 	
-	return
+	return res
 }
 
 xmlFld(base,blk,pre="") {
