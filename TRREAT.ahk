@@ -551,7 +551,7 @@ fileLoop:
 	labels := Object()
 	fldval := Object()
 	leads := Object()
-	y := maintxt := summBl := summ := sjmLog := ""
+	yp := maintxt := summBl := summ := sjmLog := ""
 	
 	if (fileIn~="i).pdf$") {
 		Run, %fileIn%
@@ -563,7 +563,7 @@ fileLoop:
 		cleanlines(maintxt)
 	}
 	if (fileIn~="i).xml$") {
-		y := new XML(fileIn)
+		yp := new XML(fileIn)
 		eventlog("Opened " fileIn)
 	}
 	
@@ -579,7 +579,7 @@ fileLoop:
 		eventlog("St Jude identified.")
 		gosub SJM
 	} 
-	else if IsObject(y) {
+	else if IsObject(yp) {
 		gosub PaceartXml
 		
 	} 
@@ -1484,7 +1484,7 @@ return
 
 PaceartXml:
 {
-	fldval.devtype := y.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
+	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
 	
 	if (fldval.devtype) {
 		eventlog("Paceart " fldval.devtype " report.")
@@ -1595,7 +1595,7 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//Statistics/Detections_Therapies",1,"detect")
 	
-	loop, % (leads:=y.selectNodes("//PatientPassiveDevice[Status='ACTIVE']")).length
+	loop, % (i:=yp.selectNodes("//PatientPassiveDevice[Status='ACTIVE']")).length
 	{
 		
 		k := readXmlLead(leads.item(A_Index-1))
@@ -1639,7 +1639,7 @@ xmlFld(base,blk,pre="") {
 		xxxxxx = xpath appended to base, if xxxxxx[@aaa] will getAttribute @aaa
 		yyyy = fldval[label], if yyyy[bbb] will append bbb units to result from xxxxxx 
 */
-	global y, fldval, fields
+	global fldval, fields
 	
 	loop,
 	{
@@ -1665,16 +1665,16 @@ readNodeVal(fld) {
 	xxxxx returns text from node
 	xxxxx[@yyy] returns value from attribute yyy
 */
-	global y
+	global yp
 	
 	if (fld="") {
 		return error
 	}
 	if RegExMatch(fld,"\[@(.*)?\]$",d) {
 		fld := strX(fld,"",1,0,"[@",1,2)
-		res := y.selectSingleNode(fld).getAttribute(d1)
+		res := yp.selectSingleNode(fld).getAttribute(d1)
 	} else {
-		res := y.selectSingleNode(fld).text
+		res := yp.selectSingleNode(fld).text
 	}
 	
 	return res
