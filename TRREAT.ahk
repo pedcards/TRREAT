@@ -1614,7 +1614,7 @@ PaceartReadXml:
 }
 
 readXmlLead(k) {
-	global fldval
+	global fldval, leads
 	
 	res := []
 	res.ser := k.selectSingleNode("SerialNumber").text
@@ -1623,6 +1623,15 @@ readXmlLead(k) {
 	res.impl := parseDate(k.selectSingleNode("ImplantDate").text).MDY
 	res.chamb := k.selectSingleNode("Chamber").text
 	res.ch := RegExReplace(res.chamb,"(L|R).*?_(A|V).*?$","$1$2")
+	if IsObject(leads[res.ch]) {
+		for k in leads
+		{
+			if (res.ch ~= k) {
+				num ++
+			}
+		}
+		res.ch .= num+1
+	}
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
 	res.pacing_pol := printQ(readNodeVal(base "//Polarity"),"###")
