@@ -1632,6 +1632,10 @@ readXmlLead(k) {
 		}
 		res.ch .= num+1
 	}
+	if (res.model ~= "6937") {
+		fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+		return res
+	}
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
 	res.pacing_pol := printQ(readNodeVal(base "//Polarity"),"###")
