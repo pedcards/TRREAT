@@ -1521,22 +1521,23 @@ PaceartReadXml:
 	
 	fields[1] := ["Device/Manufacturer:manufacturer"
 				, "Device/Model:model"
-				, "Device/Type:type"
+				, "SerialNumber:IPG_SN"
 				, "ImplantDate:IPG_impl"
 				, "FirstImplantingProvider/LastName:Physician"
 				. ""]
 	xmlFld("//ActiveDevices/PatientActiveDevice[Status='ACTIVE']",1,"dev")
+	fldfill("dev-IPG_impl",parseDate(fldval["dev-IPG_impl"]).MDY)
 	
-	fields[1] := ["Session/Timestamp:Encounter"
-				, "Session/Device/Model:model"
-				, "Session/Device/SerialNumber:IPG_SN"
-				, "Statistics/Battery/Status[@nonconformingData]:Battery_stat"
-				, "Statistics/Battery/RemainingLongevity:IPG_Longevity[months]"
-				, "Statistics/Battery/Voltage:IPG_voltage[V]"
-				, "Statistics/Battery/Impedance:IPG_impedance[ohms]"
+	fields[1] := ["Date:Encounter"
+				, "Type:EncType"
+				, "/Battery/Status[@nonconformingData]:Battery_stat"
+				, "/Battery/RemainingLongevity:IPG_Longevity[months]"
+				, "/Battery/Voltage:IPG_voltage[V]"
+				, "/Battery/Impedance:IPG_impedance[ohms]"
 				. ""]
-	xmlFld("//InterrogatedDeviceData",1,"dev")
-	fldfill("dev-IPG",fldval["dev-manufacturer"] " " fldval["dev-model"])
+	xmlFld("//Encounter",1,"dev")
+	fldfill("dev-IPG",printQ(fldval["dev-manufacturer"],"###") printQ(fldval["dev-model"]," ###"))
+	fldfill("dev-Encounter",parseDate(fldval["dev-Encounter"]).MDY)
 	
 	fields[1] := ["PacingMode:Mode"
 				, "LowerRate:LRL"
