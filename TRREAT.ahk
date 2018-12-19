@@ -102,8 +102,20 @@ parseGUI:
 	Gui, Tab, Interr
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlv hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, ListView, WQlv
+	
+	gosub readList																		; read the worklist
+	
+	gosub readFiles																		; scan the folders
+	
 	fixWqlvCols("WQlv")
 	
+	progress, off
+	
+	Gui, Show,, TRREAT Reports and File Manager
+	WinActivate, TRREAT Reports
+	return
+}
+
 fixWQlvCols(lv) {
 	Gui, ListView, % lv
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
@@ -121,6 +133,8 @@ fixWQlvCols(lv) {
 
 readList:
 {
+	progress,20,,Scanning worklist
+	
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
 	if !FileExist(worklist) {
@@ -191,6 +205,7 @@ readFilesMDT() {
 */
 	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
+	progress, 40,, Medtronic
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
@@ -252,6 +267,7 @@ readFilesSJM() {
 */
 	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
+	progress, 60,, St Jude/Abbott
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
@@ -317,6 +333,7 @@ readFilesBSCI() {
 */
 	global xl, pdfDir, filenum, bscBnk, WQlvP, WQlv, HLVp, HLV
 	
+	progress, 80,, Boston Scientific
 	tmp := []
 	bscDir := pdfDir "bsc\patientData\"
 	loop, Files, % bscDir "*", D												; Loop through subdirs of patientData
@@ -373,6 +390,8 @@ readFilesPaceart() {
 	in .\paceart\ folder
 */
 	global paceartDir, WQlvP, WQlv, HLVp, HLV
+	
+	progress, 100,, Paceart imports
 	
 	Gui, Tab, Paceart
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
