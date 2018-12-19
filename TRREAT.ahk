@@ -102,6 +102,10 @@ parseGUI:
 	Gui, Tab, Interr
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlv hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, ListView, WQlv
+	fixWqlvCols("WQlv")
+	
+fixWQlvCols(lv) {
+	Gui, ListView, % lv
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
 	LV_ModifyCol(2, "Autohdr")
 	LV_ModifyCol(3, "Autohdr")
@@ -111,19 +115,9 @@ parseGUI:
 	LV_ModifyCol(7, "0")														; hide the filename col
 	LV_ModifyCol(8, "0")														; hide the metadata col
 	LV_ModifyCol(9, "0")														; hide the report col
-	
-	progress,,,Scanning files
-	
-	gosub readList																; read the worklist
-	
-	gosub readFiles																; scan the folders
-	
-	progress, off
-	
-	Gui, Show,, TRREAT Reports and File Manager
-	WinActivate, TRREAT Reports
 	return
 }
+
 
 readList:
 {
@@ -178,12 +172,6 @@ readList:
 		LV_Modify(fileNum,"col8", tmp.meta)
 		LV_Modify(fileNum,"col9", tmp.report)
 	}
-	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
-	LV_ModifyCol(2, "Autohdr")
-	LV_ModifyCol(3, "Autohdr")
-	LV_ModifyCol(4, "Autohdr")
-	LV_ModifyCol(5, "Autohdr")
-	LV_ModifyCol(6, "Autohdr")
 	eventlog("Parse listview generated.")
 return
 }
@@ -423,15 +411,7 @@ readFilesPaceart() {
 		LV_Modify(fileNum,"col7", fileIn)
 		;~ LV_Modify(fileNum,"col8", "")
 	}
-	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
-	LV_ModifyCol(2, "Autohdr")
-	LV_ModifyCol(3, "0")
-	LV_ModifyCol(4, "0")
-	LV_ModifyCol(5, "0")
-	LV_ModifyCol(6, "0")
-	LV_ModifyCol(7, "0")														; hide the filename col
-	LV_ModifyCol(8, "0")														; hide the metadata col
-	LV_ModifyCol(9, "0")														; hide the report col
+	fixWQlvCols("WQLVp")
 
 	return	
 }
