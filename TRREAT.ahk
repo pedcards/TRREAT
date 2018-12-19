@@ -2116,16 +2116,16 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	enc_dt.YMD
 	
-	FileDelete, %binDir%%fileOut%.rtf														; delete and generate RTF fileOut.rtf
+	FileDelete, %binDir%%fileOut%.rtf													; delete and generate RTF fileOut.rtf
 	FileAppend, %rtfOut%, %binDir%%fileOut%.rtf
 	
 	eventlog("Print output generated in " binDir)
 	
-	RunWait, % "WordPad.exe " binDir fileOut ".rtf"											; launch fileNam in WordPad
+	RunWait, WordPad.exe "%binDir%%fileOut%.rtf"										; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		FileMove, %binDir%%fileOut%.rtf, % reportDir fileOut ".rtf", 1						; move RTF to the final directory
+		FileMove, %binDir%%fileOut%.rtf, % reportDir fileOut ".rtf", 1					; move RTF to the final directory
 		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
 		eventlog("RTF, PDF copied to " complDir)
 		if (pat_meta) {
