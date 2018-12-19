@@ -2051,7 +2051,7 @@ PrintOut:
 {
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
 	FormatTime, enc_date, A_now, MM/dd/yyyy
-	enc_dt := parseDate(fldval["dev-Encounter"]).MDY
+	enc_dt := parseDate(fldval["dev-Encounter"])
 	for k in leads
 	{
 		ctLeads := A_Index
@@ -2080,8 +2080,8 @@ PrintOut:
 			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
 			. "Dictation Date\tab "		"<13:" enc_date ">\par `n"
 			. "Job #\tab "				"<15:e> \par `n"
-			. "Service Date\tab "		"<31:" enc_dt ">\par `n"
-			. "Surgery Date\tab "		"<6:" enc_dt "> \par `n"
+			. "Service Date\tab "		"<31:" enc_dt.MDY ">\par `n"
+			. "Surgery Date\tab "		"<6:" enc_dt.MDY "> \par `n"
 			. "Attending Phy #\tab "	"<9:" docs[enc_MD] "> \par `n"
 			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
 			. "Job No Search\tab "		"<JobNoSearch:NONE> \par `n"
@@ -2092,7 +2092,7 @@ PrintOut:
 	
 	rtfBody := "\tx1620\tx5220\tx7040" 
 	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
-	. enc_dt "\par\par `n"
+	. enc_dt.MDY "\par\par `n"
 	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
@@ -2114,7 +2114,7 @@ PrintOut:
 	fileOut :=	enc_MD "-" encMRN " " 
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
 			.	"#" fldval["dev-IPG_SN"] " "
-			.	dt.YYYY dt.MM dt.DD
+			.	enc_dt.YMD
 	
 	FileDelete, %binDir%%fileOut%.rtf														; delete and generate RTF fileOut.rtf
 	FileAppend, %rtfOut%, %binDir%%fileOut%.rtf
@@ -2135,7 +2135,7 @@ PrintOut:
 		
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
-		xl.addElement("id","/root/work",{date: dt.YYYY dt.MM dt.DD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
+		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
