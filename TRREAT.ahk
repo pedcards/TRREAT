@@ -1995,7 +1995,9 @@ normLead(lead				; RA, RV, LV
 	global leads, fldval
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
-	leads[lead,"imp"]  		:= P_imp . printQ(fldval["leads-" lead "_HVimp"],". Defib impedance ###")
+	leads[lead,"imp"]  		:= printQ(P_imp,"Pacing impedance ###") 
+							. printQ(fldval["leads-" lead "_HVimp"]
+							, printQ(P_imp,". ") " Defib impedance ###")
 	leads[lead,"cap"]  		:= P_thr
 	leads[lead,"output"]	:= P_out
 	leads[lead,"pace pol"] 	:= P_pol
@@ -2009,7 +2011,7 @@ printLead(lead) {
 	global rtfBody, leads
 	rtfBody .= "\b " lead " lead: \b0 " 
 	. printQ(leads[lead,"model"],"###" printQ(leads[lead,"date"],", implanted ###") ". ")
-	. printQ(leads[lead,"imp"],"Pacing impedance ###. ")
+	. printQ(leads[lead,"imp"],"###. ")
 	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
 	. printQ(leads[lead,"output"],"Pacing output ###. ")
 	. printQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
