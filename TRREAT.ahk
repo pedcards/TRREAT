@@ -2066,7 +2066,7 @@ PrintOut:
 	enc_type := (instr(leads["RV","imp"],"Defib"))
 		? "ICD " enc_type
 		: "PM " enc_type
-	enc_type := (fldval["dev-EncType"]="REMOTE" ? "REMOTE " : "") . enc_type
+	enc_type := (fldval["dev-EncType"]="REMOTE" ? "REMOTE " : "IN-OFFICE ") . enc_type
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
