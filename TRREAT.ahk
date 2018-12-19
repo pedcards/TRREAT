@@ -2585,6 +2585,12 @@ fetchGUI:
 	EncMRN := fldval["dev-MRN"]
 	EncName := (fldval["dev-Name"]~="[A-Z \-]+, [A-Z\-](?!=\s)")
 	demBits := ((EncNum~="\d{8}") && (EncMRN~="\d{6,7}") && EncName)			; clear the error check
+	/*	set this as true to skip demographics validation
+	*/
+		;~ dembits := true
+	/*
+	*/
+	
 	Gui, fetch:Destroy
 	Gui, fetch:+AlwaysOnTop
 	
