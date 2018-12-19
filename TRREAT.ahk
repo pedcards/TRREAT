@@ -2133,6 +2133,13 @@ PrintOut:
 			FileCopy, % pat_meta, % complDir fileOut ".meta", 1							; copy BNK to complete directory
 			eventlog("META copied to " complDir)
 		}
+		if (ext=".xml") {
+			nBytes := Base64Dec( yp.selectSingleNode("//Encounter//Attachment//FileData").text, Bin )
+			ed_File := FileOpen( complDir . fileOut ".pdf", "w")
+			ed_File.RawWrite(Bin, nBytes)
+			ed_File.Close
+			FileDelete, % fileIn
+		}
 		
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
@@ -2165,6 +2172,17 @@ PrintOut:
 	gosub readFiles
 	
 	return
+}
+
+Base64Dec( ByRef B64, ByRef Bin ) {  ; By SKAN / 18-Aug-2017
+; from https://autohotkey.com/boards/viewtopic.php?t=35964
+Local Rqd := 0, BLen := StrLen(B64)                 ; CRYPT_STRING_BASE64 := 0x1
+  DllCall( "Crypt32.dll\CryptStringToBinary", "Str",B64, "UInt",BLen, "UInt",0x1
+         , "UInt",0, "UIntP",Rqd, "Int",0, "Int",0 )
+  VarSetCapacity( Bin, 128 ), VarSetCapacity( Bin, 0 ),  VarSetCapacity( Bin, Rqd, 0 )
+  DllCall( "Crypt32.dll\CryptStringToBinary", "Str",B64, "UInt",BLen, "UInt",0x1
+         , "Ptr",&Bin, "UIntP",Rqd, "Int",0, "Int",0 )
+Return Rqd
 }
 
 columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
