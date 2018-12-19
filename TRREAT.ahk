@@ -133,7 +133,7 @@ fixWQlvCols(lv) {
 
 readList:
 {
-	progress,20,,Scanning worklist
+	progress,20,Reading worklist,Scanning files
 	
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
@@ -205,7 +205,7 @@ readFilesMDT() {
 */
 	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
-	progress, 40,, Medtronic
+	progress, 40,Medtronic
 	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
@@ -267,7 +267,7 @@ readFilesSJM() {
 */
 	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
-	progress, 60,, St Jude/Abbott
+	progress, 60,St Jude/Abbott
 	sjmDir := pdfDir "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
@@ -333,7 +333,7 @@ readFilesBSCI() {
 */
 	global xl, pdfDir, filenum, bscBnk, WQlvP, WQlv, HLVp, HLV
 	
-	progress, 80,, Boston Scientific
+	progress, 80,Boston Scientific
 	tmp := []
 	bscDir := pdfDir "bsc\patientData\"
 	loop, Files, % bscDir "*", D												; Loop through subdirs of patientData
@@ -391,7 +391,7 @@ readFilesPaceart() {
 */
 	global paceartDir, WQlvP, WQlv, HLVp, HLV
 	
-	progress, 100,, Paceart imports
+	progress, 100, Paceart imports
 	
 	Gui, Tab, Paceart
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
