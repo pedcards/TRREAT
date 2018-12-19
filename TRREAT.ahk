@@ -2168,8 +2168,7 @@ PrintOut:
 			;~ err := whr.ResponseText													; the http response
 		}
 	}
-	gosub readList
-	gosub readFiles
+	gosub parseGUI
 	
 	return
 }
