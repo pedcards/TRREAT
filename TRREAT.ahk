@@ -2125,9 +2125,10 @@ PrintOut:
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
+		RegExMatch(fileIn,"\....$",ext)
 		FileMove, %binDir%%fileOut%.rtf, % reportDir fileOut ".rtf", 1					; move RTF to the final directory
-		FileCopy, % fileIn, % complDir fileOut ".pdf", 1								; copy PDF to complete directory
-		eventlog("RTF, PDF copied to " complDir)
+		FileCopy, % fileIn, % complDir fileOut ext, 1									; copy PDF to complete directory
+		eventlog("RTF, " ext " copied to " complDir)
 		if (pat_meta) {
 			FileCopy, % pat_meta, % complDir fileOut ".meta", 1							; copy BNK to complete directory
 			eventlog("META copied to " complDir)
