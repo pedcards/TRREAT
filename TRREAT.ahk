@@ -2075,7 +2075,7 @@ PrintOut:
 			. "Clinic Title code\tab "	"<1035:PACE> \par `n"
 			. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par `n"
 			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
-			. "CIS Encounter #\tab "	"<3: " substr("0000" . fldval["dev-Enc"], -11) " >\par `n"
+			. "CIS Encounter #\tab "	"<3: " printQ(fldval["dev-Enc"],format("{:012}",fldval["dev-Enc"])) " >\par `n"
 			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
 			. "Dictation Date\tab "		"<13:" enc_date ">\par `n"
 			. "Job #\tab "				"<15:e> \par `n"
@@ -2737,7 +2737,7 @@ makeReport:
 		return
 	}
 	if instr(summ,"normal") {
-		summ := "This represents a normal device check. The patient denies any device related symptoms. "
+		summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. "
 		eventlog("Normal summary template selected.")
