@@ -2138,6 +2138,13 @@ PrintOut:
 			ed_File.RawWrite(Bin, nBytes)
 			ed_File.Close
 			FileDelete, % fileIn
+			
+			fileWQ := enc_date "," 			 														; date processed and MA user
+					. """" nm """" ","																; CIS name
+					. """" encMRN """" ","															; CIS MRN
+					. "`n"
+			FileAppend, %fileWQ%, .\logs\trreatWQ.csv												; Add to logs\fileWQ list
+			FileCopy, .\logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
 		}
 		
 		t_now := A_Now
