@@ -345,8 +345,9 @@ readFilesBSCI() {
 			eventlog("BSC: Metafile " A_LoopFileName " found.")
 		}
 		FileRead, bscBnk, % tmp.bnk												; need bscBnk for readBnk
-		td := parseDate(trim(stregX(bscBnk,"Save Date:",1,1,"[\r\n]",1)))		; get the DATE array
-		tmp.date := td.YYYY td.MM td.DD
+		td := trim(stregX(bscBnk,"Save Date:",1,1,"\R",1))						; get the DATE array
+		td := parseDate(RegExReplace(td," ","-"))
+		tmp.date := td.YMD
 		tmp.name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp.dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
 		tmp.ser := readBnk("SystemSerialNumber")
