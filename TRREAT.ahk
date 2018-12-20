@@ -228,10 +228,11 @@ readFilesMDT() {
 				eventlog("MDT: newer version of " j " _" k )
 			}
 		}
-		tmp.name := strX(tmp.file,"",1,0,"_",1,1,n)
-		tmp.ser := strX(tmp.file,"_",n-1,1,"_",1,1,n)
-		td := parseDate(strX(tmp.file,"_",n+1,1,".pdf",1,6))
-		tmp.date := td.YYYY td.MM td.DD
+		fnam := StrSplit(tmp.file,"_")
+		tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
+		tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
+		tmp.type := fnam.3
+		tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
 		tmp.file := pdfDir tmp.file
 		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
 		
