@@ -3006,6 +3006,13 @@ ParseDate(x) {
 				: "20" d3
 		date.date := trim(d)
 	}
+	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2})\s+(\d{4})",d) {							; Dec 21, 2018
+		date.mmm := d1
+		date.mm := zdigit(objhasvalue(mo,d1))
+		date.dd := zdigit(d2)
+		date.yyyy := d3
+		date.date := trim(d)
+	}
 	else if RegExMatch(x,"\b(\d{4})-?(\d{2})-?(\d{2})\b",d) {								; 20150103 or 2015-01-03
 		date.yyyy := d1
 		date.mm := d2
