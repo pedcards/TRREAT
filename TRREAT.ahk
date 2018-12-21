@@ -1515,6 +1515,7 @@ PaceartReadXml:
 				, "Demographics/LastName:nameL"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Code:dx_code"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Description:dx_desc"
+				, "/Encounter/Evaluation/MiscellaneousComment:summary"
 				. ""]
 	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
@@ -2740,19 +2741,22 @@ makeReport:
 		return
 	}
 	
-	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
-	if (summ="Close") {
-		fetchQuit := true
-		return
-	}
-	if instr(summ,"normal") {
-		summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
-			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
-			. "Routine follow up per implantable device protocol. "
-		eventlog("Normal summary template selected.")
-	} else {
-		summ := ""
-		eventlog("Blank report summary.")
+	summ := fldval["dev-summary"]
+	if (summ="") {
+		summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
+		if (summ="Close") {
+			fetchQuit := true
+			return
+		}
+		if instr(summ,"normal") {
+			summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
+				. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
+				. "Routine follow up per implantable device protocol. "
+			eventlog("Normal summary template selected.")
+		} else {
+			summ := ""
+			eventlog("Blank report summary.")
+		}
 	}
 	
 	gosub saveChip
