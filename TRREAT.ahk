@@ -1950,10 +1950,11 @@ pmPrint:
 	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
 	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
 	. printQ(fldval["dev-AP"],"A-paced ###%. ") . printQ(fldval["dev-VP"],"V-paced ###%. ")
-	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###, " fldval["detect-Rx_AT/AF"] ". ")
-	. printQ(fldval["detect-VF"],"VF detection ###, " fldval["detect-Rx_VF"] ". ")
-	. printQ(fldval["detect-FVT"],"FVT detection ###, " fldval["detect-Rx_FVT"] ". ")
-	. printQ(fldval["detect-VT"],"VT detection ###, " fldval["detect-Rx_VT"] ". ") . "\par `n"
+	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###" printQ(fldval["detect-Rx_AT/AF"],", Rx ###") ". ")
+	. printQ(fldval["detect-VF"],"VF detection ###" printQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
+	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
+	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
+	. "\par `n"
 	. "\fs22\par `n"
 	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	
