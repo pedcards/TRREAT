@@ -2162,7 +2162,7 @@ PrintOut:
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
-			xl.addElement("paceart",edID,"")
+			xl.addElement("paceart",edID,printQ(is_remote,"True"))
 			xl.addElement("file",edID,complDir fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
