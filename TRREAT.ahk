@@ -1563,13 +1563,13 @@ PaceartReadXml:
 	xmlFld("//Programming/HeartFailure",1,"par")
 	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV<LV"
 	
-	fields[1] := ["APVPPercent:ApVp"
-				, "ASVPPercent:AsVp"
-				, "APVSPercent:ApVs"
-				, "ASVSPercent:AsVs"
-				, "/PercentPaced[Chamber='RIGHT_ATRIUM']/Percent:AP[%]"
-				, "/PercentPaced[Chamber='RIGHT_VENTRICLE']/Percent:VP[%]"
-				, "/PercentPaced[Chamber='LEFT_VENTRICLE']/Percent:LVP[%]"
+	fields[1] := ["APVPPercent:ApVp[%]"
+				, "ASVPPercent:AsVp[%]"
+				, "APVSPercent:ApVs[%]"
+				, "ASVSPercent:AsVs[%]"
+				, "/PercentPaced[Chamber='RIGHT_ATRIUM']/Percent:AP"
+				, "/PercentPaced[Chamber='RIGHT_VENTRICLE']/Percent:VP"
+				, "/PercentPaced[Chamber='LEFT_VENTRICLE']/Percent:LVP"
 				. ""]
 	xmlFld("//BradycardiaCollection/Bradycardia",1,"dev")
 	
