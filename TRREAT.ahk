@@ -2112,6 +2112,7 @@ PrintOut:
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 	
 	nm := fldval["dev-Name"]
+	RegExMatch(fileIn,"\....$",ext)
 	fileOut :=	enc_MD "-" encMRN " " 
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
 			.	"#" fldval["dev-IPG_SN"] " "
@@ -2126,12 +2127,9 @@ PrintOut:
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		RegExMatch(fileIn,"\....$",ext)
-		FileMove, %binDir%%fileOut%.rtf, % reportDir fileOut ".rtf", 1					; move RTF to the final directory
-		FileCopy, % fileIn, % complDir fileOut ext, 1									; copy PDF to complete directory
 		eventlog("RTF, " ext " copied to " complDir)
 		if (pat_meta) {
-			FileCopy, % pat_meta, % complDir fileOut ".meta", 1							; copy BNK to complete directory
+			FileMove, %pat_meta%, %complDir%%fileOut%.meta, 1							; copy BNK to complete directory
 			eventlog("META copied to " complDir)
 		}
 		if (ext=".xml") {
@@ -2139,15 +2137,17 @@ PrintOut:
 			ed_File := FileOpen( complDir . fileOut ".pdf", "w")
 			ed_File.RawWrite(Bin, nBytes)
 			ed_File.Close
-			FileDelete, % fileIn
 			
-			fileWQ := enc_date "," 			 														; date processed and MA user
-					. """" nm """" ","																; CIS name
-					. """" encMRN """" ","															; CIS MRN
+			fileWQ := enc_date "," 			 											; date processed and MA user
+					. """" nm """" ","													; CIS name
+					. """" encMRN """" ","												; CIS MRN
 					. "`n"
-			FileAppend, %fileWQ%, .\logs\trreatWQ.csv												; Add to logs\fileWQ list
+			FileAppend, %fileWQ%, .\logs\trreatWQ.csv									; Add to logs\fileWQ list
 			FileCopy, .\logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
 		}
+		FileMove, %binDir%%fileOut%.rtf, %reportDir%%fileOut%.rtf, 1					; move RTF to the final directory
+		FileCopy, %fileIn%, %complDir%%fileOut%%ext%, 1									; copy PDF to complete directory
+		fileDelete, %fileIn%
 		
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
@@ -2156,7 +2156,7 @@ PrintOut:
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
 			xl.addElement("paceart",edID,"")
-			xl.addElement("file",edID,complDir fileOut ".pdf")
+			xl.addElement("file",edID,complDir fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
 		xl.save(worklist)
