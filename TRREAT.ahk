@@ -563,10 +563,6 @@ fileLoop:
 		FileRead, maintxt, %binDir%%fileOut%.txt
 		cleanlines(maintxt)
 	}
-	if (fileIn~="i).xml$") {
-		yp := new XML(fileIn)
-		eventlog("Opened " fileIn)
-	}
 	
 	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
 		eventlog("Medtronic identified.")
@@ -580,9 +576,9 @@ fileLoop:
 		eventlog("St Jude identified.")
 		gosub SJM
 	} 
-	else if IsObject(yp) {
+	else if (fileIn~="i).xml$") {
+		eventlog("Opened " fileIn)
 		gosub PaceartXml
-		
 	} 
 	else {
 		eventlog("No file match.")
@@ -1485,6 +1481,8 @@ return
 
 PaceartXml:
 {
+	progress,,,Scanning...
+	yp := new XML(fileIn)
 	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
 	
 	if (fldval["dev-type"]) {
@@ -1492,11 +1490,13 @@ PaceartXml:
 		gosub PaceartReadXml
 	}
 	else {
+		progress,off
 		eventlog("Paceart no match.")
 		MsgBox NO MATCH
 		return
 	}
 	
+	progress,off
 	gosub fetchDem
 	
 	if (fetchQuit) {
