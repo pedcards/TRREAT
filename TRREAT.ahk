@@ -2714,6 +2714,7 @@ saveChip:
 
 makeReport:
 {
+	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
