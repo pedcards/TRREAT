@@ -1373,8 +1373,7 @@ SJM_old:
 	sjmVals(1,"dev")
 	fldfill("dev-Name",pat_name)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
-	tmp := parseDate(fldval["dev-Encounter"])
-	fldfill("dev-Encounter", tmp.MM "/" tmp.DD "/" tmp.YYYY)
+	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
 	fldfill("dev-IPG_impl",niceDate(fldval["dev-IPG_impl"]))
 	
 	fields[1] := ["Lead Chamber","Lead Type"
@@ -1417,7 +1416,7 @@ SJM_meta:
 	sjmVals(1,"dev")
 	fldfill("dev-AP",RegExReplace(fldval["dev-AP"]," %"))
 	fldfill("dev-VP",RegExReplace(fldval["dev-VP"]," %"))
-	fldfill("dev-Encounter",RegExReplace(fldval["dev-Encounter"]," \d\d:\d\d:\d\d"))
+	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
 		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], ", serial ###"))
