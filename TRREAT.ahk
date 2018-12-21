@@ -1210,6 +1210,10 @@ bsciZoomView:
 	fields[1] := ["Combined.*Report","Date of Birth","Device","/","Report Created","Last Office Interrogation","Implant Date",">>>end"]
 	labels[1] := ["Name","DOB","IPG","IPG_SN","Encounter","Last_ck","IPG_impl"]
 	fieldvals(txt,1,"dev")
+	fldfill("dev-DOB",parseDate(RegExReplace(fldval["dev-DOB"]," ","-")).MDY)
+	fldfill("dev-Encounter",parseDate(RegExReplace(fldval["dev-Encounter"]," ","-")).MDY)
+	fldfill("dev-Last_ck",parseDate(RegExReplace(fldval["dev-Last_ck"]," ","-")).MDY)
+	fldfill("dev-IPG_impl",parseDate(RegExReplace(fldval["dev-IPG_impl"]," ","-")).MDY)
 	fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
 	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"Boston Scientific "))
 	fldfill("dev-Physician",readBnk("PatientPhysFirstName") " " readBnk("PatientPhysLastName"))
@@ -1369,8 +1373,7 @@ SJM_old:
 	sjmVals(1,"dev")
 	fldfill("dev-Name",pat_name)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
-	tmp := parseDate(fldval["dev-Encounter"])
-	fldfill("dev-Encounter", tmp.MM "/" tmp.DD "/" tmp.YYYY)
+	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
 	fldfill("dev-IPG_impl",niceDate(fldval["dev-IPG_impl"]))
 	
 	fields[1] := ["Lead Chamber","Lead Type"
@@ -1413,7 +1416,7 @@ SJM_meta:
 	sjmVals(1,"dev")
 	fldfill("dev-AP",RegExReplace(fldval["dev-AP"]," %"))
 	fldfill("dev-VP",RegExReplace(fldval["dev-VP"]," %"))
-	fldfill("dev-Encounter",RegExReplace(fldval["dev-Encounter"]," \d\d:\d\d:\d\d"))
+	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
 		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], ", serial ###"))
@@ -1515,6 +1518,7 @@ PaceartReadXml:
 				, "Demographics/LastName:nameL"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Code:dx_code"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Description:dx_desc"
+				, "/Encounter/Evaluation/MiscellaneousComment:summary"
 				. ""]
 	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
@@ -1567,9 +1571,9 @@ PaceartReadXml:
 				, "ASVPPercent:AsVp[%]"
 				, "APVSPercent:ApVs[%]"
 				, "ASVSPercent:AsVs[%]"
-				, "/PercentPaced[Chamber='RIGHT_ATRIUM']/Percent:AP[%]"
-				, "/PercentPaced[Chamber='RIGHT_VENTRICLE']/Percent:VP[%]"
-				, "/PercentPaced[Chamber='LEFT_VENTRICLE']/Percent:LVP[%]"
+				, "/PercentPaced[Chamber='RIGHT_ATRIUM']/Percent:AP"
+				, "/PercentPaced[Chamber='RIGHT_VENTRICLE']/Percent:VP"
+				, "/PercentPaced[Chamber='LEFT_VENTRICLE']/Percent:LVP"
 				. ""]
 	xmlFld("//BradycardiaCollection/Bradycardia",1,"dev")
 	
@@ -1950,10 +1954,11 @@ pmPrint:
 	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
 	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
 	. printQ(fldval["dev-AP"],"A-paced ###%. ") . printQ(fldval["dev-VP"],"V-paced ###%. ")
-	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###, " fldval["detect-Rx_AT/AF"] ". ")
-	. printQ(fldval["detect-VF"],"VF detection ###, " fldval["detect-Rx_VF"] ". ")
-	. printQ(fldval["detect-FVT"],"FVT detection ###, " fldval["detect-Rx_FVT"] ". ")
-	. printQ(fldval["detect-VT"],"VT detection ###, " fldval["detect-Rx_VT"] ". ") . "\par `n"
+	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###" printQ(fldval["detect-Rx_AT/AF"],", Rx ###") ". ")
+	. printQ(fldval["detect-VF"],"VF detection ###" printQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
+	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
+	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
+	. "\par `n"
 	. "\fs22\par `n"
 	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	
@@ -2053,21 +2058,26 @@ PrintOut:
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
 	FormatTime, enc_date, A_now, MM/dd/yyyy
 	enc_dt := parseDate(fldval["dev-Encounter"])
+	if (is_remote) {
+		enc_type := "REMOTE "
+		fldval["dev-Enc"] := ""
+	} else {
+		enc_type := "IN-OFFICE "
+	}
 	for k in leads
 	{
 		ctLeads := A_Index
 	}
+	enc_type .= (instr(leads["RV","imp"],"Defib"))
+		? "ICD "
+		: "PM "
 	if (ctLeads = 1) {
-		enc_type := "Single"
+		enc_type .= "Single"
 	} else if (ctLeads = 2) {
-		enc_type := "Dual"
+		enc_type .= "Dual"
 	} else if (ctLeads > 2) {
-		enc_type := "Multi"
+		enc_type .= "Multi"
 	}
-	enc_type := (instr(leads["RV","imp"],"Defib"))
-		? "ICD " enc_type
-		: "PM " enc_type
-	enc_type := (fldval["dev-EncType"]="REMOTE" ? "REMOTE " : "IN-OFFICE ") . enc_type
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
@@ -2077,7 +2087,7 @@ PrintOut:
 			. "Clinic Title code\tab "	"<1035:PACE> \par `n"
 			. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par `n"
 			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
-			. "CIS Encounter #\tab "	"<3: " printQ(fldval["dev-Enc"],format("{:012}",fldval["dev-Enc"])) " >\par `n"
+			. "CIS Encounter #\tab "	"<3: " format("{:012}",fldval["dev-Enc"]) " >\par `n"
 			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
 			. "Dictation Date\tab "		"<13:" enc_date ">\par `n"
 			. "Job #\tab "				"<15:e> \par `n"
@@ -2155,7 +2165,7 @@ PrintOut:
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
-			xl.addElement("paceart",edID,"")
+			xl.addElement("paceart",edID,printQ(is_remote,"True"))
 			xl.addElement("file",edID,complDir fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
 			xl.addElement("report",edID,reportDir fileOut ".rtf")
@@ -2708,6 +2718,7 @@ saveChip:
 
 makeReport:
 {
+	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
@@ -2733,19 +2744,22 @@ makeReport:
 		return
 	}
 	
-	summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
-	if (summ="Close") {
-		fetchQuit := true
-		return
-	}
-	if instr(summ,"normal") {
-		summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
-			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
-			. "Routine follow up per implantable device protocol. "
-		eventlog("Normal summary template selected.")
-	} else {
-		summ := ""
-		eventlog("Blank report summary.")
+	summ := fldval["dev-summary"]
+	if (summ="") {
+		summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
+		if (summ="Close") {
+			fetchQuit := true
+			return
+		}
+		if instr(summ,"normal") {
+			summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
+				. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
+				. "Routine follow up per implantable device protocol. "
+			eventlog("Normal summary template selected.")
+		} else {
+			summ := ""
+			eventlog("Blank report summary.")
+		}
 	}
 	
 	gosub saveChip
@@ -2990,6 +3004,13 @@ ParseDate(x) {
 			: (d3>50)
 				? "19" d3
 				: "20" d3
+		date.date := trim(d)
+	}
+	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2})\s+(\d{4})",d) {							; Dec 21, 2018
+		date.mmm := d1
+		date.mm := zdigit(objhasvalue(mo,d1))
+		date.dd := zdigit(d2)
+		date.yyyy := d3
 		date.date := trim(d)
 	}
 	else if RegExMatch(x,"\b(\d{4})-?(\d{2})-?(\d{2})\b",d) {								; 20150103 or 2015-01-03
