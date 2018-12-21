@@ -2059,25 +2059,25 @@ PrintOut:
 	FormatTime, enc_date, A_now, MM/dd/yyyy
 	enc_dt := parseDate(fldval["dev-Encounter"])
 	if (is_remote) {
-		enc_type := "REMOTE"
+		enc_type := "REMOTE "
 		fldval["dev-Enc"] := ""
 	} else {
-		enc_type := "IN-OFFICE"
+		enc_type := "IN-OFFICE "
 	}
 	for k in leads
 	{
 		ctLeads := A_Index
 	}
-	if (ctLeads = 1) {
-		enc_type .= " Single "
-	} else if (ctLeads = 2) {
-		enc_type .= " Dual "
-	} else if (ctLeads > 2) {
-		enc_type .= " Multi "
-	}
 	enc_type .= (instr(leads["RV","imp"],"Defib"))
-		? "ICD"
-		: "PM"
+		? "ICD "
+		: "PM "
+	if (ctLeads = 1) {
+		enc_type .= "Single"
+	} else if (ctLeads = 2) {
+		enc_type .= "Dual"
+	} else if (ctLeads > 2) {
+		enc_type .= "Multi"
+	}
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
