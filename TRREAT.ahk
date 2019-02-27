@@ -2152,8 +2152,8 @@ PrintOut:
 					. """" nm """" ","													; CIS name
 					. """" encMRN """" ","												; CIS MRN
 					. "`n"
-			FileAppend, %fileWQ%, .\logs\trreatWQ.csv									; Add to logs\fileWQ list
-			FileCopy, .\logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
+			FileAppend, %fileWQ%, %trreatDir%logs\trreatWQ.csv									; Add to logs\fileWQ list
+			FileCopy, %trreatDir%logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
 		}
 		FileMove, %binDir%%fileOut%.rtf, %reportDir%%fileOut%.rtf, 1					; move RTF to the final directory
 		FileCopy, %fileIn%, %complDir%%fileOut%%ext%, 1									; copy PDF to complete directory
@@ -2953,8 +2953,8 @@ filecheck() {
 }
 
 eventlog(event,ch:="") {
-	global user, binDir, chipDir
-	dir := (ch="C") ? chipDir "logs\" : binDir "..\logs\"
+	global user, trreatDir, chipDir
+	dir := (ch="C") ? chipDir "logs\" : trreatDir "logs\"
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
