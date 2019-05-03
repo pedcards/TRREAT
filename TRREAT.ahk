@@ -101,7 +101,8 @@ parseGUI:
 	
 	Gui, Tab, Interr
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlv hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
-	Gui, ListView, WQlv
+	Gui, Tab, Paceart
+	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	
 	gosub readList																		; read the worklist
 	
@@ -134,6 +135,8 @@ fixWQlvCols(lv) {
 readList:
 {
 	progress,20,Reading worklist,Scanning files
+	
+	Gui, ListView, WQlv
 	
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
@@ -395,8 +398,6 @@ readFilesPaceart() {
 	
 	progress, 100, Paceart imports
 	
-	Gui, Tab, Paceart
-	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Listview, WQLVp
 	
 	loop, files, % paceartDir "*.xml"
