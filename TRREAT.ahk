@@ -533,8 +533,7 @@ parsePat:
 			xl.setText(pat_node "/paceart","True")
 			xl.save(worklist)
 			eventlog("PaceArt marked true.")
-			gosub readList
-			gosub readFiles
+			gosub ParseGUI
 			return
 		}
 	}
