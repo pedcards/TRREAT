@@ -2061,7 +2061,7 @@ PrintOut:
 	enc_trans := parseDate(fldval["dev-Encounter"])
 	if (is_remote) {
 		enc_type := "REMOTE "
-		fldval["dev-Enc"] := ""
+		;~ fldval["dev-Enc"] := ""
 	} else {
 		enc_type := "IN-OFFICE "
 	}
