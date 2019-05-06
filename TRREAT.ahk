@@ -2105,9 +2105,11 @@ PrintOut:
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 	
 	rtfBody := "\tx1620\tx5220\tx7040" 
-	. "\fs22\b\ul PROCEDURE DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
-	. "\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n" enc_trans.MDY "\par `n"
-	. "\par\par `n"
+	. "\fs22\b\ul ANALYSIS DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
+	. printQ(is_remote
+		,"\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n"
+		. enc_trans.MDY "\par `n")
+	. "\par `n"
 	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
