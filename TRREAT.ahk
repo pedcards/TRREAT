@@ -495,6 +495,7 @@ parsePat:
 	pat_paceart:=
 	pat_meta:=
 	pat_report:=
+	is_remote:=
 	LV_GetText(pat_date,fileNum,1)
 	LV_GetText(pat_name,fileNum,2)
 	LV_GetText(pat_dev,fileNum,3)
