@@ -2057,8 +2057,8 @@ return
 PrintOut:
 {
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
-	FormatTime, enc_date, A_now, MM/dd/yyyy
-	enc_dt := parseDate(fldval["dev-Encounter"])
+	enc_dt := parseDate(substr(A_now,1,8))
+	enc_trans := parseDate(fldval["dev-Encounter"])
 	if (is_remote) {
 		enc_type := "REMOTE "
 		fldval["dev-Enc"] := ""
@@ -2090,7 +2090,7 @@ PrintOut:
 			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
 			. "CIS Encounter #\tab "	"<3: " format("{:012}",fldval["dev-Enc"]) " >\par `n"
 			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
-			. "Dictation Date\tab "		"<13:" enc_date ">\par `n"
+			. "Dictation Date\tab "		"<13:" enc_dt.MDY ">\par `n"
 			. "Job #\tab "				"<15:e> \par `n"
 			. "Service Date\tab "		"<31:" enc_dt.MDY ">\par `n"
 			. "Surgery Date\tab "		"<6:" enc_dt.MDY "> \par `n"
@@ -2103,8 +2103,9 @@ PrintOut:
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 	
 	rtfBody := "\tx1620\tx5220\tx7040" 
-	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
-	. enc_dt.MDY "\par\par `n"
+	. "\fs22\b\ul PROCEDURE DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
+	. "\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n" enc_trans.MDY "\par `n"
+	. "\par\par `n"
 	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
@@ -2149,7 +2150,7 @@ PrintOut:
 			ed_File.RawWrite(Bin, nBytes)
 			ed_File.Close
 			
-			fileWQ := enc_date "," 			 											; date processed and MA user
+			fileWQ := enc_dt.MDY "," 			 											; date processed and MA user
 					. """" nm """" ","													; CIS name
 					. """" encMRN """" ","												; CIS MRN
 					. "`n"
