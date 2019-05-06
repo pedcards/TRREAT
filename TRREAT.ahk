@@ -2150,9 +2150,10 @@ PrintOut:
 			ed_File.RawWrite(Bin, nBytes)
 			ed_File.Close
 			
-			fileWQ := enc_dt.MDY "," 			 											; date processed and MA user
+			fileWQ := enc_dt.MDY "," 			 										; date processed and MA user
 					. """" nm """" ","													; CIS name
 					. """" encMRN """" ","												; CIS MRN
+					. """" fldval["dev-Enc"] """"										; Acct Num
 					. "`n"
 			FileAppend, %fileWQ%, %trreatDir%logs\trreatWQ.csv									; Add to logs\fileWQ list
 			FileCopy, %trreatDir%logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
