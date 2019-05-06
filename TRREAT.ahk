@@ -101,7 +101,8 @@ parseGUI:
 	
 	Gui, Tab, Interr
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlv hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
-	Gui, ListView, WQlv
+	Gui, Tab, Paceart
+	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	
 	gosub readList																		; read the worklist
 	
@@ -134,6 +135,8 @@ fixWQlvCols(lv) {
 readList:
 {
 	progress,20,Reading worklist,Scanning files
+	
+	Gui, ListView, WQlv
 	
 	LV_Delete()
 	fileNum := 0																; Start the worklist at fileNum 0
@@ -395,8 +398,6 @@ readFilesPaceart() {
 	
 	progress, 100, Paceart imports
 	
-	Gui, Tab, Paceart
-	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Listview, WQLVp
 	
 	loop, files, % paceartDir "*.xml"
@@ -494,6 +495,7 @@ parsePat:
 	pat_paceart:=
 	pat_meta:=
 	pat_report:=
+	is_remote:=
 	LV_GetText(pat_date,fileNum,1)
 	LV_GetText(pat_name,fileNum,2)
 	LV_GetText(pat_dev,fileNum,3)
@@ -532,8 +534,7 @@ parsePat:
 			xl.setText(pat_node "/paceart","True")
 			xl.save(worklist)
 			eventlog("PaceArt marked true.")
-			gosub readList
-			gosub readFiles
+			gosub ParseGUI
 			return
 		}
 	}
@@ -2056,14 +2057,16 @@ return
 PrintOut:
 {
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
-	FormatTime, enc_date, A_now, MM/dd/yyyy
-	enc_dt := parseDate(fldval["dev-Encounter"])
 	if (is_remote) {
 		enc_type := "REMOTE "
-		fldval["dev-Enc"] := ""
+		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
+		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
 	} else {
 		enc_type := "IN-OFFICE "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
 	}
+	
 	for k in leads
 	{
 		ctLeads := A_Index
@@ -2089,7 +2092,7 @@ PrintOut:
 			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
 			. "CIS Encounter #\tab "	"<3: " format("{:012}",fldval["dev-Enc"]) " >\par `n"
 			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
-			. "Dictation Date\tab "		"<13:" enc_date ">\par `n"
+			. "Dictation Date\tab "		"<13:" enc_dt.MDY ">\par `n"
 			. "Job #\tab "				"<15:e> \par `n"
 			. "Service Date\tab "		"<31:" enc_dt.MDY ">\par `n"
 			. "Surgery Date\tab "		"<6:" enc_dt.MDY "> \par `n"
@@ -2102,8 +2105,11 @@ PrintOut:
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 	
 	rtfBody := "\tx1620\tx5220\tx7040" 
-	. "\fs22\b\ul PROCEDURE DATE\ul0\b0\par\fs18 `n"
-	. enc_dt.MDY "\par\par `n"
+	. "\fs22\b\ul ANALYSIS DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
+	. printQ(is_remote
+		,"\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n"
+		. enc_trans.MDY "\par `n")
+	. "\par `n"
 	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
@@ -2148,12 +2154,13 @@ PrintOut:
 			ed_File.RawWrite(Bin, nBytes)
 			ed_File.Close
 			
-			fileWQ := enc_date "," 			 											; date processed and MA user
+			fileWQ := enc_dt.MDY "," 			 										; date processed and MA user
 					. """" nm """" ","													; CIS name
 					. """" encMRN """" ","												; CIS MRN
+					. """" fldval["dev-Enc"] """"										; Acct Num
 					. "`n"
-			FileAppend, %fileWQ%, .\logs\trreatWQ.csv									; Add to logs\fileWQ list
-			FileCopy, .\logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
+			FileAppend, %fileWQ%, %trreatDir%logs\trreatWQ.csv									; Add to logs\fileWQ list
+			FileCopy, %trreatDir%logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
 		}
 		FileMove, %binDir%%fileOut%.rtf, %reportDir%%fileOut%.rtf, 1					; move RTF to the final directory
 		FileCopy, %fileIn%, %complDir%%fileOut%%ext%, 1									; copy PDF to complete directory
@@ -2953,8 +2960,8 @@ filecheck() {
 }
 
 eventlog(event,ch:="") {
-	global user, binDir, chipDir
-	dir := (ch="C") ? chipDir "logs\" : binDir "..\logs\"
+	global user, trreatDir, chipDir
+	dir := (ch="C") ? chipDir "logs\" : trreatDir "logs\"
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
@@ -2981,7 +2988,8 @@ ParseDate(x) {
 	time := []
 	x := RegExReplace(x,"[,\(\)]")
 	
-	if (x~="\d{4}.\d{2}.\d{2}T\d{2}:\d{2}:\d{2}Z") {
+	if (x~="\d{4}.\d{2}.\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z") {
+		x := RegExReplace(x,"(\.\d+)Z","Z")
 		x := RegExReplace(x,"[TZ]"," ")
 	}
 	if RegExMatch(x,"i)(\d{1,2})" dSep "(" moStr ")" dSep "(\d{4}|\d{2})",d) {			; 03-Jan-2015
