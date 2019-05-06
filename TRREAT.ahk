@@ -2057,14 +2057,16 @@ return
 PrintOut:
 {
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
-	enc_dt := parseDate(substr(A_now,1,8))
-	enc_trans := parseDate(fldval["dev-Encounter"])
 	if (is_remote) {
 		enc_type := "REMOTE "
-		;~ fldval["dev-Enc"] := ""
+		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
+		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
 	} else {
 		enc_type := "IN-OFFICE "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
 	}
+	
 	for k in leads
 	{
 		ctLeads := A_Index
