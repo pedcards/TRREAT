@@ -2673,7 +2673,7 @@ FetchDem:
 }
 
 scanOrders() {
-	global xl, hl7inDir
+	global xl, hl7inDir, fldval
 	
 	if !IsObject(xl.selectSingleNode("/root/orders")) {
 		xl.addElement("orders","/root")
@@ -2719,7 +2719,7 @@ scanOrders() {
 		}
 		
 		newID := "/root/orders/order[@id='" e0.UID "']"								; otherwise create a new node
-		xl.addElement("enroll","/root/orders",{id:e0.UID})
+		xl.addElement("order","/root/orders",{id:e0.UID})
 		xl.addElement("ordernum",newID,e0.order)
 		xl.addElement("accession",newID,e0.accession)
 		xl.addElement("ctrlID",newID,e0.CtrlID)
