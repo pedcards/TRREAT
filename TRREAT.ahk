@@ -678,6 +678,20 @@ SignRep:
 	LV_GetText(l_date,l_row,3)
 	
 	eventlog("Selected '" fileNam "'")
+	
+	tmp_usr := substr(fileNam,1,2)
+	l_usr := substr(user,1,2)
+	if !(l_usr=stmp_usr) {														; first user doesn't match that on filename?
+		MsgBox, 262196,
+			, % "Did you mean to open this report?`n`n"
+			. "Was originally assigned to " tmp_usr "."
+		IfMsgBox, No
+		{
+			eventlog("Oops. Didn't mean to open that.")
+			gosub SignScan
+			return
+		}
+	}
 	gosub SignActGUI
 	Gui, Sign:Show
 Return	
