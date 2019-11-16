@@ -2555,6 +2555,61 @@ ObjHasValue(aObj, aValue, rx:="") {
     return, false, errorlevel := 1
 }
 
+parseORM() {
+/*	parse fldval values to values
+	including aliases for both WQlist and readWQorder
+*/
+	global fldval, sitesLong
+	
+	monType:=(tmp:=fldval.OBR_TestName)~="i)14 DAY" ? "BGM"
+		: tmp~="i)24 HOUR" ? "HOL"
+		: tmp~="i)RECORDER" ? "BGH"
+		: ""
+	encType:=(tmp:=fldval.PV1_PtClass)="O" ? "Outpatient" 
+		: tmp="I" ? "Inpatient"
+		: "Other"
+	switch encType
+	{
+		case "Outpatient":
+			location := sitesLong[fldval.PV1_Location]
+		case "Inpatient":
+			location := fldval.PV1_Location
+		case "SurgCntr":
+			location := "SurgCntr"
+		case "Emergency":
+			location := "Emergency"
+		default:
+			location := encType
+	}
+	;~ location := (encType="Outpatient") ? sitesLong[fldval.PV1_Location]
+		;~ : encType
+	
+	return {date:parseDate(fldval.PV1_DateTime).YMD
+		, encDate:parseDate(fldval.PV1_DateTime).YMD
+		, nameL:fldval.PID_NameL
+		, nameF:fldval.PID_NameF
+		, name:fldval.PID_NameL strQ(fldval.PID_NameF,", ###")
+		, mrn:fldval.PID_PatMRN
+		, sex:(fldval_.PID_sex~="F") ? "Female" : "Male"
+		, DOB:parseDate(fldval.PID_DOB).MDY
+		, monitor:monType
+		, mon:monType
+		, provider:fldval.ORC_ProvNameL strQ(fldval.ORC_ProvNameF,", ###")
+		, prov:fldval.ORC_ProvNameL strQ(fldval.ORC_ProvNameF,", ###")
+		, type:encType
+		, loc:location
+		, Account:fldval.ORC_ReqNum
+		, order:fldval.ORC_ReqNum
+		, accession:fldval.ORC_FillerNum
+		, acct:location strQ(fldval.ORC_ReqNum,"_###") strQ(fldval.ORC_FillerNum,"-###")
+		, UID:tobase(fldval.ORC_ReqNum fldval.ORC_FillerNum,36)
+		, ind:strQ(fldval.OBR_ReasonCode,"###") strQ(fldval.OBR_ReasonText,"^###")
+		, indication:strQ(fldval.OBR_ReasonCode,"###") strQ(fldval.OBR_ReasonText,"^###")
+		, indicationCode:fldval.OBR_ReasonCode
+		, orderCtrl:fldval.ORC_OrderCtrl
+		, ctrlID:fldval.MSH_CtrlID}
+}
+
 FetchDem:
 {
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
@@ -2997,6 +3052,23 @@ checkEP:
 	Return
 }
 
+readWQ(idx) {
+	global xl
+	
+	res := []
+	k := xl.selectSingleNode("//order[@id='" idx "']")
+	Loop, % (ch:=k.selectNodes("*")).Length
+	{
+		i := ch.item(A_index-1)
+		node := i.nodeName
+		val := i.text
+		res[node]:=val
+	}
+	res.node := k.parentNode.nodeName 
+	
+	return res
+}
+
 FetchNode(node) {
 	global
 	local x, clone
@@ -3226,6 +3298,89 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	*/
 }
 
+strQ(var1,txt,null:="") {
+/*	Print Query - Returns text based on presence of var
+	var1	= var to query
+	txt		= text to return with ### on spot to insert var1 if present
+	null	= text to return if var1="", defaults to ""
+*/
+	return (var1="") ? null : RegExReplace(txt,"###",var1)
+}
+
+ToBase(n,b) {
+/*	from https://autohotkey.com/board/topic/15951-base-10-to-base-36-conversion/
+	n >= 0, 1 < b <= 36
+*/
+   Return (n < b ? "" : ToBase(n//b,b)) . ((d:=mod(n,b)) < 10 ? d : Chr(d+55))
+}
+
+readIni(section) {
+/*	Reads a set of variables
+	[section]					==	 		var1 := res1, var2 := res2
+	var1=res1
+	var2=res2
+	
+	[array]						==			array := ["ccc","bbb","aaa"]
+	=ccc
+	bbb
+	=aaa
+	
+	[objet]						==	 		objet := {aaa:10,bbb:27,ccc:31}
+	aaa:10
+	bbb:27
+	ccc:31
+*/
+	global
+	local x, i, key, val
+		, i_res := object()
+		, i_type := []
+		, i_lines := []
+	i_type.var := i_type.obj := i_type.arr := false
+	IniRead,x,includes\trreat.ini,%section%
+	Loop, parse, x, `n,`r																; analyze section struction
+	{
+		i := A_LoopField
+		if (i~="(?<!"")[=]")															; find = not preceded by "
+		{
+			if (i ~= "^=") {															; starts with "=" is an array list
+				i_type.arr := true
+			} else {																	; "aaa=123" is a var declaration
+				i_type.var := true
+			}
+		} else																			; does not contain a quoted =
+		{
+			if (i~="(?<!"")[:]") {														; find : not preceded by " is an object
+				i_type.obj := true
+			} else {																	; contains neither = nor : can be an array list
+				i_type.arr := true
+			}
+		}
+	}
+	if ((i_type.obj) + (i_type.arr) + (i_type.var)) > 1 {								; too many types, return error
+		return error
+	}
+	Loop, parse, x, `n,`r																; now loop through lines
+	{
+		i := A_LoopField
+		if (i_type.var) {
+			key := strX(i,"",1,0,"=",1,1)
+			val := strX(i,"=",1,1,"",0)
+			%key% := trim(val,"""")
+		}
+		if (i_type.obj) {
+			key := strX(i,"",1,0,":",1,1)
+			val := strX(i,":",1,1,"",0)
+			i_res[key] := trim(val,"""")
+		}
+		if (i_type.arr) {
+			i := RegExReplace(i,"^=")													; remove preceding =
+			i_res.push(trim(i,""""))
+		}
+	}
+	return i_res
+}
+
 #Include strx.ahk
 #Include xml.ahk
 #Include CMsgBox.ahk
+#Include hl7.ahk
