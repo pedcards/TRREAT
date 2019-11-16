@@ -31,6 +31,9 @@ hl7inDir:=trreatDir "incoming\"
 
 worklist := reportDir "worklist.xml"
 
+initHL7()
+hl7DirMap := {}
+
 eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
