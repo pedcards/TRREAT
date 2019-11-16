@@ -3183,15 +3183,10 @@ FilePrepend( Text, Filename ) {
 ParseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	moStr := "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
-	dSep := "[\-_/]"																	; separation characters "-", "_", "/"
+	dSep := "[ \-_/]"
 	date := []
 	time := []
 	x := RegExReplace(x,"[,\(\)]")
-	
-	if (x~="\d{4}.\d{2}.\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z") {
-		x := RegExReplace(x,"(\.\d+)Z","Z")
-		x := RegExReplace(x,"[TZ]"," ")
-	}
 	if RegExMatch(x,"i)(\d{1,2})" dSep "(" moStr ")" dSep "(\d{4}|\d{2})",d) {			; 03-Jan-2015
 		date.dd := zdigit(d1)
 		date.mmm := d2
@@ -3199,7 +3194,7 @@ ParseDate(x) {
 		date.yyyy := d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"i)\b(" moStr "|\d{1,2})\b" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
+	else if RegExMatch(x,"i)(" moStr "|\d{1,2})" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
 		date.dd := zdigit(d2)
 		date.mmm := objhasvalue(mo,d1) 
 			? d1
@@ -3214,13 +3209,6 @@ ParseDate(x) {
 				: "20" d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2})\s+(\d{4})",d) {							; Dec 21, 2018
-		date.mmm := d1
-		date.mm := zdigit(objhasvalue(mo,d1))
-		date.dd := zdigit(d2)
-		date.yyyy := d3
-		date.date := trim(d)
-	}
 	else if RegExMatch(x,"\b(\d{4})-?(\d{2})-?(\d{2})\b",d) {								; 20150103 or 2015-01-03
 		date.yyyy := d1
 		date.mm := d2
@@ -3228,19 +3216,33 @@ ParseDate(x) {
 		date.dd := d3
 		date.date := trim(d)
 	}
+	else if RegExMatch(x,"\b(\d{4})(\d{2})(\d{2})((\d{2})(\d{2})(\d{2})?)?\b",d)  {			; 20150103174307
+		date.yyyy := d1
+		date.mm := d2
+		date.mmm := mo[d2]
+		date.dd := d3
+		date.date := d1 "-" d2 "-" d3
+		
+		time.hr := d5
+		time.min := d6
+		time.sec := d7
+		time.time := d5 ":" d6 . strQ(d7,":###")
+	}
 	
-	if RegExMatch(x,"i)(\d{1,2}):(\d{2})(:\d{2})?(.*AM|PM)?",t) {						; 17:42 PM
-		time.hr := zdigit(t1)
-		time.min := t2
-		time.sec := trim(t3," :")
-		time.ampm := trim(t4)
-		time.time := trim(t)
+	if RegExMatch(x,"iO)(\d{1,2}):(\d{2})(:\d{2})?(:\d{2})?(.*)?(AM|PM)?",t) {				; 17:42 PM
+		hasDays := (t.value[4]) ? true : false 												; 4 nums has days
+		time.days := (hasDays) ? t.value[1] : ""
+		time.hr := zdigit(t.value[1+hasDays])
+		time.min := trim(t.value[2+hasDays]," :")
+		time.sec := trim(t.value[3+hasDays]," :")
+		time.ampm := trim(t.value[5])
+		time.time := trim(t.value)
 	}
 
 	return {yyyy:date.yyyy, mm:date.mm, mmm:date.mmm, dd:date.dd, date:date.date
 			, YMD:date.yyyy date.mm date.dd
 			, MDY:date.mm "/" date.dd "/" date.yyyy
-			, hr:time.hr, min:time.min, sec:time.sec, ampm:time.ampm, time:time.time}
+			, days:time.days, hr:time.hr, min:time.min, sec:time.sec, ampm:time.ampm, time:time.time}
 }
 
 niceDate(x) {
