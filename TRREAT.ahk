@@ -2575,6 +2575,8 @@ FetchDem:
 		eventlog("Device " fldval["dev-IPG_SN"] " found in archlist (" fldval["dev-MRN"] ").")
 	}
 	
+	scanOrders()
+	
 	getDem := true
 	fetchQuit := false
 	
@@ -2608,6 +2610,116 @@ FetchDem:
 	
 	EncNum := fldval["dev-Enc"]
 	EncMRN := fldval["dev-MRN"]
+	
+	return
+}
+
+scanOrders() {
+	global xl, hl7inDir
+	
+	if !IsObject(xl.selectSingleNode("/root/orders")) {
+		xl.addElement("orders","/root")
+	}
+	
+/*	First pass: process new files
+*/
+	Loop, files, % hl7InDir "*"
+	{
+		e0 := {}
+		fileIn := A_LoopFileName
+		if RegExMatch(fileIn,"_([a-zA-Z0-9]{4,})Z.hl7",i) {								; skip old files
+			continue
+		}
+		processhl7(A_LoopFileFullPath)
+		e0:=parseORM()
+		e0.orderNode := "/root/orders/order[ordernum='" e0.order "']"
+		if IsObject(k:=xl.selectSingleNode(e0.orderNode)) {								; ordernum node exists
+			e0.nodeCtrlID := k.selectSingleNode("ctrlID").text
+			if (e0.CtrlID < e0.nodeCtrlID) {											; order CtrlID is older than existing, somehow
+				FileDelete, % hl7InDir fileIn
+				eventlog("Order msg " fileIn " is outdated.")
+				continue
+			}
+			if (e0.orderCtrl="CA") {													; CAncel an order
+				FileDelete, % hl7InDir fileIn											; delete this order message
+				FileDelete, % hl7InDir "*_" e0.UID "Z.hl7"								; and the previously processed hl7 file
+				removeNode(e0.orderNode)												; and the accompanying node
+				eventlog("Cancelled order " e0.order ".")
+				continue
+			}
+			FileDelete, % hl7InDir "*_" e0.UID "Z.hl7"									; delete previously processed hl7 file
+			removeNode(e0.orderNode)													; and the accompanying node
+			eventlog("Cleared order " e0.order " node.")
+		}
+		if (e0.orderCtrl="XO") {														; change an order
+			e0.orderNode := "/root/orders/order[accession='" e0.accession "']"
+			k := xl.selectSingleNode(e0.orderNode)
+			e0.nodeUID := k.getAttribute("id")
+			FileDelete, % hl7InDir "*_" e0.nodeUID "Z.hl7"
+			removeNode(e0.orderNode)
+			eventlog("Removed node id " e0.nodeUID " for replacement.")
+		}
+		
+		newID := "/root/orders/order[@id='" e0.UID "']"								; otherwise create a new node
+		xl.addElement("enroll","/root/orders",{id:e0.UID})
+		xl.addElement("ordernum",newID,e0.order)
+		xl.addElement("accession",newID,e0.accession)
+		xl.addElement("ctrlID",newID,e0.CtrlID)
+		xl.addElement("date",newID,e0.date)
+		xl.addElement("name",newID,e0.name)
+		xl.addElement("mrn",newID,e0.mrn)
+		xl.addElement("sex",newID,e0.sex)
+		xl.addElement("dob",newID,e0.dob)
+		xl.addElement("mon",newID,e0.mon)
+		xl.addElement("prov",newID,e0.prov)
+		xl.addElement("site",newID,e0.loc)
+		xl.addElement("acct",newID,e0.acct)
+		xl.addElement("ind",newID,e0.ind)
+		eventlog("Added order ID " e0.UID ".")
+		
+		fileOut := e0.MRN "_" 
+			. fldval["PID_nameL"] "^" fldval["PID_nameF"] "_"
+			. e0.date "_"
+			. e0.uid "Z.hl7"
+			
+		FileMove, %A_LoopFileFullPath%													; and rename ORM file
+			, % hl7InDir . fileOut
+		
+	}
+	xl.viewXML()
+	
+/*	Second pass: scan *Z.hl7 files
+*/
+	loop, Files, % hl7InDir "*Z.hl7---"
+	{
+		e0 := {}
+		fileIn := A_LoopFileName
+		if RegExMatch(fileIn,"_([a-zA-Z0-9]{4,})Z.hl7",i) {								; file appears to have been parsed
+			e0 := readWQ(i1)
+		} else {
+			continue
+		}
+		if (e0.node != "orders") {														; remnant orders file
+			FileMove, %A_LoopFileFullPath%, .\tempfiles, 1
+			eventlog("Leftover HL7 file " fileIn " moved to tempfiles.")
+			continue
+		}
+		
+		LV_Add(""
+			, hl7InDir . fileIn															; filename and path to HolterDir
+			, e0.date																	; date
+			, e0.name																	; name
+			, e0.mrn																	; mrn
+			, e0.prov																	; prov
+			, (e0.mon="HOL" ? "24-hr "													; monitor type
+				: e0.mon="BGH" ? "30-day "
+				: e0.mon~="BGM|ZIO" ? "14-day "
+				: "")
+				. e0.mon
+			, "")																		; fulldisc present, make blank
+		GuiControl, Enable, Register
+		GuiControl, Text, Register, Go to ORDERS tab
+	}
 	
 	return
 }
