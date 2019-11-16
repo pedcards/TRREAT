@@ -36,6 +36,9 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 
 worklist := reportDir "worklist.xml"
 user := A_UserName
+if instr(user,"octe") {
+	user:="TC"
+}
 eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
