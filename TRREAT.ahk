@@ -8,37 +8,29 @@ SetWorkingDir %A_ScriptDir%
 #Include includes
 
 Progress,100,Checking paths...,TRREAT
-IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
-{
-	isDevt := true
-	trreatDir := ".\"
-	binDir := ".\bin\"
-	reportDir := ".\pending\"													; generated files pending signature
-	complDir := ".\completed\"													; archive signed files and original PDF files
-	paceartDir := ".\paceart\"													; PDF reports saved from PaceArt
-	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
-	hisDir := ".\3mhis\"
-	pdfDir := ".\USB\"
-} else {
-	isDevt := false
-	trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
-	binDir := trreatDir "bin\"
-	reportDir := trreatDir "pending\"
-	complDir := trreatDir "completed\"
-	paceartDir := trreatDir "paceart\"
-	chipDir := "\\childrens\files\HCChipotle\"
-	hisDir := "\\PPWHIS11\apps$\3mhisprd\SCRIPT\impunst\crd.imp\" 
-	pdfDir := ".\"
-	if (A_ComputerName~="EWCS") {												; EWCS=local, PPWC=Citrix
-		hisDir := trreatDir "spool\"											; send RTF to spool dir
-	}
-}
-
-worklist := reportDir "worklist.xml"
+SplitPath, A_ScriptDir,,fileDir
 user := A_UserName
 if instr(user,"octe") {
 	user:="TC"
 }
+IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
+{
+	isDevt := true
+	readIni("adminpaths")
+	eventlog(">>>>> Started in DEVT mode.")
+} else {
+	isDevt := false
+	readIni("paths")
+	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
+}
+binDir:=trreatDir "bin\"
+reportDir:=trreatDir "pending\"
+complDir:=trreatDir "completed\"
+paceartDir:=trreatDir "paceart\"
+hl7inDir:=trreatDir "incoming\"
+
+worklist := reportDir "worklist.xml"
+
 eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
