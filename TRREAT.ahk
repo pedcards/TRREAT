@@ -594,6 +594,10 @@ fileLoop:
 
 SignScan:
 {
+	if !FileExist(hisDir) {
+		MsgBox % "Requires 3M HIS dir`n""" hisDir """"
+		ExitApp
+	}
 	l_users := {}
 	l_numusers :=
 	l_tabs := 
