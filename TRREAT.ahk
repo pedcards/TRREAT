@@ -2673,15 +2673,14 @@ FetchDem:
 }
 
 scanOrders() {
-	global xl, hl7inDir, fldval
+	global xl, hl7inDir, fldval, worklist
 	
+	xl := new XML(worklist)																; refresh worklist
 	if !IsObject(xl.selectSingleNode("/root/orders")) {
 		xl.addElement("orders","/root")
 	}
 	
-/*	First pass: process new files
-*/
-	Loop, files, % hl7InDir "*"
+	Loop, files, % hl7InDir "*"															; Scan incoming folder for new orders and add to Orders node
 	{
 		e0 := {}
 		fileIn := A_LoopFileName
@@ -2744,7 +2743,7 @@ scanOrders() {
 			, % hl7InDir . fileOut
 		
 	}
-	xl.viewXML()
+	xl.save(worklist)
 	
 /*	Second pass: scan *Z.hl7 files
 */
