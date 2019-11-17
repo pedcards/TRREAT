@@ -2744,40 +2744,7 @@ scanOrders() {
 		
 	}
 	xl.save(worklist)
-	
-/*	Second pass: scan *Z.hl7 files
-*/
-	loop, Files, % hl7InDir "*Z.hl7---"
-	{
-		e0 := {}
-		fileIn := A_LoopFileName
-		if RegExMatch(fileIn,"_([a-zA-Z0-9]{4,})Z.hl7",i) {								; file appears to have been parsed
-			e0 := readWQ(i1)
-		} else {
-			continue
-		}
-		if (e0.node != "orders") {														; remnant orders file
-			FileMove, %A_LoopFileFullPath%, .\tempfiles, 1
-			eventlog("Leftover HL7 file " fileIn " moved to tempfiles.")
-			continue
-		}
 		
-		LV_Add(""
-			, hl7InDir . fileIn															; filename and path to HolterDir
-			, e0.date																	; date
-			, e0.name																	; name
-			, e0.mrn																	; mrn
-			, e0.prov																	; prov
-			, (e0.mon="HOL" ? "24-hr "													; monitor type
-				: e0.mon="BGH" ? "30-day "
-				: e0.mon~="BGM|ZIO" ? "14-day "
-				: "")
-				. e0.mon
-			, "")																		; fulldisc present, make blank
-		GuiControl, Enable, Register
-		GuiControl, Text, Register, Go to ORDERS tab
-	}
-	
 	return
 }
 
