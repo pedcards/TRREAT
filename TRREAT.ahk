@@ -2645,6 +2645,7 @@ FetchDem:
 	}
 	
 	scanOrders()
+	matchOrder()
 	
 	getDem := true
 	fetchQuit := false
@@ -2756,6 +2757,25 @@ scanOrders() {
 	}
 	xl.save(worklist)
 		
+	return
+}
+
+matchOrder() {
+	global fldval, xl
+	
+	fldName := Format("{:U}",fldval["dev-Name"])
+	Loop, % (k:=xl.selectNodes("/root/orders/order")).length							; generate list of orders with fuzz levels
+	{
+		node := k.item(A_index-1)
+		nodeName := node.selectSingleNode("name").text
+		nodeID := node.getAttribute("id")
+		fuzz := fuzzysearch(nodename,fldName)
+		list .= fuzz "," nodeID "," nodeName "`n"
+	}
+	list0 := list
+	Sort, list
+	MsgBox % list0 "`n`n" list
+	
 	return
 }
 
@@ -3365,4 +3385,5 @@ readIni(section) {
 #Include strx.ahk
 #Include xml.ahk
 #Include CMsgBox.ahk
+#Include sift3.ahk
 #Include hl7.ahk
