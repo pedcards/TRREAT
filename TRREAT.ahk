@@ -2629,7 +2629,6 @@ FetchDem:
 	}
 	y := new XML(chipDir "currlist.xml")
 	yArch := new XML(chipDir "archlist.xml")
-	SNstring := "/root/id/data/device[@SN='" fldval["dev-IPG_SN"] "']"
 	SNstring := "/root/id[data/device[@SN='" fldval["dev-IPG_SN"] "']]"
 	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
 		fldval["dev-MRN"] := k.getAttribute("mrn")								; set dev-MRN based on device SN
