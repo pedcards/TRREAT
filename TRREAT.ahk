@@ -439,8 +439,13 @@ readFilesPaceart() {
 ParseName(x) {
 /*	Determine first and last name
 */
+	if (x="") {
+		return error
+	}
 	x := trim(x)																		; trim edges
+	x := RegExReplace(x,"\'","^")														; replace ['] with [^] to avoid XPATH errors
 	x := RegExReplace(x," \w "," ")														; remove middle initial: Troy A Johnson => Troy Johnson
+	x := RegExReplace(x,"(,.*?)( \w)$","$1")											; remove trailing MI: Johnston, Troy A => Johnston, Troy
 	x := RegExReplace(x,"i),?( JR| III| IV)$")											; Filter out name suffixes
 	x := RegExReplace(x,"\s+"," ",ct)													; Count " "
 	
@@ -454,7 +459,7 @@ ParseName(x) {
 		first := strX(x,"",1,0," ",1)
 		last := strX(x," ",1,1,"",0)
 	}
-	else																				; James Jacob Jingleheimer Schmidt
+	else if (ct>1)																		; James Jacob Jingleheimer Schmidt
 	{
 		x0 := x																			; make a copy to disassemble
 		n := 1
@@ -474,7 +479,11 @@ ParseName(x) {
 		first := RegExReplace(x," " last)
 	}
 	
-	return {first:first,last:last}
+	return {first:first
+			,last:last
+			,firstlast:first " " last
+			,lastfirst:last ", " first
+			,apostr:RegExReplace(x,"\^","'")}
 }
 
 parsePat:
