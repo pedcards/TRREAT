@@ -2759,12 +2759,14 @@ matchOrder() {
 		fetchQuit := true
 		return
 	}
-	if (fuzzysearch(key[selbox].name , fldval["dev-name"] > 0.20) {						; bad match
+	
+	res := key[selbox]
+	if (fuzzysearch(res.name , fldval["dev-name"]) > 0.20) {						; possible bad match
 		MsgBox, 262196
 			, Possible name mismatch
-			, % "Order name: " key[selbox].Name "`n"
+			, % "Order name: " res.Name "`n"
 			. "Report name: " fldval["dev-name"] "`n`n"
-			. "Keep " key[selbox].name "?"
+			. "Keep " res.name "?"
 		IfMsgBox, No 
 		{
 			fetchQuit:=true
