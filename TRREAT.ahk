@@ -2636,12 +2636,6 @@ FetchDem:
 		return
 	}
 	
-	getDem := true
-	fetchQuit := false
-		
-	EncNum := fldval["dev-Enc"]
-	EncMRN := fldval["dev-MRN"]
-	
 	return
 }
 
