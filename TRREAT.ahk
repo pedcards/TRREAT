@@ -2774,7 +2774,11 @@ matchOrder() {
 		}
 	}
 	
-	return key[selbox].id
+	fldval["dev-name"] := res.name
+	fldval["dev-MRN"] := res.mrn
+	fldval["dem-wqid"] := res.id
+	
+	return 
 	
 	matchOrderSelect:
 	{
