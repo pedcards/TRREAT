@@ -2775,8 +2775,10 @@ matchOrder() {
 	}
 	
 	fldval["dev-name"] := res.name
+		fldval["dev-nameL"] := parseName(res.name).last
+		fldval["dev-nameF"] := parseName(res.name).first
 	fldval["dev-MRN"] := res.mrn
-	fldval["dem-wqid"] := res.id
+	fldval["dev-wqid"] := res.id
 	
 	return 
 	
