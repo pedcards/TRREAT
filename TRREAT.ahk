@@ -2745,7 +2745,9 @@ scanOrders() {
 }
 
 matchOrder() {
-	global fldval, xl
+	global fldval, xl, fetchQuit
+	static selbox, selbut
+	key := {}
 	
 	fldName := Format("{:U}",fldval["dev-Name"])
 	Loop, % (k:=xl.selectNodes("/root/orders/order")).length							; generate list of orders with fuzz levels
@@ -2754,13 +2756,63 @@ matchOrder() {
 		nodeName := node.selectSingleNode("name").text
 		nodeID := node.getAttribute("id")
 		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "," nodeID "," nodeName "`n"
+		list .= fuzz "|" nodeID "|" nodeName "`n"
 	}
-	list0 := list
-	Sort, list
-	MsgBox % list0 "`n`n" list
+	Sort, list																			; sort by fuzz level
+	Loop, parse, list, `n
+	{
+		k := A_LoopField
+		if (k="") {
+			break
+		}
+		vals:=strsplit(k,"|")
+		key[A_Index] := {name:vals[3],id:vals[2]}										; build array of key{name,id}
+		keylist .= vals[3] "|"
+	}
 	
-	return
+	Gui, dev:Destroy
+	Gui, dev:Default
+	Gui, -MinimizeBox
+	Gui, Add, Text, w180 +Wrap
+		, % "Select the order that matches this patient:"
+	Gui, Font, s12
+	Gui, Add, ListBox, h100 vSelBox -vScroll AltSubmit gMatchOrderSelect, % keylist		; listbox and button
+	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Submit					; disabled by default
+	Gui, Show, AutoSize, Select order
+	Gui, +AlwaysOnTop
+	
+	winwaitclose, Select order
+	
+	if !(selbox) {																		; no selection
+		fetchQuit := true
+		return
+	}
+	if (fuzzysearch(key[selbox].name , fldval["dev-name"] > 0.20) {						; bad match
+		MsgBox, 262196
+			, Possible name mismatch
+			, % "Order name: " key[selbox].Name "`n"
+			. "Report name: " fldval["dev-name"] "`n`n"
+			. "Keep " key[selbox].name "?"
+		IfMsgBox, No 
+		{
+			fetchQuit:=true
+			return
+		}
+	}
+	
+	return key[selbox].id
+	
+	matchOrderSelect:
+	{
+		GuiControl, dev:Enable, Submit
+		return
+	}
+	
+	matchOrderSubmit:
+	{
+		Gui, dev:Submit
+		return
+	}
 }
 
 fetchGUI:
