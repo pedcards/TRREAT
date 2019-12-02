@@ -770,22 +770,6 @@ ActSign:
 Return
 }
 
-;~ SignVerify(user)
-;~ {
-	;~ global docs
-	;~ InputBox, userIn, Sign, Enter CIS user name
-	;~ if !(userIn=user) {
-		;~ MsgBox, 16,, Wrong user name!
-		;~ return error
-	;~ }
-	;~ InputBox, numIn, Sign, Enter signature code
-	;~ if !(numIn=docs[substr(userIn,1,2)]) {
-		;~ MsgBox, 16,, Wrong signature number!
-		;~ return error
-	;~ }
-	;~ return numIn
-;~ }
-
 Medtronic:
 {
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
