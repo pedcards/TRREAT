@@ -2091,48 +2091,25 @@ PrintOut:
 		enc_type .= "Multi"
 	}
 	
-	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
-			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
-			. "\pard\tx2160\fs22\lang9 `n"
-			. "Transcriptionist\tab "	"<TrID:crd> \par `n"
-			. "Document Type\tab "		"<7:Q8> \par `n"
-			. "Clinic Title code\tab "	"<1035:PACE> \par `n"
-			. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par `n"
-			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
-			. "CIS Encounter #\tab "	"<3: " format("{:012}",fldval["dev-Enc"]) " >\par `n"
-			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
-			. "Dictation Date\tab "		"<13:" enc_dt.MDY ">\par `n"
-			. "Job #\tab "				"<15:e> \par `n"
-			. "Service Date\tab "		"<31:" enc_dt.MDY ">\par `n"
-			. "Surgery Date\tab "		"<6:" enc_dt.MDY "> \par `n"
-			. "Attending Phy #\tab "	"<9:" docs[enc_MD] "> \par `n"
-			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
-			. "Job No Search\tab "		"<JobNoSearch:NONE> \par `n"
-			. "<EndOfHeader>\par `n"
-			. "\par `n"
+	rtfHdr := "{\rtf1\pard`n"
 	
-	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
+	rtfFtr := "`n}`n"
 	
-	rtfBody := "\tx1620\tx5220\tx7040" 
-	. "\fs22\b\ul ANALYSIS DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
-	. printQ(is_remote
-		,"\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n"
-		. enc_trans.MDY "\par `n")
-	. "\par `n"
-	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
-	. "Device interrogation " enc_type "\par `n"
-	. "Perfomed by " tech ".\par\par\fs22 `n"
-	. printQ(fldval["indication"]
-		, "\b\ul INDICATION FOR DEVICE\ul0\b0\par\fs18 `n"
-		. "###\par\par\fs22 `n")
-	. printQ(fldval["dependent"]
-		, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par\fs18 `n"
-		. "###\par\par\fs22 `n")
-	. rtfBody . "\fs22\par `n" 
-	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
-	. summ . "\par `n"
-	. "\par `n"
-	. "\pard\tx2700\tx5220\tx7040 `n"
+	rtfBody := "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par`n"
+			. strQ(is_remote
+				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par`n")
+			. "\b\ul ENCOUNTER TYPE\ul0\b0\par`n"
+			. "Device interrogation "enc_type "\par`n"
+			. "Performed by " tech ".\par\par`n"
+			. strQ(fldval["indication"]
+				, "\b\ul INDICATION FOR DEVICE\ul0\b0\par`n"
+				. "###\par\par`n")
+			. strQ(fldval["dependent"]
+				, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par`n"
+				. "###\par\par`n")
+			. rtfBody "\par`n"
+			. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par`n"
+			. summ "\par\par`n"
 	
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 	
@@ -2922,6 +2899,7 @@ saveChip:
 makeReport:
 {
 	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
+	EncMRN := fldval["dev-MRN"]
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
