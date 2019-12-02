@@ -2628,40 +2628,17 @@ FetchDem:
 		eventlog("Device " fldval["dev-IPG_SN"] " found in archlist (" fldval["dev-MRN"] ").")
 	}
 	
+	fetchQuit := false
 	scanOrders()
 	matchOrder()
 	
-	getDem := true
-	fetchQuit := false
-	
-	gosub fetchGUI
-	
-	while (getDem) {									; Repeat until we get tired of this
-		clipboard :=
-		ClipWait, 2
-		if !ErrorLevel {								; clipboard has data
-			clk := parseClip(clipboard)
-			if !ErrorLevel {															; parseClip {field:value} matches valid data
-				if (clk.field = "Account Number") {
-					fldval["dev-Enc"] := clk.value
-					eventlog("CLK: Account number " clk.value)
-				}
-				if (clk.field = "MRN") {
-					fldval["dev-MRN"] := clk.value
-					eventlog("CLK: MRN " clk.value)
-				}
-				if (clk.field = "Name") {
-					fldval["dev-Name"] := clk.value
-					eventlog("CLK: Name " clk.value)
-				}
-			}
-			gosub fetchGUI							; Update GUI with new info
-		}
-	}
 	if (fetchQuit) {
 		return
 	}
 	
+	getDem := true
+	fetchQuit := false
+		
 	EncNum := fldval["dev-Enc"]
 	EncMRN := fldval["dev-MRN"]
 	
