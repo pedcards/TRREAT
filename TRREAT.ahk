@@ -2725,9 +2725,10 @@ matchOrder() {
 	{
 		node := k.item(A_index-1)
 		nodeName := node.selectSingleNode("name").text
+		nodeMRN := node.selectSingleNode("mrn").text
 		nodeID := node.getAttribute("id")
 		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "|" nodeID "|" nodeName "`n"
+		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "`n"
 	}
 	Sort, list																			; sort by fuzz level
 	Loop, parse, list, `n
@@ -2737,7 +2738,7 @@ matchOrder() {
 			break
 		}
 		vals:=strsplit(k,"|")
-		key[A_Index] := {name:vals[3],id:vals[2]}										; build array of key{name,id}
+		key[A_Index] := {name:vals[3],id:vals[2],mrn:vals[4]}							; build array of key{name,id}
 		keylist .= vals[3] "|"
 	}
 	
