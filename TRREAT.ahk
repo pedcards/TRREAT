@@ -760,6 +760,9 @@ ActSign:
 			return																; not signing this report, return
 		}
 	}
+	
+	makeORU(l_wqid)
+	
 	if !(isDevt) {
 		FileCopy, % reportDir fileNam ".rtf", % hisDir . fileNam . ".rtf"
 		eventlog("Sent to HIS.")
@@ -773,6 +776,75 @@ ActSign:
 	
 	Gosub signScan																; regenerate file list
 Return
+}
+
+makeORU(wqid) {
+	global xl, fldval, hl7out
+	
+	order := readWQ(wqid)
+	
+	hl7time := A_Now
+	hl7out := Object()
+	buildHL7("MSH"
+		,"^~\&"
+		,"SCH"
+		,"TRREAT"
+		,""
+		,"TRREAT"
+		,hl7time
+		,"TECH"
+		,"ORU^R01"
+		,order.wqid
+		,"T"
+		,"2.5")
+	
+	buildHL7("PID"
+		, order.mrn
+		, order.mrn
+		, ""
+		, parseName(order.name).last "^" parseName(order.name).first
+		, ""
+		, order.dob
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, order.wqid
+		, "")
+	
+	tmpPrv := parseName(order.prov)
+	buildHL7("PV1"
+		, ptDem.type
+		, ptDem.loc
+		, ""
+		, ""
+		, ""
+		, "^" tmpPrv.last "^" tmpPrv.first
+		, "^" tmpPrv.last "^" tmpPrv.first
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, order.wqid)
+	
+	buildHL7("OBR"
+		, ""
+		, "")
+	
+	
+	return
 }
 
 Medtronic:
