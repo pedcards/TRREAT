@@ -2705,8 +2705,10 @@ matchOrder() {
 		nodeName := node.selectSingleNode("name").text
 		nodeMRN := node.selectSingleNode("mrn").text
 		nodeID := node.getAttribute("id")
+		nodeOrdernum := node.selectSingleNode("ordernum").text
+		nodeAccession := node.selectSingleNode("accession").text
 		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "`n"
+		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "`n"
 	}
 	Sort, list																			; sort by fuzz level
 	Loop, parse, list, `n
@@ -2716,8 +2718,12 @@ matchOrder() {
 			break
 		}
 		vals:=strsplit(k,"|")
-		key[A_Index] := {name:vals[3],id:vals[2],mrn:vals[4]}							; build array of key{name,id}
-		keylist .= vals[3] "|"
+		key[A_Index] := {name:vals[3]													; build array of key{name,id,etc}
+						,id:vals[2]
+						,mrn:vals[4]
+						,ordernum:vals[5]
+						,accession:vals[6]}
+		keylist .= vals[3] "|"															; keylist just contains the name
 	}
 	
 	Gui, dev:Destroy
@@ -2757,6 +2763,8 @@ matchOrder() {
 		fldval["dev-nameF"] := parseName(res.name).first
 	fldval["dev-MRN"] := res.mrn
 	fldval["dev-wqid"] := res.id
+	fldval["dev-ordernum"] := res.ordernum
+	fldval["dev-accession"] := res.accession
 	
 	return 
 	
