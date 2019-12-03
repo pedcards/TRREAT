@@ -2155,6 +2155,7 @@ PrintOut:
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
 		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
+			xl.addElement("order",edID,{id:fldval["dev-wqid"]})
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
