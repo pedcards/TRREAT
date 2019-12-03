@@ -1949,7 +1949,7 @@ pmPrint:
 	if !(enc_MD) {
 		return
 	}
-	rtfBody := "\fs22\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n\fs18 "
+	rtfBody := "\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n"
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
 	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
@@ -1969,8 +1969,8 @@ pmPrint:
 	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
 	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
 	. "\par `n"
-	. "\fs22\par `n"
-	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
+	. "\par `n"
+	. "\b\ul LEAD INFORMATION\ul0\b0\par`n"
 	
 	for k in leads
 	{
@@ -2059,7 +2059,7 @@ printEvents()
 	. printQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
 	. printQ(fldval["event-Obs"],"\par ### ")
 	
-	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18 `n###\par `n") 
+	rtfBody .= printQ(txt,"\par\b\ul EVENTS\ul0\b0\par`n###\par `n") 
 return	
 }
 
@@ -2091,7 +2091,7 @@ PrintOut:
 		enc_type .= "Multi"
 	}
 	
-	rtfHdr := "{\rtf1\pard`n"
+	rtfHdr := "{\rtf1`n{\fonttbl{\f0\fnil\fcharset0 Arial;}{\f2\fnil\fcharset2 Wingdings;}}\pard`n"
 	
 	rtfFtr := "`n}`n"
 	
