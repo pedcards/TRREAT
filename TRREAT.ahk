@@ -615,6 +615,7 @@ SignScan:
 		l_name := stregX(fileNam,"-\d+ ",1,1," #",1)		
 		l_ser  := stregX(fileNam," #",1,1," \d{6,8}",1)
 		l_date := strX(fileNam," ",0,1,"",0)
+		l_wqid := xl.getText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/wqid")
 		
 		if !Object(l_users[l_user]) {											; this user not present yet in l_users[]
 			l_tabs .= l_user . "|"												; add user to tab titles string
@@ -2155,7 +2156,7 @@ PrintOut:
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
 		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
-			xl.addElement("order",edID,{id:fldval["dev-wqid"]})
+			xl.addElement("wqid",edID,fldval["dev-wqid"])
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
@@ -3075,7 +3076,7 @@ readWQ(idx) {
 	global xl
 	
 	res := []
-	k := xl.selectSingleNode("//order[@id='" idx "']")
+	k := xl.selectSingleNode("//orders/order[@id='" idx "']")
 	Loop, % (ch:=k.selectNodes("*")).Length
 	{
 		i := ch.item(A_index-1)
