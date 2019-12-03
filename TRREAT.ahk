@@ -623,7 +623,8 @@ SignScan:
 		l_users[l_user,A_index] := {filename:fileNam							; creates l_users[l_user, x], where x is just a number
 			, name:l_name
 			, date:l_date
-			, ser:l_ser}
+			, ser:l_ser
+			, wqid:l_wqid}
 	}
 	eventlog("Report RTF dir scanned.")
 	gosub signGUI
@@ -640,7 +641,7 @@ SignGUI:
 	{
 		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
 		Gui, Tab, % k															; go to tab for the user
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, file|serial|Date|Name
+		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, file|serial|Date|Name|wqid
 		for v in l_users[k]														; loop through users in l_users
 		{
 			i := l_users[k,v]													; i is the element for each V
@@ -648,13 +649,15 @@ SignGUI:
 				, i.filename													; this is a hidden column 
 				, i.ser															; this is a hidden column
 				, i.date
-				, i.name)
+				, i.name
+				, i.wqid)
 		}
 		LV_ModifyCol()
 		LV_ModifyCol(1, "0")
 		LV_ModifyCol(2, "0")
 		LV_ModifyCol(3, "Autohdr")
 		LV_ModifyCol(4, "AutoHdr")
+		LV_ModifyCol(5, "0")
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
 	Gui, Show, AutoSize, TRREAT Reports Pile											; show GUI
@@ -681,6 +684,7 @@ SignRep:
 	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
 	LV_GetText(l_ser,l_row,2)													; get hidden serial number
 	LV_GetText(l_date,l_row,3)
+	LV_GetText(l_wqid,l_row,5)
 	
 	eventlog("Selected '" fileNam "'")
 	
