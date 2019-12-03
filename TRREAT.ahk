@@ -685,7 +685,7 @@ SignRep:
 	
 	tmp_usr := substr(fileNam,1,2)
 	l_usr := substr(user,1,2)
-	if !(l_usr=stmp_usr) {														; first user doesn't match that on filename?
+	if !(l_usr=tmp_usr) {														; first user doesn't match that on filename?
 		MsgBox, 262196,
 			, % "Did you mean to open this report?`n`n"
 			. "Was originally assigned to " tmp_usr "."
@@ -740,16 +740,16 @@ ActSign:
 			. "Was originally assigned to " l_tab "."
 		IfMsgBox Yes															; signing someone else's report
 		{
-			FileRead, tmp, % reportDir fileNam ".rtf"							; read the generated RTF file
-			tmp := RegExReplace(tmp
-				, "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
-				, "Dictating Phy #\tab <8:" docs[l_usr] ">\par")				; with yours
-			tmp := RegExReplace(tmp
-				, "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
-				, "Attending Phy #\tab <9:" docs[l_usr] ">\par")
-			FileDelete, % reportDir fileNam ".rtf"
-			FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
-			eventlog(l_tab " report signed by " l_usr ".") 
+			;~ FileRead, tmp, % reportDir fileNam ".rtf"							; read the generated RTF file
+			;~ tmp := RegExReplace(tmp
+				;~ , "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
+				;~ , "Dictating Phy #\tab <8:" docs[l_usr] ">\par")				; with yours
+			;~ tmp := RegExReplace(tmp
+				;~ , "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
+				;~ , "Attending Phy #\tab <9:" docs[l_usr] ">\par")
+			;~ FileDelete, % reportDir fileNam ".rtf"
+			;~ FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
+			;~ eventlog(l_tab " report signed by " l_usr ".") 
 		} else {
 			eventlog("Oops. Don't sign " l_tab "'s report.")
 			return																; not signing this report, return
