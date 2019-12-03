@@ -2675,13 +2675,8 @@ scanOrders() {
 		xl.addElement("date",newID,e0.date)
 		xl.addElement("name",newID,e0.name)
 		xl.addElement("mrn",newID,e0.mrn)
-		xl.addElement("sex",newID,e0.sex)
-		xl.addElement("dob",newID,e0.dob)
-		xl.addElement("mon",newID,e0.mon)
+		xl.addElement("dob",newID,parsedate(e0.dob).YMD)
 		xl.addElement("prov",newID,e0.prov)
-		xl.addElement("site",newID,e0.loc)
-		xl.addElement("acct",newID,e0.acct)
-		xl.addElement("ind",newID,e0.ind)
 		eventlog("Added order ID " e0.UID ".")
 		
 		fileOut := e0.MRN "_" 
