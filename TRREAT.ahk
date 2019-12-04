@@ -31,6 +31,10 @@ hl7inDir:=trreatDir "incoming\"
 
 worklist := reportDir "worklist.xml"
 
+user_parse := readIni("user_parse")
+user_sign := readIni("user_sign")
+docs := readIni("docs")
+
 initHL7()
 hl7DirMap := {}
 
@@ -58,8 +62,6 @@ MainLoop:
 	blk := Object()
 	blk2 := Object()
 	
-	docs := {"TC":"783118","JS":"343079","SS":"358945"
-			, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
 	if ObjHasKey(docs,substr(user,1,2)) {												; User is in docs[]
 		role := "Sign"																	; set role to "Sign"
 	} else {
