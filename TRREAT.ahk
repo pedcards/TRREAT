@@ -781,7 +781,7 @@ Return
 }
 
 makeORU(wqid) {
-	global xl, fldval, hl7out
+	global xl, fldval, hl7out, docs
 	
 	order := readWQ(wqid)
 	
@@ -789,16 +789,16 @@ makeORU(wqid) {
 	hl7out := Object()
 	buildHL7("MSH"
 		,"^~\&"
-		,"SCH"
-		,"TRREAT"
+		,"CVTRREAT"
+		,"CVTRREAT"
+		,"HS"
 		,""
-		,"TRREAT"
 		,hl7time
-		,"TECH"
+		,""
 		,"ORU^R01"
-		,order.wqid
+		, wqid
 		,"T"
-		,"2.5")
+		,"2.5.1")
 	
 	buildHL7("PID"
 		, order.mrn
@@ -817,13 +817,13 @@ makeORU(wqid) {
 		, ""
 		, ""
 		, ""
-		, order.wqid
+		, wqid
 		, "")
 	
 	tmpPrv := parseName(order.prov)
 	buildHL7("PV1"
-		, ptDem.type
-		, ptDem.loc
+		, ""
+		, ""
 		, ""
 		, ""
 		, ""
@@ -839,11 +839,42 @@ makeORU(wqid) {
 		, ""
 		, ""
 		, ""
-		, order.wqid)
+		, wqid)
 	
 	buildHL7("OBR"
+		, order.ordernum
+		, order.accession
+		, ((isRemote) 
+			? "CVCAR602^Cardiac Device Check - Remote" 
+			: "CVCAR601^Cardiac Device Check - In Clinic")
 		, ""
-		, "")
+		, ""
+		, order.date
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, "^" tmpPrv.last "^" tmpPrv.first
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, ""
+		, docs[A_UserName])
 	
 	
 	return
