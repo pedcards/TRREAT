@@ -787,94 +787,46 @@ makeORU(wqid) {
 	
 	hl7time := A_Now
 	hl7out := Object()
+	
 	buildHL7("MSH"
-		,"^~\&"
-		,"CVTRREAT"
-		,"CVTRREAT"
-		,"HS"
-		,""
-		,hl7time
-		,""
-		,"ORU^R01"
-		, wqid
-		,"T"
-		,"2.5.1")
+		,{1:"^~\&"
+		, 2:"CVTRREAT"
+		, 3:"CVTRREAT"
+		, 4:"HS"
+		, 6:hl7time
+		, 8:"ORU^R01"
+		, 9:wqid
+		, 10:"T"
+		, 11:"2.5.1"})
 	
 	buildHL7("PID"
-		, order.mrn
-		, order.mrn
-		, ""
-		, parseName(order.name).last "^" parseName(order.name).first
-		, ""
-		, order.dob
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, wqid
-		, "")
+		,{2:order.mrn
+		, 3:order.mrn
+		, 5:parseName(order.name).last "^" parseName(order.name).first
+		, 7:parseDate(order.dob).YMD
+		, 18:wqid})
 	
 	tmpPrv := parseName(order.prov)
 	buildHL7("PV1"
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, "^" tmpPrv.last "^" tmpPrv.first
-		, "^" tmpPrv.last "^" tmpPrv.first
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, wqid)
+		,{7:"^" tmpPrv.last "^" tmpPrv.first
+		, 8:"^" tmpPrv.last "^" tmpPrv.first
+		, 19:wqid})
 	
 	buildHL7("OBR"
-		, order.ordernum
-		, order.accession
-		, ((isRemote) 
+		,{2:order.ordernum
+		, 3:order.accession
+		, 4:((isRemote) 
 			? "CVCAR602^Cardiac Device Check - Remote" 
 			: "CVCAR601^Cardiac Device Check - In Clinic")
-		, ""
-		, ""
-		, order.date
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, "^" tmpPrv.last "^" tmpPrv.first
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, ""
-		, docs[A_UserName])
+		, 7:order.date
+		, 16:"^" tmpPrv.last "^" tmpPrv.first
+		, 32:docs[A_UserName]})
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"PACEMAKER^Pacemaker Check^^^^"
+		, 11:"F"
+		, 14:hl7time})
 	
 	
 	return
