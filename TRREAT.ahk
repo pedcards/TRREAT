@@ -838,6 +838,73 @@ makeORU(wqid) {
 		, 4:"TESTER^" fileNam ".rtf"
 		, 5:B64Data })
 	
+/*	This section can become a Loop
+*/
+	buildHL7("OBX"
+		,{2:"NM"
+		, 3:"10201^Pacemaker dependent^IMGLRR"
+		, 5:order.dependent })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10202^Device model^IMGLRR"
+		, 5:order.model })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10203^Device SN^IMGLRR"
+		, 5:order.ser })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10204^Pacing mode^IMGLRR"
+		, 5:order.mode })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10205^Lower rate limit^IMGLRR"
+		, 5:order.LRL })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10206^Upper rate limit^IMGLRR"
+		, 5:order.URL })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10207^Paced AV^IMGLRR"
+		, 5:order.PAV })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10208^Sensed AV^IMGLRR"
+		, 5:order.SAV })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10209^PVARP^IMGLRR"
+		, 5:order.PVARP })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10210^Atrial capture amplitude^IMGLRR"
+		, 5:order.ApThr })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10213^Atrial pacing amplitude^IMGLRR"
+		, 5:order.Ap })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10215^Ventricular capture amplitude^IMGLRR"
+		, 5:order.VpThr })
+	
+	buildHL7("OBX"
+		,{2:"TX"
+		, 3:"10218^Ventricular pacing amplitude^IMGLRR"
+		, 5:order.Vp })
+	
 	return
 }
 
