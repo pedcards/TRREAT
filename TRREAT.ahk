@@ -781,7 +781,7 @@ Return
 }
 
 makeORU(wqid) {
-	global xl, fldval, hl7out, docs
+	global xl, fldval, hl7out, docs, reportDir, filenam, isRemote
 	
 	order := readWQ(wqid)
 	
@@ -801,7 +801,7 @@ makeORU(wqid) {
 	
 	buildHL7("PID"
 		,{2:order.mrn
-		, 3:order.mrn
+		, 3:order.mrn "^^^^CHRMC"
 		, 5:parseName(order.name).last "^" parseName(order.name).first
 		, 7:parseDate(order.dob).YMD
 		, 18:wqid})
@@ -816,10 +816,10 @@ makeORU(wqid) {
 		,{2:order.ordernum
 		, 3:order.accession
 		, 4:((isRemote) 
-			? "CVCAR602^Cardiac Device Check - Remote" 
-			: "CVCAR601^Cardiac Device Check - In Clinic")
+			? "CVCAR602^Cardiac Device Check - Remote^IMGEAP" 
+			: "CVCAR601^Cardiac Device Check - In Clinic^IMGEAP")
 		, 7:order.date
-		, 16:"^" tmpPrv.last "^" tmpPrv.first
+		, 16:"^" tmpPrv.last "^" tmpPrv.first "^^^^^^MSOW_ORG_ID"
 		, 32:docs[A_UserName]})
 	
 	buildHL7("OBX"
