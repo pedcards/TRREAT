@@ -828,11 +828,15 @@ makeORU(wqid) {
 		, 11:"F"
 		, 14:hl7time})
 	
+	File := reportDir fileNam ".rtf"
+	FileGetSize, nBytes, %File%
+	FileRead, Bin, *c %File%
+	B64Data := StrReplace(Base64Enc( Bin, nBytes,,0),"`r`n")
 	buildHL7("OBX"
 		,{2:"ED"
 		, 3:"RTFReport^RTF Report^^^^"
-		, 4:"TESTER^" filename
-		, 5:base64enc })
+		, 4:"TESTER^" fileNam ".rtf"
+		, 5:B64Data })
 	
 	return
 }
