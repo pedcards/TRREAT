@@ -828,6 +828,11 @@ makeORU(wqid) {
 		, 11:"F"
 		, 14:hl7time})
 	
+	buildHL7("OBX"
+		,{2:"ED"
+		, 3:"RTFReport^RTF Report^^^^"
+		, 4:"TESTER^" filename
+		, 5:base64enc })
 	
 	return
 }
