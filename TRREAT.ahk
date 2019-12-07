@@ -2654,15 +2654,17 @@ parseORM() {
 		, nameF:fldval.PID_NameF
 		, name:fldval.PID_NameL strQ(fldval.PID_NameF,", ###")
 		, mrn:fldval.PID_PatMRN
-		, sex:(fldval_.PID_sex~="F") ? "Female" : "Male"
+		, sex:fldval.PID_sex
 		, DOB:parseDate(fldval.PID_DOB).MDY
 		, monitor:monType
 		, mon:monType
-		, provider:fldval.ORC_ProvNameL strQ(fldval.ORC_ProvNameF,", ###")
-		, prov:fldval.ORC_ProvNameL strQ(fldval.ORC_ProvNameF,", ###")
+		, prov:strQ(fldval.ORC_ProvCode
+			, fldval.ORC_ProvCode "^" fldval.ORC_ProvNameL "^" fldval.ORC_ProvNameF
+			, fldval.OBR_ProviderCode "^" fldval.OBR_ProviderNameL "^" fldval.OBR_ProviderNameF)
 		, type:encType
 		, loc:location
-		, Account:fldval.ORC_ReqNum
+		, accountnum:fldval.PID_AcctNum
+		, encnum:fldval.PV1_VisitNum
 		, order:fldval.ORC_ReqNum
 		, accession:fldval.ORC_FillerNum
 		, acct:location strQ(fldval.ORC_ReqNum,"_###") strQ(fldval.ORC_FillerNum,"-###")
