@@ -2757,10 +2757,13 @@ scanOrders() {
 		xl.addElement("ordernum",newID,e0.order)
 		xl.addElement("accession",newID,e0.accession)
 		xl.addElement("ctrlID",newID,e0.CtrlID)
+		xl.addElement("accountnum",newID,e0.accountnum)
+		xl.addElement("encnum",newID,e0.encnum)
 		xl.addElement("date",newID,e0.date)
 		xl.addElement("name",newID,e0.name)
 		xl.addElement("mrn",newID,e0.mrn)
 		xl.addElement("dob",newID,parsedate(e0.dob).YMD)
+		xl.addElement("sex",newID,e0.sex)
 		xl.addElement("prov",newID,e0.prov)
 		eventlog("Added order ID " e0.UID ".")
 		
@@ -2988,6 +2991,7 @@ saveChip:
 	eventlog("Add new <device> node to currlist.")
 	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
+		xl.addElement("dependent", orderString, fldval["dependent"])
 		xl.addElement("model",	orderString, fldval["dev-IPG"])
 		xl.addElement("ser",	orderString, fldval["dev-IPG_SN"])
 		xl.addElement("mode",	orderString, fldval["par-Mode"])
