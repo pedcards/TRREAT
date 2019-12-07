@@ -801,13 +801,12 @@ makeORU(wqid) {
 		, 3:order.mrn "^^^^CHRMC"
 		, 5:parseName(order.name).last "^" parseName(order.name).first
 		, 7:parseDate(order.dob).YMD
-		, 18:wqid})
+		, 8:substr(order.sex,1,1)
+		, 18:order.accountnum})
 	
-	tmpPrv := parseName(order.prov)
 	buildHL7("PV1"
-		,{7:"^" tmpPrv.last "^" tmpPrv.first
-		, 8:"^" tmpPrv.last "^" tmpPrv.first
-		, 19:wqid})
+		,{19:order.encnum
+		, 50:wqid})
 	
 	buildHL7("OBR"
 		,{2:order.ordernum
@@ -816,7 +815,8 @@ makeORU(wqid) {
 			? "CVCAR602^Cardiac Device Check - Remote^IMGEAP" 
 			: "CVCAR601^Cardiac Device Check - In Clinic^IMGEAP")
 		, 7:order.date
-		, 16:"^" tmpPrv.last "^" tmpPrv.first "^^^^^^MSOW_ORG_ID"
+		, 16:order.prov "^^^^^^MSOW_ORG_ID"
+		, 25:"F"
 		, 32:docs[A_UserName]})
 	
 	buildHL7("OBX"
@@ -833,7 +833,9 @@ makeORU(wqid) {
 		,{2:"ED"
 		, 3:"RTFReport^RTF Report^^^^"
 		, 4:"TESTER^" fileNam ".rtf"
-		, 5:B64Data })
+		, 5:B64Data
+		, 11:"F"
+		, 14:hl7time})
 	
 	for key,val in dict																	; Loop through all values in Dict (from ini)
 	{
@@ -841,7 +843,9 @@ makeORU(wqid) {
 		buildHL7("OBX"																	; generate OBX for each value
 			,{2:"TX"
 			, 3:key "^" str[1] "^IMGLRR"
-			, 5:order[str[2]] })
+			, 5:order[str[2]] 
+			, 11:"F"
+			, 14:hl7time})
 	}
 	
 	return
