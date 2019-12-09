@@ -2172,25 +2172,25 @@ PrintOut:
 		enc_type .= "Multi"
 	}
 	
-	rtfHdr := "{\rtf1`n{\fonttbl{\f0\fnil\fcharset0 Arial;}{\f2\fnil\fcharset2 Wingdings;}}\pard`n"
+	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil\fcharset0 Arial;}{\f2\fnil\fcharset2 Wingdings;}}\pard"
 	
-	rtfFtr := "`n}`n"
+	rtfFtr := "}"
 	
-	rtfBody := "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par`n"
+	rtfBody := "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
-				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par`n")
-			. "\b\ul ENCOUNTER TYPE\ul0\b0\par`n"
-			. "Device interrogation "enc_type "\par`n"
-			. "Performed by " tech ".\par\par`n"
+				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
+			. "\b\ul ENCOUNTER TYPE\ul0\b0\par "
+			. "Device interrogation " enc_type "\par "
+			. "Performed by " tech ".\par\par "
 			. strQ(fldval["indication"]
-				, "\b\ul INDICATION FOR DEVICE\ul0\b0\par`n"
-				. "###\par\par`n")
+				, "\b\ul INDICATION FOR DEVICE\ul0\b0\par "
+				. "###\par\par ")
 			. strQ(fldval["dependent"]
-				, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par`n"
-				. "###\par\par`n")
-			. rtfBody "\par`n"
-			. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par`n"
-			. summ "\par\par`n"
+				, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par "
+				. "###\par\par ")
+			. rtfBody "\par "
+			. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par "
+			. summ "\par\par "
 	
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 	
