@@ -2030,17 +2030,18 @@ pmPrint:
 	if !(enc_MD) {
 		return
 	}
-	rtfBody := "\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n"
+	rtfBody := "\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
-	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
+	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". "
 	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
-	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
-	. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
+	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
+	. printQ(fldval["par-Mode"],"Brady programming mode is ###")
+	. printQ(fldval["par-LRL"],", lower rate ###")
 	. printQ(fldval["par-URL"],", upper tracking rate ###")
 	. printQ((substr(fldval["par-Mode"],0,1)="R"),printQ(fldval["par-USR"],", upper sensor rate ###"))
-	. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
-	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
-	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
+	. printQ(fldval["par-ADL"],", ADL rate ###") . ". "
+	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. ")
+	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. ")
 	. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
 	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
 	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
@@ -2049,9 +2050,8 @@ pmPrint:
 	. printQ(fldval["detect-VF"],"VF detection ###" printQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
 	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
 	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
-	. "\par `n"
-	. "\par `n"
-	. "\b\ul LEAD INFORMATION\ul0\b0\par`n"
+	. "\par\par "
+	. "\b\ul LEAD INFORMATION\ul0\b0\par "
 	
 	for k in leads
 	{
