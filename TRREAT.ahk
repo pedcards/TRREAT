@@ -819,22 +819,16 @@ makeORU(wqid) {
 		, 25:"F"
 		, 32:docs[A_UserName]})
 	
-	buildHL7("OBX"
-		,{2:"TX"
-		, 3:"PACEMAKER^Pacemaker Check^^^^"
-		, 11:"F"
-		, 14:hl7time})
-	
 	File := reportDir fileNam ".rtf"
-	FileGetSize, nBytes, %File%
-	FileRead, Bin, *c %File%
-	B64Data := Base64Enc( Bin, nBytes,,0)
+	FileRead, rtfStr, %File%
+	rtfStr := RegExReplace(rtfStr,"\R"," ")												; replace CRLF 
+	rtfStr := StrReplace(rtfStr,"|","\|")												; replace any "|" chars
+	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" esc with HL7 "\E" esc
 	buildHL7("OBX"
-		,{2:"ED"
-		, 3:"RTFReport^RTF Report^^^^"
-		, 4:"TESTER^" fileNam ".rtf"
-		, 5:B64Data
-		, 11:"F"
+		,{2:"FT"
+		, 3:"ED1^PACEMAKER/ICD INTERROGATION"
+		, 5:rtfStr
+		, 11:"P"
 		, 14:hl7time})
 	
 	for key,val in dict																	; Loop through all values in Dict (from ini)
