@@ -16,11 +16,11 @@ if instr(user,"octe") {
 IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
-	readIni("adminpaths")
+	dir:=readIni("adminpaths")
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	readIni("paths")
+	dir:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
 binDir:=trreatDir "bin\"
