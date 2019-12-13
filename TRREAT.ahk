@@ -2823,7 +2823,8 @@ matchOrder() {
 	}
 	
 	res := key[selbox]
-	if (fuzzysearch(res.name , fldval["dev-name"]) > 0.20) {						; possible bad match
+	fuzz := fuzzysearch(res.name , fldval["dev-name"]) 
+	if (fuzz > 0.20) {						; possible bad match
 		MsgBox, 262196
 			, Possible name mismatch
 			, % "Order name: " res.Name "`n"
