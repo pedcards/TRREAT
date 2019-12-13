@@ -23,13 +23,24 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	dir:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
+trreatDir:=dir.trreat
+chipDir:=dir.chip
+pdfDir:=dir.pdf
+
 binDir:=trreatDir "bin\"
 reportDir:=trreatDir "pending\"
 complDir:=trreatDir "completed\"
 paceartDir:=trreatDir "paceart\"
 hl7inDir:=trreatDir "incoming\"
 
-worklist := reportDir "worklist.xml"
+dir.bin:=dir.trreat "bin\"
+dir.report:=dir.trreat "pending\"
+dir.compl:=dir.trreat "completed\"
+dir.paceart:=dir.trreat "paceart\"
+dir.hl7in:=dir.trreat "incoming\"
+dir.outbound:=dir.trreat "outbound\"
+
+worklist := dir.report "worklist.xml"
 
 user_parse := readIni("user_parse")
 user_sign := readIni("user_sign")
