@@ -2658,6 +2658,7 @@ parseORM() {
 		, ind:strQ(fldval.OBR_ReasonCode,"###") strQ(fldval.OBR_ReasonText,"^###")
 		, indication:strQ(fldval.OBR_ReasonCode,"###") strQ(fldval.OBR_ReasonText,"^###")
 		, indicationCode:fldval.OBR_ReasonCode
+		, ordertype:fldval.OBR_TestCode "^" fldval.OBR_TestName
 		, orderCtrl:fldval.ORC_OrderCtrl
 		, ctrlID:fldval.MSH_CtrlID}
 }
@@ -2747,6 +2748,7 @@ scanOrders() {
 		xl.addElement("ctrlID",newID,e0.CtrlID)
 		xl.addElement("accountnum",newID,e0.accountnum)
 		xl.addElement("encnum",newID,e0.encnum)
+		xl.addElement("ordertype",newID,e0.ordertype)
 		xl.addElement("date",newID,e0.date)
 		xl.addElement("name",newID,e0.name)
 		xl.addElement("mrn",newID,e0.mrn)
