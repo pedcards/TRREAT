@@ -822,9 +822,10 @@ makeORU(wqid) {
 	buildHL7("OBR"
 		,{2:order.ordernum
 		, 3:order.accession
-		, 4:((isRemote) 
-			? "CVCAR602^Cardiac Device Check - Remote^IMGEAP" 
-			: "CVCAR601^Cardiac Device Check - In Clinic^IMGEAP")
+		;~ , 4:((isRemote) 
+			;~ ? "CVCAR602^Cardiac Device Check - Remote^IMGEAP" 
+			;~ : "CVCAR601^Cardiac Device Check - In Clinic^IMGEAP")
+		, 4:order.ordertype
 		, 7:order.date
 		, 16:order.prov "^^^^^^MSOW_ORG_ID"
 		, 25:"F"
@@ -837,7 +838,7 @@ makeORU(wqid) {
 	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" esc with HL7 "\E" esc
 	buildHL7("OBX"
 		,{2:"FT"
-		, 3:"ED1^PACEMAKER/ICD INTERROGATION"
+		, 3:"&GDT^PACEMAKER/ICD INTERROGATION"
 		, 5:rtfStr
 		, 11:"P"
 		, 14:hl7time})
