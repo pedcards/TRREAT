@@ -2589,15 +2589,9 @@ cleanspace(ByRef txt) {
 
 ObjHasValue(aObj, aValue, rx:="") {
 ; modified from http://www.autohotkey.com/board/topic/84006-ahk-l-containshasvalue-method/	
-	if (rx="med") {
-		med := true
-	}
     for key, val in aObj
 		if (rx) {
-			if (med) {													; if a med regex, preface with "i)" to make case insensitive search
-				val := "i)" val
-			}
-			if (aValue ~= val) {
+			if (val ~= aValue) {
 				return, key, Errorlevel := 0
 			}
 		} else {
