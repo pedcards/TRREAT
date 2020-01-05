@@ -38,16 +38,16 @@ user_sign := readIni("user_sign")
 docs := readIni("docs")
 
 eventLog(">>>>> Session started...")
-if !FileExist(reportDir) {
-	MsgBox % "Requires pending dir`n""" reportDir """"
+if !FileExist(dir.report) {
+	MsgBox % "Requires pending dir`n""" dir.report """"
 	ExitApp
 }
-if !FileExist(complDir) {
-	MsgBox % "Requires completed dir`n""" complDir """"
+if !FileExist(dir.compl) {
+	MsgBox % "Requires completed dir`n""" dir.compl """"
 	ExitApp
 }
-if !FileExist(chipDir) {
-	MsgBox % "Requires CHIPOTLE dir`n""" chipDir """"
+if !FileExist(dir.chip) {
+	MsgBox % "Requires CHIPOTLE dir`n""" dir.chip """"
 	ExitApp
 }
 
