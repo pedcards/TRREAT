@@ -3127,6 +3127,72 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	*/
 }
 
+readIni(section) {
+/*	Reads a set of variables
+	[section]					==	 		var1 := res1, var2 := res2
+	var1=res1
+	var2=res2
+	
+	[array]						==			array := ["ccc","bbb","aaa"]
+	=ccc
+	bbb
+	=aaa
+	
+	[objet]						==	 		objet := {aaa:10,bbb:27,ccc:31}
+	aaa:10
+	bbb:27
+	ccc:31
+*/
+	global
+	local x, i, key, val
+		, i_res := object()
+		, i_type := []
+		, i_lines := []
+	i_type.var := i_type.obj := i_type.arr := false
+	IniRead,x,includes\trreat.ini,%section%
+	Loop, parse, x, `n,`r																; analyze section struction
+	{
+		i := A_LoopField
+		if (i~="(?<!"")[=]")															; find = not preceded by "
+		{
+			if (i ~= "^=") {															; starts with "=" is an array list
+				i_type.arr := true
+			} else {																	; "aaa=123" is a var declaration
+				i_type.var := true
+			}
+		} else																			; does not contain a quoted =
+		{
+			if (i~="(?<!"")[:]") {														; find : not preceded by " is an object
+				i_type.obj := true
+			} else {																	; contains neither = nor : can be an array list
+				i_type.arr := true
+			}
+		}
+	}
+	if ((i_type.obj) + (i_type.arr) + (i_type.var)) > 1 {								; too many types, return error
+		return error
+	}
+	Loop, parse, x, `n,`r																; now loop through lines
+	{
+		i := A_LoopField
+		if (i_type.var) {
+			key := strX(i,"",1,0,"=",1,1)
+			val := strX(i,"=",1,1,"",0)
+			%key% := trim(val,"""")
+		}
+		if (i_type.obj) {
+			key := strX(i,"",1,0,":",1,1)
+			val := strX(i,":",1,1,"",0)
+			i_res[key] := trim(val,"""")
+		}
+		if (i_type.arr) {
+			i := RegExReplace(i,"^=")													; remove preceding =
+			i_res.push(trim(i,""""))
+		}
+	}
+	return i_res
+}
+
 #Include strx.ahk
 #Include xml.ahk
 #Include CMsgBox.ahk
