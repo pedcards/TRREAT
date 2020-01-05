@@ -36,6 +36,7 @@ worklist := dir.report "worklist.xml"
 user_parse := readIni("user_parse")
 user_sign := readIni("user_sign")
 docs := readIni("docs")
+parsedocs(docs)
 
 eventLog(">>>>> Session started...")
 if !FileExist(dir.report) {
@@ -61,8 +62,6 @@ MainLoop:
 	blk := Object()
 	blk2 := Object()
 	
-	docs := {"TC":"783118","JS":"343079","SS":"358945"
-			, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
 	if ObjHasKey(docs,substr(user,1,2)) {												; User is in docs[]
 		role := "Sign"																	; set role to "Sign"
 	} else {
@@ -3182,6 +3181,32 @@ readIni(section) {
 	}
 	return i_res
 }
+
+parsedocs(list) {
+/*	List = {XX:aaa^bbb^ccc^ddd, BB:eee^fff^ggg^hhh}
+	map = [last,first,npi,cumg]
+	
+	returns list = {
+					XX={last:aaa,first:bbb,npi:ccc,cumg:ddd}
+					BB={last:eee,first:fff,npi:ggg,cumg:hhh}
+					}
+*/	
+	map := ["nameL","nameF","NPI","CUMG"]
+	
+	for key,val in list
+	{
+		ele:=StrSplit(val,"^")
+		list[key] := {}
+		for key2,val2 in map
+		{
+			list[key,val2] := ele[key2]
+		}
+		list[key].hl7 := list[key].NPI "^" list[key].nameL "^" list[key].nameF
+		list[key].eml := list[key].nameF "." list[key].nameL
+	}
+	return list
+}
+
 
 #Include strx.ahk
 #Include xml.ahk
