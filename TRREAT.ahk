@@ -2591,8 +2591,11 @@ ObjHasValue(aObj, aValue, rx:="") {
 ; modified from http://www.autohotkey.com/board/topic/84006-ahk-l-containshasvalue-method/	
     for key, val in aObj
 		if (rx) {
-			if (val ~= aValue) {
+			if (val ~= aValue) {														; aObj contains set of regex strings
 				return, key, Errorlevel := 0
+			}
+			if (aValue ~= val) {
+				return, key, ErrorLevel := 0											; aValue contains a regex string
 			}
 		} else {
 			if (val = aValue) {
