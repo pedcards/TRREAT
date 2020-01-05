@@ -2695,14 +2695,14 @@ FetchDem:
 }
 
 scanOrders() {
-	global xl, hl7inDir, fldval, worklist
+	global xl, path, fldval, worklist
 	
 	xl := new XML(worklist)																; refresh worklist
 	if !IsObject(xl.selectSingleNode("/root/orders")) {
 		xl.addElement("orders","/root")
 	}
 	
-	Loop, files, % hl7InDir "*"															; Scan incoming folder for new orders and add to Orders node
+	Loop, files, % path.hl7in "*"															; Scan incoming folder for new orders and add to Orders node
 	{
 		e0 := {}
 		fileIn := A_LoopFileName
@@ -2715,18 +2715,18 @@ scanOrders() {
 		if IsObject(k:=xl.selectSingleNode(e0.orderNode)) {								; ordernum node exists
 			e0.nodeCtrlID := k.selectSingleNode("ctrlID").text
 			if (e0.CtrlID < e0.nodeCtrlID) {											; order CtrlID is older than existing, somehow
-				FileDelete, % hl7InDir fileIn
+				FileDelete, % path.hl7in fileIn
 				eventlog("Order msg " fileIn " is outdated.")
 				continue
 			}
 			if (e0.orderCtrl="CA") {													; CAncel an order
-				FileDelete, % hl7InDir fileIn											; delete this order message
-				FileDelete, % hl7InDir "*_" e0.UID "Z.hl7"								; and the previously processed hl7 file
+				FileDelete, % path.hl7in fileIn											; delete this order message
+				FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"								; and the previously processed hl7 file
 				removeNode(e0.orderNode)												; and the accompanying node
 				eventlog("Cancelled order " e0.order ".")
 				continue
 			}
-			FileDelete, % hl7InDir "*_" e0.UID "Z.hl7"									; delete previously processed hl7 file
+			FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"									; delete previously processed hl7 file
 			removeNode(e0.orderNode)													; and the accompanying node
 			eventlog("Cleared order " e0.order " node.")
 		}
@@ -2734,7 +2734,7 @@ scanOrders() {
 			e0.orderNode := "/root/orders/order[accession='" e0.accession "']"
 			k := xl.selectSingleNode(e0.orderNode)
 			e0.nodeUID := k.getAttribute("id")
-			FileDelete, % hl7InDir "*_" e0.nodeUID "Z.hl7"
+			FileDelete, % path.hl7in "*_" e0.nodeUID "Z.hl7"
 			removeNode(e0.orderNode)
 			eventlog("Removed node id " e0.nodeUID " for replacement.")
 		}
@@ -2761,7 +2761,7 @@ scanOrders() {
 			. e0.uid "Z.hl7"
 			
 		FileMove, %A_LoopFileFullPath%													; and rename ORM file
-			, % hl7InDir . fileOut
+			, % path.hl7in . fileOut
 		
 	}
 	xl.save(worklist)
