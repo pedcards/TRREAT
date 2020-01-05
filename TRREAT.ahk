@@ -76,7 +76,7 @@ MainLoop:
 	
 	if instr(role,"Sign") {
 		eventLog("SIGN module")
-		xl := new XML(worklist)									; otherwise load existing worklist
+		xl := new XML(worklist)															; load existing worklist
 		gosub signScan
 	}
 
@@ -482,7 +482,7 @@ ParseName(x) {
 parsePat:
 {
 	agc := A_GuiControl
-	Gui, ListView, %agc%
+	Gui, ListView, % agc
 	if !(fileNum := LV_GetNext()) {
 		return
 	}
@@ -678,7 +678,7 @@ SignRep:
 	
 	tmp_usr := substr(fileNam,1,2)
 	l_usr := substr(user,1,2)
-	if !(l_usr=stmp_usr) {														; first user doesn't match that on filename?
+	if !(l_usr=tmp_usr) {														; first user doesn't match that on filename?
 		MsgBox, 262196,
 			, % "Did you mean to open this report?`n`n"
 			. "Was originally assigned to " tmp_usr "."
@@ -3061,7 +3061,7 @@ ParseDate(x) {
 niceDate(x) {
 	if !(x)
 		return error
-	FormatTime, x, %x%, MM/dd/yyyy
+	FormatTime, x, % x, MM/dd/yyyy
 	return x
 }
 
@@ -3138,7 +3138,7 @@ readIni(section) {
 		, i_type := []
 		, i_lines := []
 	i_type.var := i_type.obj := i_type.arr := false
-	IniRead,x,includes\trreat.ini,%section%
+	IniRead,x,includes\trreat.ini,% section
 	Loop, parse, x, `n,`r																; analyze section struction
 	{
 		i := A_LoopField
