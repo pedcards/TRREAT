@@ -9,7 +9,7 @@ SetWorkingDir %A_ScriptDir%
 
 Progress,100,Checking paths...,TRREAT
 SplitPath, A_ScriptDir,,fileDir
-user := instr(A_UserName,"octe") ? "TC" : A_UserName
+user := instr(A_UserName,"octe") ? "tc" : A_UserName
 
 IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
