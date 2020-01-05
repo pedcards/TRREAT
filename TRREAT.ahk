@@ -24,19 +24,12 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 trreatDir:=dir.trreat
 chipDir:=dir.chip
 pdfDir:=dir.pdf
+hisDir:=dir.his
 
-binDir:=trreatDir "bin\"
-reportDir:=trreatDir "pending\"
-complDir:=trreatDir "completed\"
-paceartDir:=trreatDir "paceart\"
-hl7inDir:=trreatDir "incoming\"
-
-dir.bin:=dir.trreat "bin\"
-dir.report:=dir.trreat "pending\"
-dir.compl:=dir.trreat "completed\"
-dir.paceart:=dir.trreat "paceart\"
-dir.hl7in:=dir.trreat "incoming\"
-dir.outbound:=dir.trreat "outbound\"
+binDir		:= dir.bin		:= trreatDir "bin\"
+reportDir	:= dir.report	:= trreatDir "pending\"
+complDir	:= dir.compl	:= trreatDir "completed\"
+paceartDir	:= dir.paceart	:= trreatDir "paceart\"
 
 worklist := dir.report "worklist.xml"
 
