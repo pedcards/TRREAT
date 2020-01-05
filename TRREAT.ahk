@@ -62,12 +62,12 @@ MainLoop:
 	blk := Object()
 	blk2 := Object()
 	
-	if ObjHasKey(docs,substr(user,1,2)) {												; User is in docs[]
-		role := "Sign"																	; set role to "Sign"
+	if ObjHasValue(user_sign,user) {
+		role := "Sign"
 	} else {
 		role := "Parse"
 	}
-	if instr(user,"TC") {																; But if is TC
+	if (ObjHasValue(user_sign,user) && ObjHasValue(user_parse,user)) {
 		role := cMsgBox("Administrator"													; offer to either PARSE or SIGN
 			, "Enter ROLE:"
 			, "*&Parse PDFs|&Sign reports"
