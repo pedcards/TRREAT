@@ -8,48 +8,47 @@ SetWorkingDir %A_ScriptDir%
 #Include includes
 
 Progress,100,Checking paths...,TRREAT
-IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from development vs production directory
+SplitPath, A_ScriptDir,,fileDir
+user := instr(A_UserName,"octe") ? "tc" : A_UserName
+
+IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
-	trreatDir := ".\"
-	binDir := ".\bin\"
-	reportDir := ".\pending\"													; generated files pending signature
-	complDir := ".\completed\"													; archive signed files and original PDF files
-	paceartDir := ".\paceart\"													; PDF reports saved from PaceArt
-	chipDir := "..\CHIPOTLE\"													; CHIPOTLE files
-	hisDir := ".\3mhis\"
-	pdfDir := ".\USB\"
+	path:=readIni("devpaths")
+	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
-	binDir := trreatDir "bin\"
-	reportDir := trreatDir "pending\"
-	complDir := trreatDir "completed\"
-	paceartDir := trreatDir "paceart\"
-	chipDir := "\\childrens\files\HCChipotle\"
-	hisDir := "\\PPWHIS11\apps$\3mhisprd\SCRIPT\impunst\crd.imp\" 
-	pdfDir := ".\"
-	if (A_ComputerName~="EWCS") {												; EWCS=local, PPWC=Citrix
-		hisDir := trreatDir "spool\"											; send RTF to spool dir
-	}
+	path:=readIni("paths")
+	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
 
-worklist := reportDir "worklist.xml"
-user := A_UserName
-if instr(user,"octe") {
-	user:="TC"
-}
+;~ trreatDir:=path.trreat
+;~ chipDir:=path.chip
+;~ pdfDir:=path.pdf
+;~ hisDir:=path.his
+path.bin		:= path.trreat "bin\"
+path.report		:= path.trreat "pending\"
+path.compl		:= path.trreat "completed\"
+path.paceart	:= path.trreat "paceart\"
+
+worklist := path.report "worklist.xml"
+
+user_parse := readIni("user_parse")
+user_sign := readIni("user_sign")
+docs := readIni("docs")
+parsedocs(docs)
+
 eventLog(">>>>> Session started...")
-if !FileExist(reportDir) {
-	MsgBox % "Requires pending dir`n""" reportDir """"
+if !FileExist(path.report) {
+	MsgBox % "Requires pending dir`n""" path.report """"
 	ExitApp
 }
-if !FileExist(complDir) {
-	MsgBox % "Requires completed dir`n""" complDir """"
+if !FileExist(path.compl) {
+	MsgBox % "Requires completed dir`n""" path.compl """"
 	ExitApp
 }
-if !FileExist(chipDir) {
-	MsgBox % "Requires CHIPOTLE dir`n""" chipDir """"
+if !FileExist(path.chip) {
+	MsgBox % "Requires CHIPOTLE dir`n""" path.chip """"
 	ExitApp
 }
 
@@ -63,14 +62,12 @@ MainLoop:
 	blk := Object()
 	blk2 := Object()
 	
-	docs := {"TC":"783118","JS":"343079","SS":"358945"
-			, "TCeml":"terrence.chun","JSeml":"jack.salerno","SSeml":"stephen.seslar"}
-	if ObjHasKey(docs,substr(user,1,2)) {												; User is in docs[]
-		role := "Sign"																	; set role to "Sign"
+	if ObjHasValue(user_sign,user) {
+		role := "Sign"
 	} else {
 		role := "Parse"
 	}
-	if instr(user,"TC") {																; But if is TC
+	if (ObjHasValue(user_sign,user) && ObjHasValue(user_parse,user)) {
 		role := cMsgBox("Administrator"													; offer to either PARSE or SIGN
 			, "Enter ROLE:"
 			, "*&Parse PDFs|&Sign reports"
@@ -79,7 +76,7 @@ MainLoop:
 	
 	if instr(role,"Sign") {
 		eventLog("SIGN module")
-		xl := new XML(worklist)									; otherwise load existing worklist
+		xl := new XML(worklist)															; load existing worklist
 		gosub signScan
 	}
 
@@ -209,10 +206,10 @@ return
 readFilesMDT() {
 /*	Read root - usually MEDT files
 */
-	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
+	global path, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
 	progress, 40,Medtronic
-	Loop, files, % pdfDir "*.pdf"												; read all PDFs in root
+	Loop, files, % path.pdf "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
 		tmp.file := A_LoopFileName												; next file in PDFdir
@@ -220,14 +217,14 @@ readFilesMDT() {
 			continue
 		}
 		tmp.max := 1															; reset max k counter
-		Loop, files, % pdfDir strX(tmp.file,"",1,0,"_",0,1) "*.pdf"				; loop through all files with this "prefix"
+		Loop, files, % path.pdf strX(tmp.file,"",1,0,"_",0,1) "*.pdf"			; loop through all files with this "prefix"
 		{
 			i := A_LoopFileName													; i is filename in this inner loop
 			n := substr(i,instr(i,"_",,-1))										; n is string up to final _#
 			k := strX(i,"_",n,1,".",1)											; k is # between _ and .pdf
 			if (k > tmp.max) {													; greater than previous kmax?
 				j := substr(i,1,instr(i,"_",,-1)) (tmp.max) ".pdf"				; j is filename of previous kmax
-				FileMove, % pdfDir j, % pdfDir j ".old"							; rename it to j.pdf.old
+				FileMove, % path.pdf j, % path.pdf j ".old"							; rename it to j.pdf.old
 				tmp.max := k													; new kmax
 				tmp.file := i													; set patPDF as this new max (for when exits)
 				tmp.maxstr .= i "`n"											; add to string of files to subsequently ignore
@@ -239,7 +236,7 @@ readFilesMDT() {
 		tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
 		tmp.type := fnam.3
 		tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
-		tmp.file := pdfDir tmp.file
+		tmp.file := path.pdf tmp.file
 		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
@@ -272,10 +269,10 @@ readFilesMDT() {
 readFilesSJM() {
 /* Read SJM "PDFs" folder
 */
-	global pdfDir, xl, filenum, WQlvP, WQlv, HLVp, HLV
+	global path, xl, filenum, WQlvP, WQlv, HLVp, HLV
 	
 	progress, 60,St Jude/Abbott
-	sjmDir := pdfDir "PDFs\Live.combined"
+	sjmDir := path.pdf "PDFs\Live.combined"
 	Loop, Files, % sjmDir "\*", D
 	{
 		DateDir := A_LoopFileName
@@ -307,11 +304,11 @@ readFilesSJM() {
 				tmp.file := A_LoopFileName
 				tmp.full := A_LoopFileFullPath
 				tmp.dev := strx(tmp.file,"",1,0,"_",1,1)
-				Loop, Files, % pdfDir "*.log", F
+				Loop, Files, % path.pdf "*.log", F
 				{
 					k := RegExReplace(A_LoopFileName,".log")
 					if InStr(tmp.ser,k) {
-						tmp.meta := pdfDir k ".log"
+						tmp.meta := path.pdf k ".log"
 						eventlog("SJM: " tmp.file " metafile " k ".log found")
 					}
 				}
@@ -338,11 +335,11 @@ readFilesSJM() {
 readFilesBSCI() {
 /* Read BSCI "bsc" folder
 */
-	global xl, pdfDir, filenum, bscBnk, WQlvP, WQlv, HLVp, HLV
+	global xl, path, filenum, bscBnk, WQlvP, WQlv, HLVp, HLV
 	
 	progress, 80,Boston Scientific
 	tmp := []
-	bscDir := pdfDir "bsc\patientData\"
+	bscDir := path.pdf "bsc\patientData\"
 	loop, Files, % bscDir "*", D												; Loop through subdirs of patientData
 	{
 		patDir := bscDir A_LoopFileName
@@ -397,15 +394,15 @@ readFilesPaceart() {
 /*	read exported PDF reports from Paceart
 	in .\paceart\ folder
 */
-	global paceartDir, WQlvP, WQlv, HLVp, HLV
+	global path, WQlvP, WQlv, HLVp, HLV
 	
 	progress, 100, Paceart imports
 	
 	Gui, Listview, WQLVp
 	
-	loop, files, % paceartDir "*.xml"
+	loop, files, % path.paceart "*.xml"
 	{
-		fileIn := paceartDir A_LoopFileName
+		fileIn := path.paceart A_LoopFileName
 		dem := []
 		if (fileIn~="WQ.xml$") {
 			fnam := StrSplit(RegExReplace(A_LoopFileName,"WQ.xml$"),"_")
@@ -422,8 +419,8 @@ readFilesPaceart() {
 			if !(dem.nameL && dem.mrn && dem.devtype) {									; probably not a Paceart report
 				continue																; skip it
 			}
-			fileOut := paceartDir . dem.mrn "_" dem.nameL "_" dem.encdate "WQ.xml"
-			FileMove, %fileIn%, %fileOut%, 1
+			fileOut := path.paceart . dem.mrn "_" dem.nameL "_" dem.encdate "WQ.xml"
+			FileMove, % fileIn, % fileOut, 1
 			fileIn := fileOut
 		}
 		fileNum += 1																	; Add a row to the LV
@@ -485,7 +482,7 @@ ParseName(x) {
 parsePat:
 {
 	agc := A_GuiControl
-	Gui, ListView, %agc%
+	Gui, ListView, % agc
 	if !(fileNum := LV_GetNext()) {
 		return
 	}
@@ -559,12 +556,12 @@ fileLoop:
 	yp := maintxt := summBl := summ := sjmLog := ""
 	
 	if (fileIn~="i).pdf$") {
-		Run, %fileIn%
+		Run, % fileIn
 		SplitPath, fileIn,,,,fileOut
-		FileDelete, %binDir%%fileOut%.txt
-		RunWait, %binDir%pdftotext.exe -table "%fileIn%" "%binDir%%fileOut%.txt" , , hide
-		eventlog("pdftotext " fileIn " -> " binDir fileOut ".txt")
-		FileRead, maintxt, %binDir%%fileOut%.txt
+		FileDelete, % path.bin fileOut ".txt"
+		RunWait, % path.bin "pdftotext.exe -table """ fileIn """ """ path.bin fileOut ".txt""" , , hide
+		eventlog("pdftotext " fileIn " -> " path.bin fileOut ".txt")
+		FileRead, maintxt, % path.bin fileOut ".txt"
 		cleanlines(maintxt)
 	}
 	
@@ -594,14 +591,14 @@ fileLoop:
 
 SignScan:
 {
-	if !FileExist(hisDir) {
-		MsgBox % "Requires 3M HIS dir`n""" hisDir """"
+	if !FileExist(path.his) {
+		MsgBox % "Requires 3M HIS dir`n""" path.his """"
 		ExitApp
 	}
 	l_users := {}
 	l_numusers :=
 	l_tabs := 
-	Loop, %reportDir%*.rtf
+	Loop, % path.report "*.rtf"
 	{
 		fileNam := RegExReplace(A_LoopFileName,"i)\.rtf")						; fileNam is name only without extension, no path
 		fileIn := A_LoopFileFullPath											; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
@@ -681,7 +678,7 @@ SignRep:
 	
 	tmp_usr := substr(fileNam,1,2)
 	l_usr := substr(user,1,2)
-	if !(l_usr=stmp_usr) {														; first user doesn't match that on filename?
+	if !(l_usr=tmp_usr) {														; first user doesn't match that on filename?
 		MsgBox, 262196,
 			, % "Did you mean to open this report?`n`n"
 			. "Was originally assigned to " tmp_usr "."
@@ -706,20 +703,20 @@ SignActGui:
 	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO ESIG
 	Gui, Color, EEAA99
 	
-	if !FileExist(complDir fileNam ".pdf") {
+	if !FileExist(path.compl fileNam ".pdf") {
 		GuiControl, Act:Disable, S_PDF
 	}
 	Gui, Act:+AlwaysOnTop -MinimizeBox -MaximizeBox
 	Gui, Show
 	
-	RunWait, % "WordPad.exe """ reportDir fileNam ".rtf"""						; launch fileNam in WordPad
+	RunWait, % "WordPad.exe """ path.report fileNam ".rtf"""						; launch fileNam in WordPad
 	GuiControl, Act:Enable, S_rev
 Return
 }
 
 ActPDF:
 {
-	pdfNam := complDir fileNam ".pdf"
+	pdfNam := path.compl fileNam ".pdf"
 	run, % pdfNam
 	eventlog("PDF opened.")
 Return
@@ -736,15 +733,15 @@ ActSign:
 			. "Was originally assigned to " l_tab "."
 		IfMsgBox Yes															; signing someone else's report
 		{
-			FileRead, tmp, % reportDir fileNam ".rtf"							; read the generated RTF file
+			FileRead, tmp, % path.report fileNam ".rtf"							; read the generated RTF file
 			tmp := RegExReplace(tmp
 				, "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
 				, "Dictating Phy #\tab <8:" docs[l_usr] ">\par")				; with yours
 			tmp := RegExReplace(tmp
 				, "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
 				, "Attending Phy #\tab <9:" docs[l_usr] ">\par")
-			FileDelete, % reportDir fileNam ".rtf"
-			FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
+			FileDelete, % path.report fileNam ".rtf"
+			FileAppend, % tmp, % path.report fileNam ".rtf"						; generate a new RTF file
 			eventlog(l_tab " report signed by " l_usr ".") 
 		} else {
 			eventlog("Oops. Don't sign " l_tab "'s report.")
@@ -752,10 +749,10 @@ ActSign:
 		}
 	}
 	if !(isDevt) {
-		FileCopy, % reportDir fileNam ".rtf", % hisDir . fileNam . ".rtf"
+		FileCopy, % path.report fileNam ".rtf", % path.his . fileNam . ".rtf"
 		eventlog("Sent to HIS.")
 	}
-	FileMove, % reportDir fileNam ".rtf", % complDir fileNam ".rtf", 1			; move copy to "completed" folder
+	FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1		; move copy to "completed" folder
 	
 	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
 	xl.save(worklist)
@@ -2112,12 +2109,12 @@ PrintOut:
 			. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par `n"
 			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
 			. "CIS Encounter #\tab "	"<3: " format("{:012}",fldval["dev-Enc"]) " >\par `n"
-			. "Dictating Phy #\tab "	"<8:" docs[enc_MD] ">\par `n"
+			. "Dictating Phy #\tab "	"<8:" docs[enc_MD].cumg ">\par `n"
 			. "Dictation Date\tab "		"<13:" enc_dt.MDY ">\par `n"
 			. "Job #\tab "				"<15:e> \par `n"
 			. "Service Date\tab "		"<31:" enc_dt.MDY ">\par `n"
 			. "Surgery Date\tab "		"<6:" enc_dt.MDY "> \par `n"
-			. "Attending Phy #\tab "	"<9:" docs[enc_MD] "> \par `n"
+			. "Attending Phy #\tab "	"<9:" docs[enc_MD].cumg "> \par `n"
 			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
 			. "Job No Search\tab "		"<JobNoSearch:NONE> \par `n"
 			. "<EndOfHeader>\par `n"
@@ -2155,23 +2152,23 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	enc_dt.YMD
 	
-	FileDelete, %binDir%%fileOut%.rtf													; delete and generate RTF fileOut.rtf
-	FileAppend, %rtfOut%, %binDir%%fileOut%.rtf
+	FileDelete, % path.bin fileOut ".rtf"												; delete and generate RTF fileOut.rtf
+	FileAppend, % rtfOut, % path.bin fileOut ".rtf"
 	
-	eventlog("Print output generated in " binDir)
+	eventlog("Print output generated in " path.bin)
 	
-	RunWait, WordPad.exe "%binDir%%fileOut%.rtf"										; launch fileNam in WordPad
+	RunWait, % "WordPad.exe """ path.bin fileOut ".rtf"""								; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
-		eventlog("RTF, " ext " copied to " complDir)
+		eventlog("RTF, " ext " copied to " path.compl)
 		if (pat_meta) {
-			FileMove, %pat_meta%, %complDir%%fileOut%.meta, 1							; copy BNK to complete directory
-			eventlog("META copied to " complDir)
+			FileMove, % pat_meta, % path.compl fileOut ".meta", 1						; copy BNK to complete directory
+			eventlog("META copied to " path.compl)
 		}
 		if (ext=".xml") {
 			nBytes := Base64Dec( yp.selectSingleNode("//Encounter//Attachment//FileData").text, Bin )
-			ed_File := FileOpen( complDir . fileOut ".pdf", "w")
+			ed_File := FileOpen( path.compl fileOut ".pdf", "w")
 			ed_File.RawWrite(Bin, nBytes)
 			ed_File.Close
 			
@@ -2180,12 +2177,12 @@ PrintOut:
 					. """" encMRN """" ","												; CIS MRN
 					. """" fldval["dev-Enc"] """"										; Acct Num
 					. "`n"
-			FileAppend, %fileWQ%, %trreatDir%logs\trreatWQ.csv									; Add to logs\fileWQ list
-			FileCopy, %trreatDir%logs\trreatWQ.csv, %chipDir%trreatWQ-copy.csv, 1
+			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
+			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
 		}
-		FileMove, %binDir%%fileOut%.rtf, %reportDir%%fileOut%.rtf, 1					; move RTF to the final directory
-		FileCopy, %fileIn%, %complDir%%fileOut%%ext%, 1									; copy PDF to complete directory
-		fileDelete, %fileIn%
+		FileMove, % path.bin fileOut ".rtf", % path.report fileOut ".rtf", 1				; move RTF to the final directory
+		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
+		fileDelete, % fileIn
 		
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
@@ -2194,9 +2191,9 @@ PrintOut:
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("status",edID,"Pending")
 			xl.addElement("paceart",edID,printQ(is_remote,"True"))
-			xl.addElement("file",edID,complDir fileOut ext)
-			xl.addElement("meta",edID,(pat_meta) ? complDir fileOut ".meta" : "")
-			xl.addElement("report",edID,reportDir fileOut ".rtf")
+			xl.addElement("file",edID,path.compl fileOut ext)
+			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
+			xl.addElement("report",edID,path.report fileOut ".rtf")
 		xl.save(worklist)
 		eventlog("Record added to worklist.xml")
 		
@@ -2565,8 +2562,8 @@ FetchDem:
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
 	}
-	y := new XML(chipDir "currlist.xml")
-	yArch := new XML(chipDir "archlist.xml")
+	y := new XML(path.chip "currlist.xml")
+	yArch := new XML(path.chip "archlist.xml")
 	SNstring := "/root/id/data/device[@SN='" fldval["dev-IPG_SN"] "']"
 	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
 		dx := k.parentNode
@@ -2918,49 +2915,50 @@ RemoveNode(node) {
 	q.parentNode.removeChild(q)
 }
 
-WriteOut(path,node) {
+WriteOut(parentpath,node) {
 /* 
 	Prevents concurrent writing of y.MRN data. If someone is saving data (.currlock exists), script will wait
 	approx 6 secs and check every 50 msec whether the lock file is removed. When available it creates clones the y.MRN
 	node, loads a fresh currlist into Z (latest update), replaces the z.MRN node with the cloned y.MRN node,
 	saves it, then reloads this currlist into Y.
 */
-	global y, chipDir
+	global y, path
 	filecheck()
-	FileOpen(chipDir ".currlock", "W")													; Create lock file.
+	FileOpen(path.chip ".currlock", "W")										; Create lock file.
 	
-	locPath := y.selectSingleNode(path)
+	locPath := y.selectSingleNode(parentpath)
 	locNode := locPath.selectSingleNode(node)
 	clone := locNode.cloneNode(true)											; make copy of y.node
 	
 	z := y																		; temp Z will be most recent good currlist
 	
-	if !IsObject(z.selectSingleNode(path "/" node)) {
+	if !IsObject(z.selectSingleNode(parentpath "/" node)) {
 		If instr(node,"id[@mrn") {
 			z.addElement("id","root",{mrn: strX(node,"='",1,2,"']",1,2)})
 		} else {
-			z.addElement(node,path)
+			z.addElement(node,parentpath)
 		}
 	}
-	zPath := z.selectSingleNode(path)											; find same "node" in z
+	zPath := z.selectSingleNode(parentpath)										; find same "node" in z
 	zNode := zPath.selectSingleNode(node)
 	zPath.replaceChild(clone,zNode)												; replace existing zNode with node clone
 	
-	z.save(chipDir "currlist.xml")												; write z into currlist
-	eventlog(path "/" node " saved.","C")
+	z.save(path.chip "currlist.xml")											; write z into currlist
+	eventlog(parentpath "/" node " saved.","C")
 	eventlog("CHIPOTLE currlist updated.")
 	y := z																		; make Y match Z, don't need a file op
-	FileDelete, % chipDir ".currlock"											; release lock file.
+	FileDelete, % path.chip ".currlock"											; release lock file.
 	return
 }
 
 filecheck() {
-	if FileExist(chipDir ".currlock") {
+	global path
+	if FileExist(path.chip ".currlock") {
 		err=0
 		Progress, , Waiting to clear lock, File write queued...
 		loop 50 {
-			if (FileExist(chipDir ".currlock")) {
-				progress, %p%
+			if (FileExist(path.chip ".currlock")) {
+				progress, % p
 				Sleep 100
 				p += 2
 			} else {
@@ -2978,12 +2976,12 @@ filecheck() {
 }
 
 eventlog(event,ch:="") {
-	global user, trreatDir, chipDir
-	dir := (ch="C") ? chipDir "logs\" : trreatDir "logs\"
+	global user, path
+	logdir := (ch="C") ? path.chip "logs\" : path.trreat "logs\"
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
-	name := dir . sessdate . ".log"
+	name := logdir . sessdate . ".log"
 	txt := now " [" user "/" comp "] " event "`n"
 	filePrepend(txt,name)
 }
@@ -3064,7 +3062,7 @@ ParseDate(x) {
 niceDate(x) {
 	if !(x)
 		return error
-	FormatTime, x, %x%, MM/dd/yyyy
+	FormatTime, x, % x, MM/dd/yyyy
 	return x
 }
 
@@ -3118,6 +3116,100 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 		substr length is position of N (either pos1 or include ePat) less starting pos0
 	*/
 }
+
+readIni(section) {
+/*	Reads a set of variables
+	[section]					==	 		var1 := res1, var2 := res2
+	var1=res1
+	var2=res2
+	
+	[array]						==			array := ["ccc","bbb","aaa"]
+	=ccc
+	bbb
+	=aaa
+	
+	[objet]						==	 		objet := {aaa:10,bbb:27,ccc:31}
+	aaa:10
+	bbb:27
+	ccc:31
+*/
+	global
+	local x, i, key, val
+		, i_res := object()
+		, i_type := []
+		, i_lines := []
+	i_type.var := i_type.obj := i_type.arr := false
+	IniRead,x,includes\trreat.ini,% section
+	Loop, parse, x, `n,`r																; analyze section struction
+	{
+		i := A_LoopField
+		if (i~="(?<!"")[=]")															; find = not preceded by "
+		{
+			if (i ~= "^=") {															; starts with "=" is an array list
+				i_type.arr := true
+			} else {																	; "aaa=123" is a var declaration
+				i_type.var := true
+			}
+		} else																			; does not contain a quoted =
+		{
+			if (i~="(?<!"")[:]") {														; find : not preceded by " is an object
+				i_type.obj := true
+			} else {																	; contains neither = nor : can be an array list
+				i_type.arr := true
+			}
+		}
+	}
+	if ((i_type.obj) + (i_type.arr) + (i_type.var)) > 1 {								; too many types, return error
+		return error
+	}
+	Loop, parse, x, `n,`r																; now loop through lines
+	{
+		i := A_LoopField
+		if (i_type.var) {
+			key := strX(i,"",1,0,"=",1,1)
+			val := strX(i,"=",1,1,"",0)
+			%key% := trim(val,"""")
+		}
+		if (i_type.obj) {
+			key := strX(i,"",1,0,":",1,1)
+			val := strX(i,":",1,1,"",0)
+			i_res[key] := trim(val,"""")
+		}
+		if (i_type.arr) {
+			i := RegExReplace(i,"^=")													; remove preceding =
+			i_res.push(trim(i,""""))
+		}
+	}
+	return i_res
+}
+
+parsedocs(list) {
+/*	List = {XX:aaa^bbb^ccc^ddd, BB:eee^fff^ggg^hhh}
+	map = [last,first,npi,cumg]
+	
+	returns list = {
+					XX={last:aaa,first:bbb,npi:ccc,cumg:ddd}
+					BB={last:eee,first:fff,npi:ggg,cumg:hhh}
+					}
+*/	
+	map := ["nameL","nameF","NPI","CUMG"]
+	
+	for key,val in list
+	{
+		init := substr(key,1,2)
+		ele:=StrSplit(val,"^")
+		node := list[init] := {}
+		for key2,val2 in map
+		{
+			node[val2] := ele[key2]
+		}
+		node.hl7 := node.NPI "^" node.nameL "^" node.nameF
+		node.eml := node.nameF "." node.nameL
+		node.user := key
+	}
+	return list
+}
+
 
 #Include strx.ahk
 #Include xml.ahk
