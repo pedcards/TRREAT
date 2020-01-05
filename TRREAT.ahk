@@ -14,7 +14,7 @@ user := instr(A_UserName,"octe") ? "TC" : A_UserName
 IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
-	dir:=readIni("adminpaths")
+	dir:=readIni("devpaths")
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
