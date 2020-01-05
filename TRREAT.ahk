@@ -36,6 +36,9 @@ IfInString, A_WorkingDir, AhkProjects					; Change enviroment if run from develo
 
 worklist := reportDir "worklist.xml"
 user := A_UserName
+if instr(user,"octe") {
+	user:="TC"
+}
 eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
@@ -591,6 +594,10 @@ fileLoop:
 
 SignScan:
 {
+	if !FileExist(hisDir) {
+		MsgBox % "Requires 3M HIS dir`n""" hisDir """"
+		ExitApp
+	}
 	l_users := {}
 	l_numusers :=
 	l_tabs := 
@@ -671,6 +678,20 @@ SignRep:
 	LV_GetText(l_date,l_row,3)
 	
 	eventlog("Selected '" fileNam "'")
+	
+	tmp_usr := substr(fileNam,1,2)
+	l_usr := substr(user,1,2)
+	if !(l_usr=stmp_usr) {														; first user doesn't match that on filename?
+		MsgBox, 262196,
+			, % "Did you mean to open this report?`n`n"
+			. "Was originally assigned to " tmp_usr "."
+		IfMsgBox, No
+		{
+			eventlog("Oops. Didn't mean to open that.")
+			gosub SignScan
+			return
+		}
+	}
 	gosub SignActGUI
 	Gui, Sign:Show
 Return	
@@ -2523,16 +2544,13 @@ cleanspace(ByRef txt) {
 
 ObjHasValue(aObj, aValue, rx:="") {
 ; modified from http://www.autohotkey.com/board/topic/84006-ahk-l-containshasvalue-method/	
-	if (rx="med") {
-		med := true
-	}
     for key, val in aObj
 		if (rx) {
-			if (med) {													; if a med regex, preface with "i)" to make case insensitive search
-				val := "i)" val
+			if (val ~= aValue) {														; aObj contains set of regex strings
+				return, key, Errorlevel := 0
 			}
 			if (aValue ~= val) {
-				return, key, Errorlevel := 0
+				return, key, ErrorLevel := 0											; aValue contains a regex string
 			}
 		} else {
 			if (val = aValue) {
