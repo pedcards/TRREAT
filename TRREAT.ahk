@@ -44,9 +44,6 @@ user_parse := readIni("user_parse")
 user_sign := readIni("user_sign")
 docs := readIni("docs")
 
-initHL7()
-hl7DirMap := {}
-
 eventLog(">>>>> Session started...")
 if !FileExist(reportDir) {
 	MsgBox % "Requires pending dir`n""" reportDir """"
