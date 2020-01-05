@@ -3195,14 +3195,16 @@ parsedocs(list) {
 	
 	for key,val in list
 	{
+		init := substr(key,1,2)
 		ele:=StrSplit(val,"^")
-		list[key] := {}
+		node := list[init] := {}
 		for key2,val2 in map
 		{
-			list[key,val2] := ele[key2]
+			node[val2] := ele[key2]
 		}
-		list[key].hl7 := list[key].NPI "^" list[key].nameL "^" list[key].nameF
-		list[key].eml := list[key].nameF "." list[key].nameL
+		node.hl7 := node.NPI "^" node.nameL "^" node.nameF
+		node.eml := node.nameF "." node.nameL
+		node.user := key
 	}
 	return list
 }
