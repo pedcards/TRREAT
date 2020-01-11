@@ -1,7 +1,7 @@
 initHL7() {
 	global hl7, preventiceDDE, path
 	hl7 := Object()
-	inifile := path.trreat "includes\hl7.ini"
+	inifile := path.files "hl7.ini"
 	IniRead, s0, %inifile%																	; s0 = Section headers
 	loop, parse, s0, `n, `r																	; parse s0
 	{
