@@ -27,13 +27,14 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 ;~ pdfDir:=path.pdf
 ;~ hisDir:=path.his
 path.bin		:= path.trreat "bin\"
+path.files		:= path.trreat "files\"
 path.report		:= path.trreat "pending\"
 path.compl		:= path.trreat "completed\"
 path.paceart	:= path.trreat "paceart\"
 path.hl7in		:= path.trreat "incoming\"
 path.outbound	:= path.trreat "outbound\"
 
-worklist := path.report "worklist.xml"
+worklist := path.files "worklist.xml"
 
 user_parse := readIni("user_parse")
 user_sign := readIni("user_sign")
@@ -3435,7 +3436,7 @@ readIni(section) {
 		, i_type := []
 		, i_lines := []
 	i_type.var := i_type.obj := i_type.arr := false
-	IniRead,x,includes\trreat.ini,%section%
+	IniRead,x,.\files\trreat.ini,% section
 	Loop, parse, x, `n,`r																; analyze section struction
 	{
 		i := A_LoopField
