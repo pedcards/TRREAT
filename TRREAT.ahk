@@ -2091,7 +2091,7 @@ normLead(lead				; RA, RV, LV
 {
 	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol) {			; ALL parameters in pre or post are NULL
 		eventlog("Lead " lead " all null values!")
-		;~ return error																	; Do not populate leads[]
+		return error																	; Do not populate leads[]
 	}
 	global leads, fldval
 	leads[lead,"model"] 	:= model
