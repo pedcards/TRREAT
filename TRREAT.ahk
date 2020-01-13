@@ -25,7 +25,6 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 ;~ trreatDir:=path.trreat																; TRREAT root
 ;~ chipDir:=path.chip																	; CHIPOTLE root
 ;~ pdfDir:=path.pdf																		; USB root
-;~ hisDir:=path.his																		; 3M drop dir
 path.bin		:= path.trreat "bin\"													; helper exe files
 path.files		:= path.trreat "files\"													; ini and xml files
 path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
@@ -742,7 +741,7 @@ ActSign:
 	Gui, Act:Hide
 	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
 	l_usr := substr(user,1,2)
-	if !(l_usr=l_tab) {													; first 2 chars of Citrix login don't match l_tab?
+	if !(l_usr=l_tab) {															; first 2 chars of Citrix login don't match l_tab?
 		MsgBox, 52, 
 			, % "Sign this report?`n`n"
 			. "Was originally assigned to " l_tab "."
