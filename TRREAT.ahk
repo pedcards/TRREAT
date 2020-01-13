@@ -784,7 +784,7 @@ Return
 }
 
 makeORU(wqid) {
-	global xl, fldval, hl7out, docs, reportDir, filenam, isRemote
+	global xl, fldval, hl7out, docs, path, filenam, isRemote
 	dict:=readIni("EpicResult")
 	
 	order := readWQ(wqid)
@@ -827,7 +827,7 @@ makeORU(wqid) {
 		, 25:"F"
 		, 32:docs[A_UserName]})
 	
-	File := reportDir fileNam ".rtf"
+	File := path.report fileNam ".rtf"
 	FileRead, rtfStr, %File%
 	rtfStr := RegExReplace(rtfStr,"\R"," ")												; replace CRLF 
 	rtfStr := StrReplace(rtfStr,"|","\|")												; replace any "|" chars
