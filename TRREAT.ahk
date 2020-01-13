@@ -22,15 +22,15 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
 
-;~ trreatDir:=path.trreat
-;~ chipDir:=path.chip
-;~ pdfDir:=path.pdf
-;~ hisDir:=path.his
-path.bin		:= path.trreat "bin\"
-path.files		:= path.trreat "files\"
-path.report		:= path.trreat "pending\"
-path.compl		:= path.trreat "completed\"
-path.paceart	:= path.trreat "paceart\"
+;~ trreatDir:=path.trreat																; TRREAT root
+;~ chipDir:=path.chip																	; CHIPOTLE root
+;~ pdfDir:=path.pdf																		; USB root
+;~ hisDir:=path.his																		; 3M drop dir
+path.bin		:= path.trreat "bin\"													; helper exe files
+path.files		:= path.trreat "files\"													; ini and xml files
+path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
+path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
+path.paceart	:= path.trreat "paceart\"												; PaceArt import xml
 
 worklist := path.files "worklist.xml"
 
