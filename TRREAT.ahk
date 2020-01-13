@@ -766,11 +766,11 @@ ActSign:
 	makeORU(l_wqid)
 	
 	hl7out.file := "TRREAT_ORU_" A_now
-	FileAppend, % hl7out.msg, % dir.report hl7out.file							; create ORU file in pending
+	FileAppend, % hl7out.msg, % path.report hl7out.file							; create ORU file in pending
 	
-	FileCopy, % dir.report hl7out.file, % dir.outbound							; copy ORU to outbound folder for Ensemble
-	FileMove, % dir.report hl7out.file, % dir.compl fileNam ".hl7", 1			; move ORU to completed folder, renamed fileNam.hl7
-	FileMove, % dir.report fileNam ".rtf", % dir.compl fileNam ".rtf", 1		; move RTF from pending to completed folder
+	FileCopy, % path.report hl7out.file, % path.outbound						; copy ORU to outbound folder for Ensemble
+	FileMove, % path.report hl7out.file, % path.compl fileNam ".hl7", 1			; move ORU to completed folder, renamed fileNam.hl7
+	FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1		; move RTF from pending to completed folder
 	eventlog("ORU sent to outbound.")
 	
 	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
