@@ -2780,6 +2780,7 @@ matchOrder() {
 		nodeID := node.getAttribute("id")
 		nodeOrdernum := node.selectSingleNode("ordernum").text
 		nodeAccession := node.selectSingleNode("accession").text
+		nodeOrdertype := node.selectSingleNode("ordertype").text
 		fuzz := fuzzysearch(nodename,fldName)
 		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "`n"
 	}
@@ -2796,7 +2797,7 @@ matchOrder() {
 						,mrn:vals[4]
 						,ordernum:vals[5]
 						,accession:vals[6]}
-		keylist .= vals[3] "|"															; keylist just contains the name
+		keylist .= vals[3] "/ " nodeOrderType "|"										; keylist just contains the name
 	}
 	
 	Gui, dev:Destroy
@@ -2805,7 +2806,7 @@ matchOrder() {
 	Gui, Add, Text, w180 +Wrap
 		, % "Select the order that matches this patient:"
 	Gui, Font, s12
-	Gui, Add, ListBox, h100 vSelBox -vScroll AltSubmit gMatchOrderSelect, % keylist		; listbox and button
+	Gui, Add, ListBox, h100 w600 vSelBox -vScroll AltSubmit gMatchOrderSelect, % keylist	; listbox and button
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Submit					; disabled by default
 	Gui, Show, AutoSize, Select order
 	Gui, +AlwaysOnTop
@@ -2819,7 +2820,7 @@ matchOrder() {
 	
 	res := key[selbox]
 	fuzz := fuzzysearch(res.name , fldval["dev-name"]) 
-	if (fuzz > 0.20) {						; possible bad match
+	if (fuzz > 0.20) {																	; possible bad match
 		MsgBox, 262196
 			, Possible name mismatch
 			, % "Order name: " res.Name "`n"
