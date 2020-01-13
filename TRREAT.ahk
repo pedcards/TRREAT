@@ -22,15 +22,15 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
 
-;~ trreatDir:=path.trreat
-;~ chipDir:=path.chip
-;~ pdfDir:=path.pdf
-;~ hisDir:=path.his
-path.bin		:= path.trreat "bin\"
-path.files		:= path.trreat "files\"
-path.report		:= path.trreat "pending\"
-path.compl		:= path.trreat "completed\"
-path.paceart	:= path.trreat "paceart\"
+;~ trreatDir:=path.trreat																; TRREAT root
+;~ chipDir:=path.chip																	; CHIPOTLE root
+;~ pdfDir:=path.pdf																		; USB root
+;~ hisDir:=path.his																		; 3M drop dir
+path.bin		:= path.trreat "bin\"													; helper exe files
+path.files		:= path.trreat "files\"													; ini and xml files
+path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
+path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
+path.paceart	:= path.trreat "paceart\"												; PaceArt import xml
 path.hl7in		:= path.trreat "incoming\"
 path.outbound	:= path.trreat "outbound\"
 
@@ -357,22 +357,21 @@ readFilesBSCI() {
 		FileRead, bscBnk, % tmp.bnk												; need bscBnk for readBnk
 		td := trim(stregX(bscBnk,"Save Date:",1,1,"\R",1))						; get the DATE array
 		td := parseDate(RegExReplace(td," ","-"))
-		tmp.date := td.YMD
 		tmp.name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp.dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
 		tmp.ser := readBnk("SystemSerialNumber")
-		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		tmp.node := "id[@date='" td.YMD "'][@ser='" tmp.ser "']"
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
-			eventlog("BSC: Skipping " tmp.date "\" tmp.ser ", already in worklist.")
+			eventlog("BSC: Skipping " td.YMD "\" tmp.ser ", already in worklist.")
 			continue															; skip reprocessing in WORK list
 		}
 		if IsObject(xl.selectSingleNode("/root/done/ " tmp.node)) {
 			fileNum += 1
-			LV_Add("", tmp.date)
+			LV_Add("", td.YMD)
 			LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
-			eventlog("BSC: File " tmp.date "\" tmp.ser " already DONE.")
+			eventlog("BSC: File " td.YMD "\" tmp.ser " already DONE.")
 			continue
 		}
 		
@@ -383,7 +382,7 @@ readFilesBSCI() {
 		}
 		
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", tmp.date)										; col1 is date
+		LV_Add("", td.YMD)														; col1 is date
 		LV_Modify(fileNum,"col2", tmp.name)
 		LV_Modify(fileNum,"col3", tmp.dev)
 		LV_Modify(fileNum,"col4", tmp.ser)
@@ -1469,7 +1468,7 @@ SJM_old:
 	fldfill("dev-Name",pat_name)
 	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
-	fldfill("dev-IPG_impl",niceDate(fldval["dev-IPG_impl"]))
+	fldfill("dev-IPG_impl",parseDate(fldval["dev-IPG_impl"]).MDY)
 	
 	fields[1] := ["Lead Chamber","Lead Type"
 				, ".. Pulse Amplitude",".. Pulse Width","Lead Impedance","P/R Sensitivity",
@@ -3339,13 +3338,6 @@ ParseDate(x) {
 			, YMD:date.yyyy date.mm date.dd
 			, MDY:date.mm "/" date.dd "/" date.yyyy
 			, days:time.days, hr:time.hr, min:time.min, sec:time.sec, ampm:time.ampm, time:time.time}
-}
-
-niceDate(x) {
-	if !(x)
-		return error
-	FormatTime, x, %x%, MM/dd/yyyy
-	return x
 }
 
 year4dig(x) {
