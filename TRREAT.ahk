@@ -31,8 +31,8 @@ path.files		:= path.trreat "files\"													; ini and xml files
 path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
 path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
 path.paceart	:= path.trreat "paceart\"												; PaceArt import xml
-path.hl7in		:= path.trreat "incoming\"
-path.outbound	:= path.trreat "outbound\"
+path.hl7in		:= path.trreat "incoming\"												; inbound Epic ORM
+path.outbound	:= path.trreat "outbound\"												; outbound ORU for Ensemble
 
 worklist := path.files "worklist.xml"
 
