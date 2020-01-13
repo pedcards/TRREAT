@@ -10,6 +10,7 @@ SetWorkingDir %A_ScriptDir%
 Progress,100,Checking paths...,TRREAT
 SplitPath, A_ScriptDir,,fileDir
 user := instr(A_UserName,"octe") ? "tc" : A_UserName
+trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
 
 IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
@@ -3428,7 +3429,7 @@ readIni(section) {
 		, i_type := []
 		, i_lines := []
 	i_type.var := i_type.obj := i_type.arr := false
-	IniRead,x,.\files\trreat.ini,% section
+	IniRead,x,% trreatDir "files\trreat.ini",% section
 	Loop, parse, x, `n,`r																; analyze section struction
 	{
 		i := A_LoopField
