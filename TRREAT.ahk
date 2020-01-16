@@ -825,7 +825,7 @@ makeORU(wqid) {
 		, 4:order.ordertype
 		, 7:order.date
 		, 16:order.prov "^^^^^^MSOW_ORG_ID"
-		, 25:"F"
+		, 25:"P"
 		, 32:docs[A_UserName]})
 	
 	File := path.report fileNam ".rtf"
