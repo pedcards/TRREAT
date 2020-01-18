@@ -10,15 +10,16 @@ SetWorkingDir %A_ScriptDir%
 Progress,100,Checking paths...,TRREAT
 SplitPath, A_ScriptDir,,fileDir
 user := instr(A_UserName,"octe") ? "tc" : A_UserName
-trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
 
 IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
+	trreatDir := ".\"
 	path:=readIni("devpaths")
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
+	trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
