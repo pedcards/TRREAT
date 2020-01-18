@@ -3069,45 +3069,50 @@ ciedQuery() {
 	gui, cied:Add, Text, , Indication for device
 	gui, cied:Add, Edit, r3 w200 vInd, % fldval["indication"]
 	gui, cied:Add, Text
-	gui, cied:Add, Button, w100 h30, OK
+	gui, cied:Add, Text, , Checked or Interrogated?
+	gui, cied:Add, Radio, vtmp gciedProg, Checked/Reprogrammed
+	gui, cied:Add, Radio, gciedProg, Just Interrogated
+	gui, cied:Add, Text
+	gui, cied:Add, Button, vSelBut w100 h30 Disabled, OK
 	
-	gui, cied:Show, AutoSize
+	gui, cied:Show, AutoSize, CIED Query
 	
-	loop
-	{
-		if (tmpBtn) {
-			break
-		}
-	}
-	gui, cied:Submit, NoHide
+	WinWaitClose, CIED Query
+	
 	gui, cied:Destroy
-	
-	if (tmpBtn="x") {
+	return
+
+	ciedGuiEscape:
+	ciedGuiClose:
+	{
 		fetchQuit := true
+		gui, cied:Destroy
 		return
 	}
 	
-	fldval["dependent"] := (depY) 
-		? "Yes"
-			: (depN)
-		? "No"
-			: ""
-	fldval["indication"] := Ind
-	
-	return
-}
+	ciedProg:
+	{
+		GuiControl, Enable, selBut
+		return
+	}
 
-ciedGuiEscape:
-ciedGuiClose:
-{
-	tmpBtn := "x"
-	return
-}
-
-ciedButtonOK:
-{
-	tmpBtn := "ok"
-	return
+	ciedButtonOK:
+	{
+		fldval["dependent"] := (depY) 
+			? "Yes"
+				: (depN)
+			? "No"
+				: ""
+		
+		fldval["indication"] := Ind
+		
+		GuiControlGet, checked,, tmp
+		fldval["checked"] := (checked) ? true : false
+		
+		gui, cied:Submit
+		
+		return
+	}
 }
 
 checkEP:
