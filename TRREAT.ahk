@@ -3057,9 +3057,8 @@ makeReport:
 }
 
 ciedQuery() {
-	global fldval, tmpBtn, fetchQuit
+	global fldval, fetchQuit, selBut, tmp
 	static DepY, DepN, DepX, Ind
-	tmpBtn := ""
 	
 	gui, cied:Destroy
 	gui, cied:Add, Text, , Pacemaker dependent?
