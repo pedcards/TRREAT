@@ -2177,7 +2177,7 @@ PrintOut:
 		enc_type .= "Multi"
 	}
 	
-	rtfHdr := "{\rtf1\pard"																; removed {\fonttbl{\f0\fnil\fcharset0 Arial;}{\f2\fnil\fcharset2 Wingdings;}}
+	rtfHdr := "{\rtf1\pard"																; removed \fonttbl
 	
 	rtfFtr := "}"
 	
