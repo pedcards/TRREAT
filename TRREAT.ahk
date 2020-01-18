@@ -3018,7 +3018,7 @@ makeReport:
 	
 	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
 	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
-	ciedGUI()
+	ciedQuery()
 	if (fetchQuit) {
 		return
 	}
@@ -3056,7 +3056,7 @@ makeReport:
 	return
 }
 
-ciedGUI() {
+ciedQuery() {
 	global fldval, tmpBtn, fetchQuit
 	static DepY, DepN, DepX, Ind
 	tmpBtn := ""
