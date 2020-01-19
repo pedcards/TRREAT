@@ -2745,6 +2745,8 @@ scanOrders() {
 		xl.addElement("accountnum",newID,e0.accountnum)
 		xl.addElement("encnum",newID,e0.encnum)
 		xl.addElement("ordertype",newID,e0.ordertype)
+		xl.addElement("loctype",newID,e0.type)
+		xl.addElement("loc",newID,e0.loc)
 		xl.addElement("date",newID,e0.date)
 		xl.addElement("name",newID,e0.name)
 		xl.addElement("mrn",newID,e0.mrn)
