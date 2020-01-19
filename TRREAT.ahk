@@ -9,7 +9,6 @@ SetWorkingDir %A_ScriptDir%
 
 Progress,100,Checking paths...,TRREAT
 SplitPath, A_ScriptDir,,fileDir
-user := instr(A_UserName,"octe") ? "tc" : A_UserName
 
 IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
@@ -37,6 +36,7 @@ path.outbound	:= path.trreat "outbound\"												; outbound ORU for Ensemble
 
 worklist := path.files "worklist.xml"
 
+user := instr(A_UserName,"octe") ? "tchun1" : A_UserName
 user_parse := readIni("user_parse")
 user_sign := readIni("user_sign")
 docs := readIni("docs")
