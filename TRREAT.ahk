@@ -2187,6 +2187,9 @@ PrintOut:
 	} else if (ctLeads > 2) {
 		enc_type .= "Multi"
 	}
+/*	Need to add in other types here for leadless, ILR, and SICD
+	Might need to insert these for Epic testing
+*/
 	
 	rtfHdr := "{\rtf1\pard"																; removed \fonttbl
 	
