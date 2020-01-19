@@ -2784,8 +2784,9 @@ matchOrder() {
 		nodeOrdernum := node.selectSingleNode("ordernum").text
 		nodeAccession := node.selectSingleNode("accession").text
 		nodeOrdertype := node.selectSingleNode("ordertype").text
+		nodeLocation := node.selectSingleNode("loctype").text
 		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "`n"
+		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "|" nodeLocation "`n"
 	}
 	Sort, list																			; sort by fuzz level
 	Loop, parse, list, `n
@@ -2799,7 +2800,8 @@ matchOrder() {
 						,id:vals[2]
 						,mrn:vals[4]
 						,ordernum:vals[5]
-						,accession:vals[6]}
+						,accession:vals[6]
+						,location:vals[7]}
 		keylist .= vals[3] "/ " nodeOrderType "|"										; keylist just contains the name
 	}
 	
@@ -2809,12 +2811,14 @@ matchOrder() {
 	Gui, Add, Text, w180 +Wrap
 		, % "Select the order that matches this patient:"
 	Gui, Font, s12
-	Gui, Add, ListBox, h100 w600 vSelBox -vScroll AltSubmit gMatchOrderSelect, % keylist	; listbox and button
-	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Submit					; disabled by default
-	Gui, Show, AutoSize, Select order
+	Gui, Add, ListBox																	; listbox and button
+		, h100 w600 vSelBox -vScroll AltSubmit gMatchOrderSelect
+		, % keylist
+	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
+	Gui, Show, AutoSize, Active orders
 	Gui, +AlwaysOnTop
 	
-	winwaitclose, Select order
+	winwaitclose, Active orders
 	
 	if !(selbox) {																		; no selection
 		fetchQuit := true
@@ -2843,12 +2847,13 @@ matchOrder() {
 	fldval["dev-wqid"] := res.id
 	fldval["dev-ordernum"] := res.ordernum
 	fldval["dev-accession"] := res.accession
+	fldval["dev-location"] := res.location
 	
 	return 
 	
 	matchOrderSelect:
 	{
-		GuiControl, dev:Enable, Submit
+		GuiControl, dev:Enable, Select order
 		return
 	}
 	
