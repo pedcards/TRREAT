@@ -2152,12 +2152,23 @@ return
 PrintOut:
 {
 	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
+	if (fldval["dev-location"]="Outpatient") {
+		enc_type := "OUTPATIENT "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
 	if (is_remote) {
 		enc_type := "REMOTE "
 		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
 		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
-	} else {
-		enc_type := "IN-OFFICE "
+	} 
+	if (fldval["dev-location"]="Inpatient") {
+		enc_type := "INPATIENT "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	if (is_postop) {
+		enc_type := "POST-IMPLANT "
 		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
 		enc_trans :=																	; transmission date is null
 	}
