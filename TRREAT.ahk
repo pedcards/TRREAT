@@ -3479,7 +3479,7 @@ readIni(section) {
 	return i_res
 }
 
-parsedocs(list) {
+parsedocs(ByRef list) {
 /*	List = {XX:aaa^bbb^ccc^ddd, BB:eee^fff^ggg^hhh}
 	map = [last,first,npi,cumg]
 	
@@ -3501,7 +3501,9 @@ parsedocs(list) {
 		}
 		node.hl7 := node.NPI "^" node.nameL "^" node.nameF
 		node.eml := node.nameF "." node.nameL
+		node.abbrev := substr(node.nameF,1,1) ". " node.nameL
 		node.user := key
+		list.Delete(key)
 	}
 	return list
 }
