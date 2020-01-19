@@ -3019,6 +3019,7 @@ makeReport:
 	
 	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
 	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
+	fldval["primaryEP"] := y.selectSingleNode(MRNstring "/prov").getAttribute("EP")
 	ciedQuery()
 	if (fetchQuit) {
 		return
@@ -3050,16 +3051,19 @@ makeReport:
 	
 	gosub saveChip
 	
-	gosub checkEP
-	
 	gosub pmPrint
 	
 	return
 }
 
 ciedQuery() {
-	global fldval, fetchQuit, selBut, tmp
+/*	For setting values related to this patient/device
+	Values are saved in Chipotle currlist.xml
+*/
+	global fldval, fetchQuit, docs
 	static DepY, DepN, DepX, Ind
+		, DocGroup, tmpEP
+	tmpEP := []
 	
 	gui, cied:Destroy
 	gui, cied:Add, Text, , Pacemaker dependent?
@@ -3070,11 +3074,16 @@ ciedQuery() {
 	gui, cied:Add, Text, , Indication for device
 	gui, cied:Add, Edit, r3 w200 vInd, % fldval["indication"]
 	gui, cied:Add, Text
-	gui, cied:Add, Text, , Checked or Interrogated?
-	gui, cied:Add, Radio, vtmp gciedProg, Checked/Reprogrammed
-	gui, cied:Add, Radio, gciedProg, Just Interrogated
+	gui, cied:Add, Text, , Primary EP
+	gui, cied:Add, Radio, vDocGroup, Outside/None
+	for key,val in docs
+	{
+		tmpName := val.abbrev
+		tmpEP[A_Index+1]:=tmpName
+		gui, cied:Add, Radio, % "Checked" (tmpName=fldval.primaryEP), % tmpName
+	}
 	gui, cied:Add, Text
-	gui, cied:Add, Button, vSelBut w100 h30 Disabled, OK
+	gui, cied:Add, Button, w100 h30 , OK
 	
 	gui, cied:Show, AutoSize, CIED Query
 	
@@ -3087,18 +3096,14 @@ ciedQuery() {
 	ciedGuiClose:
 	{
 		fetchQuit := true
-		gui, cied:Destroy
+		gui, cied:Cancel
 		return
 	}
 	
-	ciedProg:
-	{
-		GuiControl, Enable, selBut
-		return
-	}
-
 	ciedButtonOK:
 	{
+		gui, cied:Submit
+		
 		fldval["dependent"] := (depY) 
 			? "Yes"
 				: (depN)
@@ -3107,52 +3112,55 @@ ciedQuery() {
 		
 		fldval["indication"] := Ind
 		
-		GuiControlGet, checked,, tmp
-		fldval["checked"] := (checked) ? true : false
-		
-		gui, cied:Submit
+		fldval["primaryEP"] := checkEP(tmpEP[docGroup])
 		
 		return
 	}
 }
 
-checkEP:
-{
+checkEP(name) {
 /*	Find responsible EP
 	and/or assign to someone
 */
+	global y, fldval, mrnString, enc_MD, docs
 	yID := y.selectSingleNode(MRNstring)
 	
-	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {						; Assign a primary EP in prov if it does not exist
-		eventlog("No primary EP found.")
-		yEP := cMsgBox("No associated EP found"
-						,"Assign a primary EP`nClose [x] if none"
-						,"T. Chun|J. Salerno|S. Seslar"
-						,"Q","")
-		if !(yEP=="Close") {
-			yID.selectSingleNode("prov").setAttribute("EP", yEP)
-			yID.selectSingleNode("prov").setAttribute("au", A_UserName)
+	if (name!=fldval.PrimaryEP) {
+		MsgBox, 262180, Change, % "Change primary EP `n"
+			. "from '" fldval.PrimaryEP "'`n"
+			. "to '" name "'?"
+		IfMsgBox, Yes
+		{
+			yID.selectSingleNode("prov").setAttribute("EP", name)
+			yID.selectSingleNode("prov").setAttribute("au", user)
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
-			eventlog(yEP " set as primary EP.")
-			eventlog(yEP " set as primary EP.","C")
+			eventlog(name " set as primary EP.")
+			eventlog(name " set as primary EP.","C")
 			writeOut(MRNstring,"prov")
-		} 
+		} else {
+			name := fldval.PrimaryEP
+		}
 	}
 	
-	enc_MD := cMsgBox("Assign report"
-					, "Send report to:`n`n(primary EP is " yEP ").`n`n"
+	for key,val in docs
+	{
+		
+		doclist .= (name=val.abbrev ? "*" : "") format("{:U}",key) " - " val.abbrev "|"
+	}
+	tmp := cMsgBox("Assign report"
+					, "Send report to:`n`n(primary EP is " name ").`n`n"
 					. "Close [x] window to skip this step."
-					, ((yEP="T. Chun") ? "*" : "") . "&TC|"
-					. ((yEP="J. Salerno") ? "*" : "") . "&JS|"
-					. ((yEP="S. Seslar") ? "*" : "") . "&SS"
+					, trim(doclist," |")
 					, "Q","")
 	
-	if (enc_MD="Close") {
+	if (tmp="Close") {
 		enc_MD := ""
+	} else {
+		enc_MD := substr(tmp,1,2)
 	}
 	eventlog("Report assigned to " enc_MD ".")
 	
-	Return
+	Return name
 }
 
 readWQ(idx) {
