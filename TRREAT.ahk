@@ -786,7 +786,7 @@ Return
 }
 
 makeORU(wqid) {
-	global xl, fldval, hl7out, docs, path, filenam, isRemote
+	global xl, fldval, hl7out, docs, path, filenam, isRemote, user
 	dict:=readIni("EpicResult")
 	
 	order := readWQ(wqid)
@@ -817,7 +817,7 @@ makeORU(wqid) {
 		,{19:order.encnum
 		, 50:wqid})
 	
-	tmpDoc := docs[substr(A_UserName,1,2)]
+	tmpDoc := docs[substr(user,1,2)]
 	buildHL7("OBR"
 		,{2:order.ordernum
 		, 3:order.accession
@@ -2956,7 +2956,7 @@ saveChip:
 	}
 	y.addElement("device"
 		,MRNstring "/data"
-		,{	au:A_UserName
+		,{	au:user
 		,	ed:A_Now
 		,	model:fldval["dev-IPG"]
 		,	SN:fldval["dev-IPG_SN"]} )
