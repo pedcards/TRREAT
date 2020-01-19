@@ -3004,6 +3004,10 @@ saveChip:
 makeReport:
 {
 	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
+	tmp := A_Now
+	tmp -= parsedate(fldval["dev-IPG_impl"]).YMD, Days
+	is_postop := (tmp<7) ? true : ""
+	
 	EncMRN := fldval["dev-MRN"]
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
