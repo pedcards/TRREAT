@@ -2739,7 +2739,6 @@ scanOrders() {
 		xl.addElement("ctrlID",newID,e0.CtrlID)
 		xl.addElement("accountnum",newID,e0.accountnum)
 		xl.addElement("encnum",newID,e0.encnum)
-		xl.addElement("ordertype",newID,e0.ordertype)
 		xl.addElement("loctype",newID,e0.type)
 		xl.addElement("loc",newID,e0.loc)
 		xl.addElement("date",newID,e0.date)
@@ -2981,6 +2980,7 @@ saveChip:
 	eventlog("Add new <device> node to currlist.")
 	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
+		xl.addElement("ordertype", orderString, enc_type)
 		xl.addElement("dependent", orderString, fldval["dependent"])
 		xl.addElement("model",	orderString, fldval["dev-IPG"])
 		xl.addElement("ser",	orderString, fldval["dev-IPG_SN"])
@@ -3284,10 +3284,6 @@ makeOBR() {
 	default:
 		enc_type .= "PM "
 	}
-	
-	;~ enc_type .= (instr(leads["RV","imp"],"Defib"))
-		;~ ? "ICD "
-		;~ : "PM "
 /*	Need to add in other types here for leadless, ILR, and SICD
 	Might need to insert these for Epic testing
 */
