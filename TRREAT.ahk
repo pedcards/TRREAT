@@ -856,6 +856,23 @@ makeORU(wqid) {
 	return
 }
 
+matchEAP(txt) {
+	
+	EAP := readIni("EpicOrderEAP")
+	top := 1.00
+	for key,val in EAP
+	{
+		str := RegExReplace(val,"^.*?\^")
+		fuzz := fuzzysearch(txt,str)
+		if (fuzz<top) {
+			top := fuzz
+			best := key
+		}
+	}
+	
+	return EAP[best]
+}
+
 Medtronic:
 {
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
