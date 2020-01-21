@@ -3137,7 +3137,25 @@ ciedCheck() {
 	
 	gui, cied2:Destroy
 	return
-
+	
+	cied2click:
+	{
+		gui, cied2:Submit, NoHide
+		rn := (RN_Yes or RN_No)
+		prg := (ChkPrg or ChkInt)
+		peri := (PeriOp_Y or PeriOp_N)
+		
+		valid := chk_peri 
+			? (rn && prg && peri)
+			: (rn && prg)
+			
+		if valid {
+			GuiControl, cied2:Enable, OK
+		}
+	}
+	
+	return
+	
 	cied2GuiEscape:
 	cied2GuiClose:
 	{
