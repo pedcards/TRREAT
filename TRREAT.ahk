@@ -3168,15 +3168,8 @@ ciedCheck() {
 	{
 		gui, cied2:Submit
 		
-		fldval["dependent"] := (depY) 
-			? "Yes"
-				: (depN)
-			? "No"
-				: ""
-		
-		fldval["indication"] := Ind
-		
-		fldval["primaryEP"] := checkEP(tmpEP[docGroup])
+		is_postop := (PeriOp_Y)
+		fldval["dev-CheckType"] := ChkPrg ? "PROGRAMMING" : "INTERROGATION"
 		
 		return
 	}
