@@ -2164,8 +2164,7 @@ PrintOut:
 			. strQ(is_remote
 				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
 			. "\b\ul ENCOUNTER TYPE\ul0\b0\par "
-			. "Device interrogation " enc_type "\par "
-			. "Performed by " tech ".\par\par "
+			. "Device interrogation " enc_type "\par\par "
 			. strQ(fldval["indication"]
 				, "\b\ul INDICATION FOR DEVICE\ul0\b0\par "
 				. "###\par\par ")
