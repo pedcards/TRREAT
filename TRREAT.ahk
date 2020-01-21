@@ -821,10 +821,7 @@ makeORU(wqid) {
 	buildHL7("OBR"
 		,{2:order.ordernum
 		, 3:order.accession
-		;~ , 4:((isRemote) 
-			;~ ? "CVCAR602^Cardiac Device Check - Remote^IMGEAP" 
-			;~ : "CVCAR601^Cardiac Device Check - In Clinic^IMGEAP")
-		, 4:order.ordertype
+		, 4:matchEAP(order.ordertype) "^IMGEAP"
 		, 7:order.date
 		, 16:order.prov "^^^^^^MSOW_ORG_ID"
 		, 25:"P"
