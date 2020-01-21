@@ -716,7 +716,7 @@ SignActGui:
 	Gui, Act:Default
 	Gui, Add, Text,, % fileNam
 	Gui, Add, Button, vS_PDF gActPDF, View PDF
-	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO ESIG
+	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO EPIC
 	Gui, Color, EEAA99
 	
 	if !FileExist(path.compl fileNam ".pdf") {
