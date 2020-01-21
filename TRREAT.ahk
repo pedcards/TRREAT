@@ -2711,12 +2711,12 @@ scanOrders() {
 			}
 			if (e0.orderCtrl="CA") {													; CAncel an order
 				FileDelete, % path.hl7in fileIn											; delete this order message
-				FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"								; and the previously processed hl7 file
+				FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"							; and the previously processed hl7 file
 				removeNode(e0.orderNode)												; and the accompanying node
 				eventlog("Cancelled order " e0.order ".")
 				continue
 			}
-			FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"									; delete previously processed hl7 file
+			FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"								; delete previously processed hl7 file
 			removeNode(e0.orderNode)													; and the accompanying node
 			eventlog("Cleared order " e0.order " node.")
 		}
