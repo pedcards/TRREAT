@@ -2151,45 +2151,10 @@ return
 
 PrintOut:
 {
-	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
-	if (fldval["dev-location"]="Outpatient") {
-		enc_type := "OUTPATIENT "
-		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
-		enc_trans :=																	; transmission date is null
-	}
-	if (is_remote) {
-		enc_type := "REMOTE "
-		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
-		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
-	} 
-	if (fldval["dev-location"]="Inpatient") {
-		enc_type := "INPATIENT "
-		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
-		enc_trans :=																	; transmission date is null
-	}
-	if (is_postop) {
-		enc_type := "POST-IMPLANT "
-		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
-		enc_trans :=																	; transmission date is null
-	}
-	
-	for k in leads
-	{
-		ctLeads := A_Index
-	}
-	enc_type .= (instr(leads["RV","imp"],"Defib"))
-		? "ICD "
-		: "PM "
-	if (ctLeads = 1) {
-		enc_type .= "Single"
-	} else if (ctLeads = 2) {
-		enc_type .= "Dual"
-	} else if (ctLeads > 2) {
-		enc_type .= "Multi"
-	}
-/*	Need to add in other types here for leadless, ILR, and SICD
-	Might need to insert these for Epic testing
-*/
+	summ := strQ(fldval["dev-summary"],"###"
+			, "This represents a normal " strQ(format("{:L}",fldval["dev-EncType"]),"### ") "device check. The patient denies any device related symptoms. "
+			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
+			. "Routine follow up per implantable device protocol. ")	
 	
 	rtfHdr := "{\rtf1\pard"																; removed \fonttbl
 	
@@ -3024,11 +2989,15 @@ saveChip:
 
 makeReport:
 {
-	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
-	tmp := A_Now
-	tmp -= parsedate(fldval["dev-IPG_impl"]).YMD, Days
-	is_postop := (tmp<7) ? true : ""
-	
+/*	Generate the elements of the report
+	- Pull Chipotle data if it exists (dependent, indication, primary EP), make necessary data node
+	- Validate data values
+	- Generate OBR_4 string, store in <order> for makeORU
+	- Device check performed by
+	- Normal text insert
+	- Save values to Chipotle and Orders
+	- Final print output and file routing
+*/
 	EncMRN := fldval["dev-MRN"]
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
@@ -3041,38 +3010,21 @@ makeReport:
 	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
 		y.addElement("data",MRNstring)
 	}
-	
 	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
 	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
 	fldval["primaryEP"] := y.selectSingleNode(MRNstring "/prov").getAttribute("EP")
+	
 	ciedQuery()
 	if (fetchQuit) {
 		return
 	}
 	
-	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
-	if (tech="Close") {
-		fetchQuit := true
+	ciedCheck()
+	if (fetchQuit) {
 		return
 	}
-	
-	summ := fldval["dev-summary"]
-	if (summ="") {
-		summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
-		if (summ="Close") {
-			fetchQuit := true
-			return
-		}
-		if instr(summ,"normal") {
-			summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
-				. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
-				. "Routine follow up per implantable device protocol. "
-			eventlog("Normal summary template selected.")
-		} else {
-			summ := ""
-			eventlog("Blank report summary.")
-		}
-	}
+
+	makeOBR()
 	
 	gosub saveChip
 	
@@ -3086,8 +3038,10 @@ ciedQuery() {
 	Values are saved in Chipotle currlist.xml
 */
 	global fldval, fetchQuit, docs
+	
 	static DepY, DepN, DepX, Ind
 		, DocGroup, tmpEP
+	
 	tmpEP := []
 	
 	gui, cied:Destroy
