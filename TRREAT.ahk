@@ -3100,35 +3100,36 @@ ciedCheck() {
 /*	For setting values related to the performance of this check
 	To aid in determining procedure performed
 */
-	global fldval, fetchQuit, docs, enc_type
-	static RN_Yes, RN_No, PeriOp_Y, PeriOp_N, ChkInt, ChkProg
+	global fldval, fetchQuit, enc_type, is_postop
+	static RN_Yes, RN_No, PeriOp_Y, PeriOp_N, chk_peri, ChkInt, ChkPrg
 	tmpEP := []
 	
 	gui, cied2:Destroy
 	gui, cied2:Font, w Bold Underline
 	gui, cied2:Add, Text, , Check performed by:
 	gui, cied2:Font, w Norm
-	gui, cied2:Add, Radio, vRN_Yes , Pacemaker RN
-	gui, cied2:Add, Radio, vRN_No  , Device rep
+	gui, cied2:Add, Radio, vRN_Yes gcied2click, Pacemaker RN
+	gui, cied2:Add, Radio, vRN_No  gcied2click, Device rep
 	gui, cied2:Add, Text
 	
 	if (fldval["dev-location"]="Inpatient") {											; Inpatient encounter, ask if peri-op check
+		chk_peri := true
 		gui, cied2:Font, w Bold Underline
 		gui, cied2:Add, Text, , Is this a peri-procedural check?
 		gui, cied2:Font, w Norm
-		gui, cied2:Add, Radio, vPeriOp_Y , Yes											; is_postop := true
-		gui, cied2:Add, Radio, vPeriOp_N , No											; is_postop := ""
+		gui, cied2:Add, Radio, vPeriOp_Y gcied2click, Yes								; is_postop := true
+		gui, cied2:Add, Radio, vPeriOp_N gcied2click, No								; is_postop := ""
 		gui, cied2:Add, Text
 	}
 	
 	gui, cied2:Font, w Bold Underline
 	gui, cied2:Add, Text, w400, % "Did this check involve checking thresholds, changing settings, or any other device programming?"
 	gui, cied2:Font, w Norm
-	gui, cied2:Add, Radio, vChkProg , Yes												; fldval["dev-CheckType"] := "Programming"
-	gui, cied2:Add, Radio, vChkInt  , No												; fldval["dev-CheckType"] := "Interrogation"
+	gui, cied2:Add, Radio, vChkPrg gcied2click, Yes									; fldval["dev-CheckType"] := "Programming"
+	gui, cied2:Add, Radio, vChkInt gcied2click, No										; fldval["dev-CheckType"] := "Interrogation"
 	gui, cied2:Add, Text
 	
-	gui, cied2:Add, Button, w100 h30 , OK
+	gui, cied2:Add, Button, w100 h30 Disabled, OK
 	
 	gui, cied2:Show, AutoSize, Device Check Info
 	
