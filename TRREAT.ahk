@@ -3188,6 +3188,78 @@ checkEP(name) {
 	Return name
 }
 
+makeOBR() {
+/*	Determine certain statuses
+	- is_remote = remote check
+	- is_postop = postop check
+	
+	- enc_dt = date object of device check date
+	- enc_trans = date object of transmit date from Paceart XML
+	
+	- enc_type = text of check type: OUTPATIENT, INPATIENT, POSTOP, REMOTE
+	- enc_type = append device type: PM, ICD, ILR, Leadless(?)
+	- enc_type = append lead type: Single, Dual, Multi
+*/
+	global fldval
+		, is_remote, is_postop
+		, enc_dt, enc_trans, enc_type
+	dict := readIni("EpicOrderEAP")
+	
+	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
+	
+	if (fldval["dev-location"]="Outpatient") {
+		enc_type := "IN-CLINIC "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	if (is_remote) {
+		enc_type := "REMOTE "
+		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
+		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
+	} 
+	if (fldval["dev-location"]="Inpatient") {
+		enc_type := "INPATIENT "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	if (is_postop) {
+		enc_type := "PERI-PROCEDURE "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	
+	Switch leads.rv.imp
+	{
+	Case "Defib":
+		enc_type .= "ICD "
+	default:
+		enc_type .= "PM "
+	}
+	
+	;~ enc_type .= (instr(leads["RV","imp"],"Defib"))
+		;~ ? "ICD "
+		;~ : "PM "
+/*	Need to add in other types here for leadless, ILR, and SICD
+	Might need to insert these for Epic testing
+*/
+	
+	for k in leads
+	{
+		ctLeads := A_Index
+	}
+	if (ctLeads = 1) {
+		enc_type .= "Single"
+	} else if (ctLeads = 2) {
+		enc_type .= "Dual"
+	} else if (ctLeads > 2) {
+		enc_type .= "BiV"
+	}
+	
+	enc_type .= fldval["dev-CheckType"]
+	
+	return
+}
+
 readWQ(idx) {
 	global xl
 	
