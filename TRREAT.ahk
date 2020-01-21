@@ -3232,7 +3232,7 @@ makeOBR() {
 	- enc_type = append device type: PM, ICD, ILR, Leadless(?)
 	- enc_type = append lead type: Single, Dual, Multi
 */
-	global fldval
+	global fldval, leads
 		, is_remote, is_postop
 		, enc_dt, enc_trans, enc_type
 	dict := readIni("EpicOrderEAP")
@@ -3280,11 +3280,11 @@ makeOBR() {
 		ctLeads := A_Index
 	}
 	if (ctLeads = 1) {
-		enc_type .= "Single"
+		enc_type .= "SINGLE "
 	} else if (ctLeads = 2) {
-		enc_type .= "Dual"
+		enc_type .= "DUAL "
 	} else if (ctLeads > 2) {
-		enc_type .= "BiV"
+		enc_type .= "BIV "
 	}
 	
 	enc_type .= fldval["dev-CheckType"]
