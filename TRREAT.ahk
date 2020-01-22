@@ -2977,7 +2977,7 @@ saveChip:
 	eventlog("Add new <device> node to currlist.")
 	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
-		xl.addElement("ordertype", orderString, enc_type)
+		xl.addElement("ordertype", orderString, matchEAP(enc_type))
 		xl.addElement("dependent", orderString, fldval["dependent"])
 		xl.addElement("model",	orderString, fldval["dev-IPG"])
 		xl.addElement("ser",	orderString, fldval["dev-IPG_SN"])
