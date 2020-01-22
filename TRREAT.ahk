@@ -3274,13 +3274,9 @@ makeOBR() {
 		enc_trans :=																	; transmission date is null
 	}
 	
-	Switch leads.rv.imp
-	{
-	Case "Defib":
-		enc_type .= "ICD "
-	default:
-		enc_type .= "PM "
-	}
+	enc_type .= (instr(leads["RV","imp"],"Defib"))
+		? "ICD "
+		: "PM "
 /*	Need to add in other types here for leadless, ILR, and SICD
 	Might need to insert these for Epic testing
 */
