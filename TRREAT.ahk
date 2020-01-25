@@ -2597,30 +2597,16 @@ parseORM() {
 /*	parse fldval values to values
 	including aliases for both WQlist and readWQorder
 */
-	global fldval, sitesLong
+	global fldval
 	
-	monType:=(tmp:=fldval.OBR_TestName)~="i)14 DAY" ? "BGM"
-		: tmp~="i)24 HOUR" ? "HOL"
-		: tmp~="i)RECORDER" ? "BGH"
-		: ""
-	encType:=(tmp:=fldval.PV1_PtClass)="O" ? "Outpatient" 
-		: tmp="I" ? "Inpatient"
-		: "Other"
-	switch encType
+	switch fldval.PV1_PtClass
 	{
-		case "Outpatient":
-			location := sitesLong[fldval.PV1_Location]
-		case "Inpatient":
-			location := fldval.PV1_Location
-		case "SurgCntr":
-			location := "SurgCntr"
-		case "Emergency":
-			location := "Emergency"
-		default:
-			location := encType
+	case "O":
+		encType:="Outpatient"
+	Case "I":
+		encType:="Inpatient"
 	}
-	;~ location := (encType="Outpatient") ? sitesLong[fldval.PV1_Location]
-		;~ : encType
+	location := encType
 	
 	return {date:parseDate(fldval.PV1_DateTime).YMD
 		, encDate:parseDate(fldval.PV1_DateTime).YMD
@@ -2630,8 +2616,6 @@ parseORM() {
 		, mrn:fldval.PID_PatMRN
 		, sex:fldval.PID_sex
 		, DOB:parseDate(fldval.PID_DOB).MDY
-		, monitor:monType
-		, mon:monType
 		, prov:strQ(fldval.ORC_ProvCode
 			, fldval.ORC_ProvCode "^" fldval.ORC_ProvNameL "^" fldval.ORC_ProvNameF
 			, fldval.OBR_ProviderCode "^" fldval.OBR_ProviderNameL "^" fldval.OBR_ProviderNameF)
