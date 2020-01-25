@@ -2170,7 +2170,7 @@ PrintOut:
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. ")	
 	
-	rtfHdr := "{\rtf1\pard"																; removed \fonttbl
+	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}\pard"
 	
 	rtfFtr := "}"
 	
