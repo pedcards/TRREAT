@@ -2758,8 +2758,9 @@ matchOrder() {
 		nodeAccession := node.selectSingleNode("accession").text
 		nodeOrdertype := node.selectSingleNode("ordertype").text
 		nodeLocation := node.selectSingleNode("loctype").text
+		nodeDate := node.selectSingleNode("date").text
 		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "|" nodeLocation "`n"
+		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "|" nodeLocation "|" nodeDate "`n"
 	}
 	Sort, list																			; sort by fuzz level
 	Loop, parse, list, `n
@@ -2774,8 +2775,9 @@ matchOrder() {
 						,mrn:vals[4]
 						,ordernum:vals[5]
 						,accession:vals[6]
-						,location:vals[7]}
-		keylist .= vals[3] "/ " nodeOrderType "|"										; keylist just contains the name
+						,location:vals[7]
+						,date:vals[8]}
+		keylist .= key[A_index].name " [" key[A_Index].ordernum " - " parseDate(key[A_Index].date).mdy "]|"
 	}
 	
 	Gui, dev:Destroy
