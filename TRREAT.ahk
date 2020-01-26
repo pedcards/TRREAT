@@ -765,6 +765,11 @@ ActSign:
 		}
 	}
 	
+	FileRead, tmp, % path.report fileNam ".rtf"
+	tmp := RegExReplace(tmp,"{\\\*\\annotation START.*?annotation END}")		; remove the temp text between annotations
+	FileDelete, % path.report fileNam ".rtf"
+	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
+	
 	makeORU(l_wqid)
 	
 	hl7out.file := "TRREAT_ORU_" A_now
@@ -2189,6 +2194,9 @@ PrintOut:
 			. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par "
 			. summ "\par\par "
 	
+	. "{\*\annotation START}"
+	. "\fs22\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par `n"
+	. "{\*\annotation END}"
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 	
 	nm := fldval["dev-Name"]
