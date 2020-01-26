@@ -750,6 +750,12 @@ ActSign:
 			return																; not signing this report, return
 		}
 	}
+	
+	FileRead, tmp, % path.report fileNam ".rtf"
+	tmp := RegExReplace(tmp,"{\\\*\\annotation START.*?annotation END}")		; remove the temp text between annotations
+	FileDelete, % path.report fileNam ".rtf"
+	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
+	
 	if !(isDevt) {
 		FileCopy, % path.report fileNam ".rtf", % path.his . fileNam . ".rtf"
 		eventlog("Sent to HIS.")
