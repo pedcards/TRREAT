@@ -747,19 +747,8 @@ ActSign:
 		MsgBox, 52, 
 			, % "Sign this report?`n`n"
 			. "Was originally assigned to " l_tab "."
-		IfMsgBox Yes															; signing someone else's report
+		IfMsgBox No																; signing someone else's report
 		{
-			;~ FileRead, tmp, % reportDir fileNam ".rtf"							; read the generated RTF file
-			;~ tmp := RegExReplace(tmp
-				;~ , "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
-				;~ , "Dictating Phy #\tab <8:" docs[l_usr] ">\par")				; with yours
-			;~ tmp := RegExReplace(tmp
-				;~ , "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
-				;~ , "Attending Phy #\tab <9:" docs[l_usr] ">\par")
-			;~ FileDelete, % reportDir fileNam ".rtf"
-			;~ FileAppend, % tmp, % reportDir fileNam ".rtf"						; generate a new RTF file
-			;~ eventlog(l_tab " report signed by " l_usr ".") 
-		} else {
 			eventlog("Oops. Don't sign " l_tab "'s report.")
 			return																; not signing this report, return
 		}
@@ -2175,11 +2164,15 @@ PrintOut:
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. ")	
 	
-	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}\pard"
+	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
 	
 	rtfFtr := "}"
 	
-	rtfBody := "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
+	rtfBody := "\pard"
+			. "{\*\annotation START}"
+			. "\fs22\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par "
+			. "{\*\annotation END}"
+			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
 				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
 			. "\b\ul ENCOUNTER TYPE\ul0\b0\par "
@@ -2194,9 +2187,6 @@ PrintOut:
 			. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par "
 			. summ "\par\par "
 	
-	. "{\*\annotation START}"
-	. "\fs22\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par `n"
-	. "{\*\annotation END}"
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 	
 	nm := fldval["dev-Name"]
