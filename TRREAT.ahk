@@ -2202,6 +2202,7 @@ PrintOut:
 		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
+			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
 			xl.addElement("status",edID,"Pending")
 			xl.addElement("paceart",edID,printQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
@@ -2859,8 +2860,8 @@ ciedGUI() {
 ciedCheckMicrony:
 {
 	if !(fldval["dev-IPG"]~="Microny") {
-	return
-}
+		return
+	}
 	tmpLead := fldval["dev-lead"]
 	tmpLDate := fldval["dev-leadimpl"]
 	gui, cied:Add, Text, , Pacing lead
