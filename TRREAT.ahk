@@ -2847,6 +2847,15 @@ ciedGUI() {
 			: ""
 	fldval["indication"] := Ind
 	
+	if (tmpLead) {
+		tmp:=instr(fldval["leads-chamber"],"V") ? "RV" : "RA"
+		leads[tmp].model := fldval["dev-lead"] := fldval["dev-RVlead"] := tmpLead
+		leads[tmp].date := fldval["dev-leadimpl"] := fldval["dev-RVlead_impl"] := tmpLDate
+	}
+	
+	return
+}
+
 ciedCheckMicrony:
 {
 	if !(fldval["dev-IPG"]~="Microny") {
