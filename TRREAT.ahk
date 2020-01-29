@@ -3042,14 +3042,26 @@ ciedQuery() {
 /*	For setting values related to this patient/device
 	Values are saved in Chipotle currlist.xml
 */
-	global fldval, fetchQuit, docs
-	
+	global fldval, leads, fetchQuit, docs
+		, tmpLead, tmpLDate
 	static DepY, DepN, DepX, Ind
 		, DocGroup, tmpEP
+	tmpLead := ""
+	tmpLDate := ""
 	
 	tmpEP := []
 	
 	gui, cied:Destroy
+	
+	if (fldval["dev-IPG"]~="Microny") {
+		tmpLead := fldval["dev-lead"]
+		tmpLDate := fldval["dev-leadimpl"]
+		gui, cied:Add, Text, , Pacing lead
+		gui, cied:Add, Edit, w200 vtmpLead, % tmpLead
+		gui, cied:Add, Text, , Lead implant date
+		gui, cied:Add, Edit, w200 vtmpLDate, % tmpLDate
+		gui, cied:Add, Text
+	}
 	gui, cied:Add, Text, , Pacemaker dependent?
 	gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
 	gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
@@ -3098,6 +3110,12 @@ ciedQuery() {
 		
 		fldval["primaryEP"] := checkEP(tmpEP[docGroup])
 		
+		if (tmpLead) {
+			tmp:=instr(fldval["leads-chamber"],"V") ? "RV" : "RA"
+			leads[tmp].model := fldval["dev-lead"] := fldval["dev-RVlead"] := tmpLead
+			leads[tmp].date := fldval["dev-leadimpl"] := fldval["dev-RVlead_impl"] := tmpLDate
+		}
+		
 		return
 	}
 }
@@ -3131,7 +3149,7 @@ ciedCheck() {
 	gui, cied2:Font, w Bold Underline
 	gui, cied2:Add, Text, w400, % "Did this check involve checking thresholds, changing settings, or any other device programming?"
 	gui, cied2:Font, w Norm
-	gui, cied2:Add, Radio, vChkPrg gcied2click, Yes									; fldval["dev-CheckType"] := "Programming"
+	gui, cied2:Add, Radio, vChkPrg gcied2click, Yes										; fldval["dev-CheckType"] := "Programming"
 	gui, cied2:Add, Radio, vChkInt gcied2click, No										; fldval["dev-CheckType"] := "Interrogation"
 	gui, cied2:Add, Text
 	
@@ -3142,6 +3160,7 @@ ciedCheck() {
 	WinWaitClose, Device Check Info
 	
 	gui, cied2:Destroy
+	
 	return
 	
 	cied2click:
@@ -3158,9 +3177,8 @@ ciedCheck() {
 		if valid {
 			GuiControl, cied2:Enable, OK
 		}
+		return
 	}
-	
-	return
 	
 	cied2GuiEscape:
 	cied2GuiClose:
