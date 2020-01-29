@@ -1405,7 +1405,7 @@ SJM_old:
 	
 	fields[1] := ["Lead Chamber","Lead Type"
 				, ".. Pulse Amplitude",".. Pulse Width","Lead Impedance","P/R Sensitivity",
-				, "Vario Capture Threshold","Test Pulse Width","E/R Sensitivity"]
+				, "Vario Capture Threshold","Test Pulse Width","P/R Signal"]
 	labels[1] := ["Chamber","Type"
 				, "Pace_Amp","Pace_PW","Imped","Sensitivity"
 				, "Thr_Amp","Thr_PW","Thr_Sens"]
