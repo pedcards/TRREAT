@@ -2066,9 +2066,12 @@ pmPrint:
 	. "\par\par "
 	. "\b\ul LEAD INFORMATION\ul0\b0\par "
 	
-	for k in leads
+	for k,v in ["RA","RV","LV"]
 	{
-		printLead(k)
+		if !isobject(leads[v]) {
+			continue
+		}
+		printLead(v)
 	}
 	
 	printEvents()
