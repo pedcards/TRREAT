@@ -1492,6 +1492,10 @@ SJM_old:
 	labels[1] := ["Mode","LRL","USR"]
 	sjmVals(1,"par")
 	
+	tmp := xl.selectSingleNode("//id[@ser='" pat_ser "']/lead")
+	fldval["dev-lead"] := fldval["dev-RVlead"] := tmp.text
+	fldval["dev-leadimpl"] := fldval["dev-RVlead_impl"] := tmp.getAttribute("date")
+	
 	normLead("R" (InStr(fldval["leads-Chamber"],"V")?"V":"A")
 		,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-Imped"]
 		,printQ(fldval["leads-Thr_Amp"],"###" printQ(fldval["leads-Thr_PW"]," @ ###"))
