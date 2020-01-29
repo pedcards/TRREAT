@@ -2241,6 +2241,7 @@ PrintOut:
 			xl.addElement("wqid",edID,fldval["dev-wqid"])
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
+			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
 			xl.addElement("status",edID,"Pending")
 			xl.addElement("paceart",edID,printQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
