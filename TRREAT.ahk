@@ -2807,11 +2807,13 @@ makeReport:
 }
 
 ciedGUI() {
-	global fldval, tmpBtn, fetchQuit
+	global fldval, leads, fetchQuit, tmpBtn, tmpLead, tmpLDate
 	static DepY, DepN, DepX, Ind
 	tmpBtn := ""
+	tmpLead := ""
 	
 	gui, cied:Destroy
+	gosub ciedCheckMicrony
 	gui, cied:Add, Text, , Pacemaker dependent?
 	gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
 	gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
@@ -2844,6 +2846,19 @@ ciedGUI() {
 		? "No"
 			: ""
 	fldval["indication"] := Ind
+	
+ciedCheckMicrony:
+{
+	if !(fldval["dev-IPG"]~="Microny") {
+	return
+}
+	tmpLead := fldval["dev-lead"]
+	tmpLDate := fldval["dev-leadimpl"]
+	gui, cied:Add, Text, , Pacing lead
+	gui, cied:Add, Edit, w200 vtmpLead, % tmpLead
+	gui, cied:Add, Text, , Lead implant date
+	gui, cied:Add, Edit, w200 vtmpLDate, % tmpLDate
+	gui, cied:Add, Text
 	
 	return
 }
