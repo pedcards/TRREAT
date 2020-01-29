@@ -2087,7 +2087,7 @@ printQ(var1,txt,null:="") {
 	return (var1="") ? null : RegExReplace(txt,"###",var1)
 }
 
-normLead(lead				; RA, RV, LV
+normLead(lead				; RA, RV, LV 												) {
 		,model				; Model name/ser
 		,date				; Date implanted
 		,P_imp				; Pacing impedance
