@@ -1418,8 +1418,8 @@ bsciZoomView:
 
 	ctrB := stregX(ctr,"Brady Counters",1,0,"$",0)
 	if (ctr~="(A Paced)|(V Paced)") {
-		fields[1] := ["% A Paced","% V Paced"]
-		labels[1] := ["AP","VP"]
+		fields[1] := ["A Paced","\R","V Paced","\R"]
+		labels[1] := ["AP","null","VP","null"]
 	} else {
 		fields[1] := ["% Paced"]
 		labels[1] := [substr(fldval["par-Mode"],1,1) "P"]
@@ -1827,6 +1827,9 @@ fldfill(var,val) {
 	
 	if (val=="") {																; val is null
 		return																	; do nothing
+	}
+	if (val=="N/R") {
+		val := ""
 	}
 	
 	fldval[var] := trim(val," `t`r`n")											; set var as val
