@@ -1416,15 +1416,15 @@ bsciZoomView:
 	labels[1] := ["VHR","VTNS","V_Paced","V_Shocked","V_Aborted","AHR"]
 	scanParams(ctrT,1,"event",1)
 
-	ctrB := stregX(ctr,"Brady Counters",1,0,"$",0)
+	ctrB := stregX(ctr,"Brady Counters",1,0,"Page \d+ of",0)
 	if (ctr~="(A Paced)|(V Paced)") {
-		fields[1] := ["A Paced","\R","V Paced","\R"]
-		labels[1] := ["AP","null","VP","null"]
+		fields[1] := ["Since Last Reset-% A Paced","Since Last Reset-% V Paced"]
+		labels[1] := ["AP","VP"]
 	} else {
 		fields[1] := ["% Paced"]
 		labels[1] := [substr(fldval["par-Mode"],1,1) "P"]
 	}
-	scanParams(ctrB,1,"dev",1)
+	scanParams(parseTable(ctrB),1,"dev",1)
 	
 	normLead("RA"
 			,fldval["dev-Alead"],fldval["dev-Alead_impl"]
@@ -1960,9 +1960,9 @@ scanParams(txt,blk,pre:="par",rx:="") {
 		i := A_LoopField "  "
 		set := trim(strX(i,"",1,0,"  ",1,2)," :")								; Get leftmost column to first "  "
 		val := objHasValue(fields[blk],set,rx)
-		;~ if !(val) {
-			;~ continue
-		;~ }
+		if (val<1) {
+			continue
+		}
 		
 		RegExMatch(i															; Add "  " to end of scan string
 				,"O)" colstr													; Search "  text  " as each column 
@@ -2586,7 +2586,10 @@ cleanspace(ByRef txt) {
 
 ObjHasValue(aObj, aValue, rx:="") {
 ; modified from http://www.autohotkey.com/board/topic/84006-ahk-l-containshasvalue-method/	
-    for key, val in aObj
+    if (aValue="") {
+		return, false, errorlevel := 1
+	}
+	for key, val in aObj
 		if (rx) {
 			if (val ~= aValue) {														; aObj contains set of regex strings
 				return, key, Errorlevel := 0
