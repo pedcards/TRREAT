@@ -3334,7 +3334,7 @@ makeOBR() {
 			enc_type .= "BIV "
 		}
 	} 
-		
+	
 	enc_type .= fldval["dev-CheckType"]
 	
 	return
