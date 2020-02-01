@@ -511,6 +511,8 @@ parsePat:
 	pat_meta:=
 	pat_report:=
 	is_remote:=
+	is_remoteAlert:=
+	is_postop:=
 	LV_GetText(pat_date,fileNum,1)
 	LV_GetText(pat_name,fileNum,2)
 	LV_GetText(pat_dev,fileNum,3)
@@ -3130,8 +3132,11 @@ ciedCheck() {
 /*	For setting values related to the performance of this check
 	To aid in determining procedure performed
 */
-	global fldval, fetchQuit, enc_type, is_postop
-	static RN_Yes, RN_No, PeriOp_Y, PeriOp_N, chk_peri, ChkInt, ChkPrg
+	global fldval, fetchQuit, enc_type, is_postop, is_remote, is_remoteAlert
+	static RN_Yes, RN_No
+		, PeriOp_Y, PeriOp_N, chk_peri
+		, RemoteAlert_Y, RemoteAlert_N
+		, ChkInt, ChkPrg
 	tmpEP := []
 	
 	gui, cied2:Destroy
@@ -3151,13 +3156,22 @@ ciedCheck() {
 		gui, cied2:Add, Radio, vPeriOp_N gcied2click, No								; is_postop := ""
 		gui, cied2:Add, Text
 	}
-	
-	gui, cied2:Font, w Bold Underline
-	gui, cied2:Add, Text, w400, % "Did this check involve checking thresholds, changing settings, or any other device programming?"
-	gui, cied2:Font, w Norm
-	gui, cied2:Add, Radio, vChkPrg gcied2click, Yes										; fldval["dev-CheckType"] := "Programming"
-	gui, cied2:Add, Radio, vChkInt gcied2click, No										; fldval["dev-CheckType"] := "Interrogation"
-	gui, cied2:Add, Text
+	if (fldval["dev-EncType"]="REMOTE") {												; Inpatient encounter, ask if peri-op check
+		is_remote := true
+		gui, cied2:Font, w Bold Underline
+		gui, cied2:Add, Text, , Was this a non-scheduled remote alert?
+		gui, cied2:Font, w Norm
+		gui, cied2:Add, Radio, vRemoteAlert_Y gcied2click, Yes							; is_remoteAlert := true
+		gui, cied2:Add, Radio, vRemoteAlert_N gcied2click, No							; is_remoteAlert := ""
+		gui, cied2:Add, Text
+	} else {
+		gui, cied2:Font, w Bold Underline
+		gui, cied2:Add, Text, w400, % "Did this check involve checking thresholds, changing settings, or any other device programming?"
+		gui, cied2:Font, w Norm
+		gui, cied2:Add, Radio, vChkPrg gcied2click, Yes										; fldval["dev-CheckType"] := "Programming"
+		gui, cied2:Add, Radio, vChkInt gcied2click, No										; fldval["dev-CheckType"] := "Interrogation"
+		gui, cied2:Add, Text
+	}
 	
 	gui, cied2:Add, Button, w100 h30 Disabled, OK
 	
@@ -3175,10 +3189,20 @@ ciedCheck() {
 		rn := (RN_Yes or RN_No)
 		prg := (ChkPrg or ChkInt)
 		peri := (PeriOp_Y or PeriOp_N)
+		alert := (RemoteAlert_Y or RemoteAlert_N)
 		
-		valid := chk_peri 
-			? (rn && prg && peri)
-			: (rn && prg)
+
+		if (chk_peri) {
+			valid := rn && (prg && peri)
+		} else {
+			valid := (rn && prg)
+		}
+		if (is_remote) {
+				valid := (alert)
+		}
+		;~ valid := rn && (chk_peri 
+			;~ ? (rn && prg && peri)
+			;~ : (rn && prg)
 			
 		if valid {
 			GuiControl, cied2:Enable, OK
@@ -3199,6 +3223,7 @@ ciedCheck() {
 		gui, cied2:Submit
 		
 		is_postop := (PeriOp_Y)
+		is_remoteAlert := (RemoteAlert_Y)
 		fldval["dev-CheckType"] := ChkPrg ? "PROGRAMMING" : "INTERROGATION"
 		
 		return
@@ -3263,11 +3288,9 @@ makeOBR() {
 	- enc_type = append lead type: Single, Dual, Multi
 */
 	global fldval, leads
-		, is_remote, is_postop
+		, is_remote, is_remoteAlert, is_postop
 		, enc_dt, enc_trans, enc_type
 	dict := readIni("EpicOrderEAP")
-	
-	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
 	
 	if (fldval["dev-location"]="Outpatient") {
 		enc_type := "IN-CLINIC "
@@ -3278,6 +3301,8 @@ makeOBR() {
 		enc_type := "REMOTE "
 		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
 		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
+		enc_type .= (is_remoteAlert) ? "ALERT " : ""									; include if remote alert
+		fldval["dev-CheckType"] := ""
 	} 
 	if (fldval["dev-location"]="Inpatient") {
 		enc_type := "INPATIENT "
