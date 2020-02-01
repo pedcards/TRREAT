@@ -3183,14 +3183,13 @@ ciedCheck() {
 		peri := (PeriOp_Y or PeriOp_N)
 		alert := (RemoteAlert_Y or RemoteAlert_N)
 		
-
-		if (chk_peri) {
-			valid := rn && (prg && peri)
+		if (chk_peri) {																	; PeriOp
+			valid := (prg && peri)
 		} else {
-			valid := (rn && prg)
+			valid := (prg)																; Inpt not PeriOp, all outpt
 		}
-		if (is_remote) {
-				valid := (alert)
+		if (is_remote) {																; Remote
+			valid := (alert)
 		}
 			
 		if valid {
