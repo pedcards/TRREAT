@@ -3293,7 +3293,7 @@ makeOBR() {
 	dict := readIni("EpicOrderEAP")
 	
 	if (fldval["dev-location"]="Outpatient") {
-		enc_type := "IN-CLINIC "
+		enc_type := "OUTPT "
 		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
 		enc_trans :=																	; transmission date is null
 	}
@@ -3305,7 +3305,7 @@ makeOBR() {
 		fldval["dev-CheckType"] := ""
 	} 
 	if (fldval["dev-location"]="Inpatient") {
-		enc_type := "INPATIENT "
+		enc_type := "INPT "
 		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
 		enc_trans :=																	; transmission date is null
 	}
