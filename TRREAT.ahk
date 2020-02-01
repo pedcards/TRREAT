@@ -3133,19 +3133,12 @@ ciedCheck() {
 	To aid in determining procedure performed
 */
 	global fldval, fetchQuit, enc_type, is_postop, is_remote, is_remoteAlert
-	static RN_Yes, RN_No
-		, PeriOp_Y, PeriOp_N, chk_peri
+	static PeriOp_Y, PeriOp_N, chk_peri
 		, RemoteAlert_Y, RemoteAlert_N
 		, ChkInt, ChkPrg
 	tmpEP := []
 	
 	gui, cied2:Destroy
-	gui, cied2:Font, w Bold Underline
-	gui, cied2:Add, Text, , Check performed by:
-	gui, cied2:Font, w Norm
-	gui, cied2:Add, Radio, vRN_Yes gcied2click, Pacemaker RN
-	gui, cied2:Add, Radio, vRN_No  gcied2click, Device rep
-	gui, cied2:Add, Text
 	
 	if (fldval["dev-location"]="Inpatient") {											; Inpatient encounter, ask if peri-op check
 		chk_peri := true
@@ -3186,7 +3179,6 @@ ciedCheck() {
 	cied2click:
 	{
 		gui, cied2:Submit, NoHide
-		rn := (RN_Yes or RN_No)
 		prg := (ChkPrg or ChkInt)
 		peri := (PeriOp_Y or PeriOp_N)
 		alert := (RemoteAlert_Y or RemoteAlert_N)
@@ -3200,9 +3192,6 @@ ciedCheck() {
 		if (is_remote) {
 				valid := (alert)
 		}
-		;~ valid := rn && (chk_peri 
-			;~ ? (rn && prg && peri)
-			;~ : (rn && prg)
 			
 		if valid {
 			GuiControl, cied2:Enable, OK
