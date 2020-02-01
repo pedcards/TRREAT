@@ -641,7 +641,7 @@ Return
 SignGUI:
 {
 	Gui, sign:Destroy
-	Gui, sign:Add, Tab3, w600 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
+	Gui, sign:Add, Tab3, w600 vRepLV hwndRepH, % l_tabs							; Create a tab control (hwnd=RepH) with titles l_tabs
 	Gui, sign:Default
 	for k in l_users															; loop through l_users
 	{
@@ -754,6 +754,14 @@ ActSign:
 			eventlog("Oops. Don't sign " l_tab "'s report.")
 			return																; not signing this report, return
 		}
+	}
+	MsgBox, 262177, Electronic signature, % "Confirm sign report as " user
+	IfMsgBox, OK
+	{
+		eventlog("Electronic signature")
+	} else {
+		eventlog("Cancel signature")
+		return
 	}
 	
 	FileRead, tmp, % path.report fileNam ".rtf"
