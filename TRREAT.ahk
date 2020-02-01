@@ -3321,19 +3321,20 @@ makeOBR() {
 /*	Need to add in other types here for leadless, ILR, and SICD
 	Might need to insert these for Epic testing
 */
-	
-	for k in leads
-	{
-		ctLeads := A_Index
-	}
-	if (ctLeads = 1) {
-		enc_type .= "SINGLE "
-	} else if (ctLeads = 2) {
-		enc_type .= "DUAL "
-	} else if (ctLeads > 2) {
-		enc_type .= "BIV "
-	}
-	
+	if !(is_remote || is_postop) {
+		for k in leads
+		{
+			ctLeads := A_Index
+		}
+		if (ctLeads = 1) {
+			enc_type .= "SINGLE "
+		} else if (ctLeads = 2) {
+			enc_type .= "DUAL "
+		} else if (ctLeads > 2) {
+			enc_type .= "BIV "
+		}
+	} 
+		
 	enc_type .= fldval["dev-CheckType"]
 	
 	return
