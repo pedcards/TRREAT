@@ -818,7 +818,7 @@ makeORU(wqid) {
 		, 4:order.ordertype "^IMGEAP"
 		, 7:order.date
 		, 16:order.prov "^^^^^^MSOW_ORG_ID"
-		, 25:"P"
+		, 25:"F"
 		, 32:tmpDoc.NPI "^" tmpDoc.nameL "^" tmpDoc.nameF })
 	
 	File := path.report fileNam ".rtf"
@@ -830,7 +830,7 @@ makeORU(wqid) {
 		,{2:"FT"
 		, 3:"&GDT^PACEMAKER/ICD INTERROGATION"
 		, 5:rtfStr
-		, 11:"P"
+		, 11:"F"
 		, 14:hl7time})
 	
 	for key,val in dict																	; Loop through all values in Dict (from ini)
