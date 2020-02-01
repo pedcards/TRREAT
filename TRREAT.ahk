@@ -3152,17 +3152,17 @@ ciedCheck() {
 	if (fldval["dev-EncType"]="REMOTE") {												; Inpatient encounter, ask if peri-op check
 		is_remote := true
 		gui, cied2:Font, w Bold Underline
-		gui, cied2:Add, Text, , Was this a non-scheduled remote alert?
+		gui, cied2:Add, Text, , Was this a scheduled check or remote alert?
 		gui, cied2:Font, w Norm
-		gui, cied2:Add, Radio, vRemoteAlert_Y gcied2click, Yes							; is_remoteAlert := true
-		gui, cied2:Add, Radio, vRemoteAlert_N gcied2click, No							; is_remoteAlert := ""
+		gui, cied2:Add, Radio, vRemoteAlert_N gcied2click, Scheduled					; is_remoteAlert := ""
+		gui, cied2:Add, Radio, vRemoteAlert_Y gcied2click, Acute						; is_remoteAlert := true
 		gui, cied2:Add, Text
 	} else {
 		gui, cied2:Font, w Bold Underline
-		gui, cied2:Add, Text, w400, % "Did this check involve checking thresholds, changing settings, or any other device programming?"
+		gui, cied2:Add, Text, w400, Did this check involve checking thresholds, changing settings, or any other device programming?
 		gui, cied2:Font, w Norm
-		gui, cied2:Add, Radio, vChkPrg gcied2click, Yes										; fldval["dev-CheckType"] := "Programming"
-		gui, cied2:Add, Radio, vChkInt gcied2click, No										; fldval["dev-CheckType"] := "Interrogation"
+		gui, cied2:Add, Radio, vChkPrg gcied2click, Yes									; fldval["dev-CheckType"] := "Programming"
+		gui, cied2:Add, Radio, vChkInt gcied2click, No									; fldval["dev-CheckType"] := "Interrogation"
 		gui, cied2:Add, Text
 	}
 	
