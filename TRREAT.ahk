@@ -2804,6 +2804,13 @@ matchOrder() {
 		keylist .= key[A_index].name " [" key[A_Index].ordernum " - " parseDate(key[A_Index].date).mdy "]|"
 	}
 	
+	if (keylist="") {
+		MsgBox, 262160, Empty orders, No active orders available!`n`nBe sure to "check-in" the order to send to TRREAT.
+		fetchQuit := true
+		eventlog("No orders released to incoming.")
+		return
+	}
+	
 	Gui, dev:Destroy
 	Gui, dev:Default
 	Gui, -MinimizeBox
