@@ -2871,52 +2871,6 @@ matchOrder() {
 	}
 }
 
-fetchGUI:
-{
-	fYd := 30,	fXd := 90														; fetchGUI delta Y, X
-	fX1 := 12,	fX2 := fX1+fXd													; x pos for title and input fields
-	fW1 := 80,	fW2 := 190														; width for title and input fields
-	fH := 20																	; line heights
-	fY := 10																	; y pos to start
-	EncNum := fldval["dev-Enc"]													; we need these non-array variables for the Gui statements
-	EncMRN := fldval["dev-MRN"]
-	EncName := (fldval["dev-Name"]~="[A-Z \-]+, [A-Z\-](?!=\s)")
-	demBits := ((EncNum~="\d{8}") && (EncMRN~="\d{6,7}") && EncName)			; clear the error check
-	/*	set this as true to skip demographics validation
-	*/
-		;~ dembits := true
-	/*
-	*/
-	
-	Gui, fetch:Destroy
-	Gui, fetch:+AlwaysOnTop
-	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encName)?"Default":"Red") , Name
-	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
-		. " readonly c" ((encName)?"Default":"Red") , % fldval["dev-Name"]
-	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encMRN~="\d{6,7}")?"Default":"Red") , MRN
-	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
-		. " readonly c" ((encMRN~="\d{6,7}")?"Default":"Red"), % fldval["dev-MRN"]
-	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encNum~="\d{8}")?"Default":"Red") , Encounter
-	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
-		. " readonly c" ((encNum~="\d{8}")?"Default":"Red"), % fldval["dev-Enc"]
-	
-	Gui, fetch:Add, Button, % "x" fX1 " yP+" fYD " h" fH+10 " w" fW1+fW2+10 " gfetchSubmit " ((demBits)?"":"Disabled"), Submit!
-	Gui, fetch:Show, AutoSize, % fldval["dev-Name"]
-	return
-}
-
-fetchGuiClose:
-{
-	Gui, fetch:destroy
-	getDem := false																	; break out of fetchDem loop
-	fetchQuit := true
-	eventlog("Manual [x] out of fetchDem.")
-Return
-}
-
 parseClip(clip) {
 /*	If clip matches "val1:val2" format, and val1 in demVals[], return field:val
 	If clip contains proper Encounter Type ("Outpatient", "Inpatient", "Observation", etc), return Type, Date, Time
@@ -2936,19 +2890,6 @@ parseClip(clip) {
 	}
 	
 	return Error																		; Anything else returns Error
-}
-
-fetchSubmit:
-{
-/*	some error checking
-	Check for required elements
-demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
-*/
-	Gui, fetch:Submit
-	Gui, fetch:Destroy
-	
-	getDem := false
-	return
 }
 
 saveChip:
