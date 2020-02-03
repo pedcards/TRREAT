@@ -603,6 +603,7 @@ fileLoop:
 		MsgBox No match!														; Attempt OCR on PDF?
 	}
 	
+	gosub parseGUI
 	return
 }
 
