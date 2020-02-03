@@ -1461,8 +1461,10 @@ SJM:
 	} 
 	FileRead, sjmLog, % pat_meta
 	if (sjmLog~="Microny|Zephyr") {
+		eventlog("Old SJM report.")
 		gosub SJM_old
 	} else {
+		eventlog("Newer SJM report.")
 		gosub SJM_meta															; 
 	}
 	
@@ -2986,11 +2988,13 @@ makeReport:
 	
 	ciedQuery()
 	if (fetchQuit) {
+		eventlog("fetchQuit ciedQuery.")
 		return
 	}
 	
 	ciedCheck()
 	if (fetchQuit) {
+		eventlog("fetchQuit ciedCheck.")
 		return
 	}
 
