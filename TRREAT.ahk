@@ -1441,6 +1441,24 @@ bsciZoomView:
 	return
 }
 
+SICD:
+{
+	txt := onecol(stregX(maintxt,"",1,0,"Programmable\s+Parameters",1))
+	fields[1] := ["Patient Name","Follow-up Date","Last Follow-up Date","Implant Date"]
+	labels[1] := ["Name","Encounter","Last_ck","IPG_impl"]
+	scanparams(txt,1,"dev")
+	;~ fieldvals(txt,1,"dev")
+	;~ fldfill("dev-DOB",parseDate(RegExReplace(fldval["dev-DOB"]," ","-")).MDY)
+	;~ fldfill("dev-Encounter",parseDate(RegExReplace(fldval["dev-Encounter"]," ","-")).MDY)
+	;~ fldfill("dev-Last_ck",parseDate(RegExReplace(fldval["dev-Last_ck"]," ","-")).MDY)
+	;~ fldfill("dev-IPG_impl",parseDate(RegExReplace(fldval["dev-IPG_impl"]," ","-")).MDY)
+	;~ fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
+	;~ fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"Boston Scientific "))
+	;~ fldfill("dev-Physician",readBnk("PatientPhysFirstName") " " readBnk("PatientPhysLastName"))
+	
+	return	
+}
+
 SJM:
 {
 	if !(pat_meta) {																; SJM device with metadata (ICD exported)
