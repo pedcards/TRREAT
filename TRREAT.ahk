@@ -571,7 +571,7 @@ fileLoop:
 		eventlog("Medtronic identified.")
 		gosub Medtronic
 	}
-	else if (maintxt~="Boston Scientific Corporation") {
+	else if (maintxt~="(Boston Scientific Corporation|800\.CARDIAC)") {
 		eventlog("Boston Scientific identified.")
 		gosub BSCI
 	}
@@ -1218,7 +1218,12 @@ BSCI:
 	if (pat_meta) {
 		FileRead, bscbnk, % pat_meta
 	}
-	gosub bsciZoomView
+	if instr(maintxt,"800.CARDIAC") {
+		eventlog("Boston Scientific Emblem identified.")
+		gosub SICD
+	} else {
+		gosub bsciZoomView
+	}
 	
 	gosub fetchDem
 	
