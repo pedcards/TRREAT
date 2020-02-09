@@ -389,6 +389,77 @@ readFilesBSCI() {
 		LV_Modify(fileNum,"col8", tmp.bnk)
 	}
 	
+	bscDir := path.pdf "DataFiles\"
+	loop, Files, % bscDir "*", D												; Loop through subdirs of Emblem datafiles
+	{
+		tmp := A_LoopFileName
+		MMDD := substr(tmp,1,4)
+		YYYY := SubStr(tmp,5,4)
+		dirdate := YYYY MMDD 													; correct their weird date format
+		dt := A_Now
+		dt -= dirdate , Days													; calculate days since check
+		dirlist .= Format("{:04}",dt) "|" dirdate "|" tmp "`n"
+	}
+	sort dirlist																; sort from most recent
+	Loop , parse, dirlist, `n, `n
+	{
+		dirName := StrSplit(A_LoopField,"|").3 "\Sessions\"
+		name := {}
+		loop, Files, % bscDir dirName "*.hl7", F
+		{
+			snam := RegExReplace(A_LoopFileName,"__(.*)","__")
+			maxdate :=
+			loop, Files, % bscDir dirName snam "*.hl7"
+			{
+				fnam := A_LoopFileName
+				RegExMatch(fnam,"(.*)-(.*)-(.*)-(.*)__(.*)\.hl7",x)
+				dt := parseDate(x4).YMD RegExReplace(x5,"[.:]")
+				if (dt>maxdate) {
+					maxdate:=dt
+					maxfnam:=fnam
+				}
+			}
+			tmp := []
+			tmp.fnam := maxfnam
+			RegExMatch(tmp.fnam,"(.*)-(.*)-(.*)-(.*)__(.*)\.hl7",x)
+			tmp.name := x1
+			tmp.model := "BSCI " x2
+			tmp.ser := x3
+			tmp.date := parseDate(x4).YMD 
+			tmp.time := RegExReplace(x5,"[.:]")
+			dt := tmp.date tmp.time 
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+			if instr(name[tmp.name],dt) {
+				continue
+			}
+			if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
+				eventlog("BSC: Skipping " tmp.date "\" tmp.ser ", already in worklist.")
+				continue																; skip reprocessing in WORK list
+			}
+			if IsObject(xl.selectSingleNode("/root/done/ " tmp.node)) {
+				fileNum += 1
+				LV_Add("", tmp.date)
+				LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
+				LV_Modify(fileNum,"col3", "[DONE]")
+				eventlog("BSC: File " tmp.date "\" tmp.ser " already DONE.")
+				continue
+			}
+			name[tmp.name] .= dt "`n"
+			tmp.fnam := bscDir dirName tmp.fnam
+			tmp.file := bscDir dirName RegExReplace(fnam,".hl7",".pdf")
+			
+			fileNum += 1																; Add a row to the LV
+			LV_Add("", tmp.date)														; col1 is date
+			LV_Modify(fileNum,"col2", tmp.name)
+			LV_Modify(fileNum,"col3", tmp.model)
+			LV_Modify(fileNum,"col4", tmp.ser)
+			LV_Modify(fileNum,"col5", tmp.dev)
+			LV_Modify(fileNum,"col6", "")
+			LV_Modify(fileNum,"col7", tmp.file)
+			LV_Modify(fileNum,"col8", tmp.fnam)
+		}
+	}
+	
 	return
 }
 
