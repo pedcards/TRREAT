@@ -1445,17 +1445,43 @@ bsciZoomView:
 SICD:
 {
 	txt := onecol(stregX(maintxt,"",1,0,"Programmable\s+Parameters",1))
-	fields[1] := ["Patient Name","Follow-up Date","Last Follow-up Date","Implant Date"]
-	labels[1] := ["Name","Encounter","Last_ck","IPG_impl"]
-	scanparams(txt,1,"dev")
-	;~ fieldvals(txt,1,"dev")
-	;~ fldfill("dev-DOB",parseDate(RegExReplace(fldval["dev-DOB"]," ","-")).MDY)
-	;~ fldfill("dev-Encounter",parseDate(RegExReplace(fldval["dev-Encounter"]," ","-")).MDY)
-	;~ fldfill("dev-Last_ck",parseDate(RegExReplace(fldval["dev-Last_ck"]," ","-")).MDY)
-	;~ fldfill("dev-IPG_impl",parseDate(RegExReplace(fldval["dev-IPG_impl"]," ","-")).MDY)
-	;~ fldfill("dev-IPG_SN",RegExReplace(fldval["dev-IPG_SN"],"Tachy.*"))
-	;~ fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"Boston Scientific "))
-	;~ fldfill("dev-Physician",readBnk("PatientPhysFirstName") " " readBnk("PatientPhysLastName"))
+	txt := RegExReplace(txt,": ",":  ")
+	fields[1] := ["Patient Name","^Follow-up Date","^Last Follow-up Date","Implant Date"
+				, "Device Model#","Device Serial#","Electrode Model#","Electrode Serial#"]
+	labels[1] := ["Name","Encounter","Last_ck","IPG_impl"
+				, "IPG","IPG_SN","HV","HV_SN"]
+	scanparams(txt,1,"dev",1)
+	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"EMBLEMTM","Emblem(TM)"))
+	fldfill("dev-HVlead"
+		, printQ(fldval["dev-HV"],"Boston Scientific ###")
+		. printQ(fldval["dev-HV_SN"]," (serial ###)"))
+	
+	txt := onecol(stregX(maintxt,"Programmable\s+Parameters.*?\R",1,1,"Shock Polarity.*?\R",0))
+	txt := RegExReplace(txt,": ",":  ")
+	txt1 := stregX(txt,"Current Device Settings",1,0,"Initial Device Settings",1)
+	txt2 := stregX(txt,"Initial Device Settings",1,0,">>>end",1)
+	fields[1] := ["^Shock Zone","^Conditional Shock Zone"]
+	labels[1] := ["VF","VT"]
+	scanparams(txt1,1,"tachy",1)
+	fields[1] := ["^Post Shock Pacing","^Gain Setting","^Sensing Configuration"]
+	labels[1] := ["Mode","Gain","Pol_Sens"]
+	scanparams(txt1,1,"par",1)
+	fldval["par-Mode"] := printQ(fldval["par-Mode"],"Post-shock pacing ###")
+	
+	txt := onecol(stregx(maintxt,"Episode\s+Summary.*?\R",1,1,"1.800.CARDIAC",1))
+	txt := stregx(txt,"",1,0,"Americas",0)
+	txt := RegExReplace(txt,": ",":  ")
+	fields[1] := ["Remaining Battery Life to ERI"]
+	labels[1] := ["Battery_stat"]
+	scanparams(txt,1,"dev",1)
+	fields[1] := ["^Untreated Episodes","^Treated Episodes"]
+	labels[1] := ["V_Aborted","V_Shocked"]
+	scanparams(txt,1,"event",1)
+	
+	normLead("HV"
+			,fldval["dev-HVlead"],fldval["dev-HVlead_impl"] 
+			,"","","",""
+			,"",fldval["par-Gain"],fldval["par-Pol_Sens"])
 	
 	return	
 }
