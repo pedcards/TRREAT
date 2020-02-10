@@ -393,6 +393,78 @@ readFilesBSCI() {
 		LV_Modify(fileNum,"col8", tmp.bnk)
 	}
 	
+	progress, 100
+	bscDir := path.pdf "DataFiles\"
+	loop, Files, % bscDir "*", D												; Loop through subdirs of Emblem datafiles
+	{
+		tmp := A_LoopFileName
+		MMDD := substr(tmp,1,4)
+		YYYY := SubStr(tmp,5,4)
+		dirdate := YYYY MMDD 													; correct their weird date format
+		dt := A_Now
+		dt -= dirdate , Days													; calculate days since check
+		dirlist .= Format("{:04}",dt) "|" dirdate "|" tmp "`n"
+	}
+	sort dirlist																; sort from most recent
+	Loop , parse, dirlist, `n, `n
+	{
+		dirName := StrSplit(A_LoopField,"|").3 "\Sessions\"
+		name := {}
+		loop, Files, % bscDir dirName "*.hl7", F
+		{
+			snam := RegExReplace(A_LoopFileName,"__(.*)","__")
+			maxdate :=
+			loop, Files, % bscDir dirName snam "*.hl7"
+			{
+				fnam := A_LoopFileName
+				RegExMatch(fnam,"(.*)-(.*)-(.*)-(.*)__(.*)\.hl7",x)
+				dt := parseDate(x4).YMD RegExReplace(x5,"[.:]")
+				if (dt>maxdate) {
+					maxdate:=dt
+					maxfnam:=fnam
+				}
+			}
+			tmp := []
+			tmp.fnam := maxfnam
+			RegExMatch(tmp.fnam,"(.*)-(.*)-(.*)-(.*)__(.*)\.hl7",x)
+			tmp.name := x1
+			tmp.model := "BSCI " x2
+			tmp.ser := x3
+			tmp.date := parseDate(x4).YMD 
+			tmp.time := RegExReplace(x5,"[.:]")
+			dt := tmp.date tmp.time 
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+			if instr(name[tmp.name],dt) {
+				continue
+			}
+			if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
+				eventlog("BSC: Skipping " tmp.date "\" tmp.ser ", already in worklist.")
+				continue																; skip reprocessing in WORK list
+			}
+			if IsObject(xl.selectSingleNode("/root/done/ " tmp.node)) {
+				fileNum += 1
+				LV_Add("", tmp.date)
+				LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
+				LV_Modify(fileNum,"col3", "[DONE]")
+				eventlog("BSC: File " tmp.date "\" tmp.ser " already DONE.")
+				continue
+			}
+			name[tmp.name] .= dt "`n"
+			tmp.fnam := bscDir dirName tmp.fnam
+			tmp.file := bscDir dirName RegExReplace(fnam,".hl7",".pdf")
+			
+			fileNum += 1																; Add a row to the LV
+			LV_Add("", tmp.date)														; col1 is date
+			LV_Modify(fileNum,"col2", tmp.name)
+			LV_Modify(fileNum,"col3", tmp.model)
+			LV_Modify(fileNum,"col4", tmp.ser)
+			LV_Modify(fileNum,"col5", tmp.dev)
+			LV_Modify(fileNum,"col6", "")
+			LV_Modify(fileNum,"col7", tmp.file)
+			LV_Modify(fileNum,"col8", tmp.fnam)
+		}
+	}
+	
 	return
 }
 
@@ -586,7 +658,7 @@ fileLoop:
 		eventlog("Medtronic identified.")
 		gosub Medtronic
 	}
-	else if (maintxt~="Boston Scientific Corporation") {
+	else if (maintxt~="(Boston Scientific Corporation|800\.CARDIAC)") {
 		eventlog("Boston Scientific identified.")
 		gosub BSCI
 	}
@@ -1306,7 +1378,12 @@ BSCI:
 	if (pat_meta) {
 		FileRead, bscbnk, % pat_meta
 	}
-	gosub bsciZoomView
+	if instr(maintxt,"800.CARDIAC") {
+		eventlog("Boston Scientific Emblem identified.")
+		gosub SICD
+	} else {
+		gosub bsciZoomView
+	}
 	
 	gosub fetchDem
 	
@@ -1451,6 +1528,50 @@ bsciZoomView:
 			,fldval["leads-LV_Sensitivity"],fldval["leads-LV_Sthr"],fldval["leads-LV_Pol_sens"])
 
 	return
+}
+
+SICD:
+{
+	txt := onecol(stregX(maintxt,"",1,0,"Programmable\s+Parameters",1))
+	txt := RegExReplace(txt,": ",":  ")
+	fields[1] := ["Patient Name","^Follow-up Date","^Last Follow-up Date","Implant Date"
+				, "Device Model#","Device Serial#","Electrode Model#","Electrode Serial#"]
+	labels[1] := ["Name","Encounter","Last_ck","IPG_impl"
+				, "IPG","IPG_SN","HV","HV_SN"]
+	scanparams(txt,1,"dev",1)
+	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"EMBLEMTM","Emblem(TM)"))
+	fldfill("dev-HVlead"
+		, printQ(fldval["dev-HV"],"Boston Scientific ###")
+		. printQ(fldval["dev-HV_SN"]," (serial ###)"))
+	
+	txt := onecol(stregX(maintxt,"Programmable\s+Parameters.*?\R",1,1,"Shock Polarity.*?\R",0))
+	txt := RegExReplace(txt,": ",":  ")
+	txt1 := stregX(txt,"Current Device Settings",1,0,"Initial Device Settings",1)
+	txt2 := stregX(txt,"Initial Device Settings",1,0,">>>end",1)
+	fields[1] := ["^Shock Zone","^Conditional Shock Zone"]
+	labels[1] := ["VF","VT"]
+	scanparams(txt1,1,"tachy",1)
+	fields[1] := ["^Post Shock Pacing","^Gain Setting","^Sensing Configuration"]
+	labels[1] := ["Mode","Gain","Pol_Sens"]
+	scanparams(txt1,1,"par",1)
+	fldval["par-Mode"] := printQ(fldval["par-Mode"],"Post-shock pacing ###")
+	
+	txt := onecol(stregx(maintxt,"Episode\s+Summary.*?\R",1,1,"1.800.CARDIAC",1))
+	txt := stregx(txt,"",1,0,"Americas",0)
+	txt := RegExReplace(txt,": ",":  ")
+	fields[1] := ["Remaining Battery Life to ERI"]
+	labels[1] := ["Battery_stat"]
+	scanparams(txt,1,"dev",1)
+	fields[1] := ["^Untreated Episodes","^Treated Episodes"]
+	labels[1] := ["V_Aborted","V_Shocked"]
+	scanparams(txt,1,"event",1)
+	
+	normLead("HV"
+			,fldval["dev-HVlead"],fldval["dev-HVlead_impl"] 
+			,"","","",""
+			,"",fldval["par-Gain"],fldval["par-Pol_Sens"])
+	
+	return	
 }
 
 SJM:
@@ -2086,7 +2207,7 @@ pmPrint:
 	. "\par\par "
 	. "\b\ul LEAD INFORMATION\ul0\b0\par "
 	
-	for k,v in ["RA","RV","LV"]
+	for k,v in ["RA","RV","LV","HV"]
 	{
 		if !isobject(leads[v]) {
 			continue
@@ -2188,6 +2309,28 @@ PrintOut:
 			. "Routine follow up per implantable device protocol. ")	
 	
 	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
+	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]))
+		? "ICD "
+		: "PM "
+	
+	if (IsObject(leads["RA"])) {
+		leads.A := true
+	}
+	if (IsObject(leads["RV"]) || IsObject(leads["LV"])) {
+		leads.V := true
+	}
+	if (IsObject(leads["RV"]) && IsObject(leads["LV"])) {
+		leads.M := true
+	}
+	if (leads.M) {
+		enc_type .= "Multi"
+	} else
+	if (leads.A && leads.V) {
+		enc_type .= "Dual"
+	} else
+	{
+		enc_type .= "Single"
+	}
 	
 	rtfFtr := "}"
 	
@@ -3418,7 +3561,7 @@ FilePrepend( Text, Filename ) {
 ParseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	moStr := "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
-	dSep := "[ \-_/]"
+	dSep := "[ \-\._/]"
 	date := []
 	time := []
 	x := RegExReplace(x,"[,\(\)]")
