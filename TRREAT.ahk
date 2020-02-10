@@ -2224,19 +2224,27 @@ PrintOut:
 		enc_trans :=																	; transmission date is null
 	}
 	
-	for k in leads
-	{
-		ctLeads := A_Index
-	}
-	enc_type .= (instr(leads["RV","imp"],"Defib"))
+	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]))
 		? "ICD "
 		: "PM "
-	if (ctLeads = 1) {
-		enc_type .= "Single"
-	} else if (ctLeads = 2) {
-		enc_type .= "Dual"
-	} else if (ctLeads > 2) {
+	
+	if (IsObject(leads["RA"])) {
+		leads.A := true
+	}
+	if (IsObject(leads["RV"]) || IsObject(leads["LV"])) {
+		leads.V := true
+	}
+	if (IsObject(leads["RV"]) && IsObject(leads["LV"])) {
+		leads.M := true
+	}
+	if (leads.M) {
 		enc_type .= "Multi"
+	} else
+	if (leads.A && leads.V) {
+		enc_type .= "Dual"
+	} else
+	{
+		enc_type .= "Single"
 	}
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
