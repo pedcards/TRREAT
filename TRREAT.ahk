@@ -2309,28 +2309,6 @@ PrintOut:
 			. "Routine follow up per implantable device protocol. ")	
 	
 	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
-	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]))
-		? "ICD "
-		: "PM "
-	
-	if (IsObject(leads["RA"])) {
-		leads.A := true
-	}
-	if (IsObject(leads["RV"]) || IsObject(leads["LV"])) {
-		leads.V := true
-	}
-	if (IsObject(leads["RV"]) && IsObject(leads["LV"])) {
-		leads.M := true
-	}
-	if (leads.M) {
-		enc_type .= "Multi"
-	} else
-	if (leads.A && leads.V) {
-		enc_type .= "Dual"
-	} else
-	{
-		enc_type .= "Single"
-	}
 	
 	rtfFtr := "}"
 	
@@ -3407,23 +3385,30 @@ makeOBR() {
 		enc_trans :=																	; transmission date is null
 	}
 	
-	enc_type .= (instr(leads["RV","imp"],"Defib"))
+	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]))
 		? "ICD "
 		: "PM "
 /*	Need to add in other types here for leadless, ILR, and SICD
 	Might need to insert these for Epic testing
 */
 	if !(is_remote || is_postop) {
-		for k in leads
-		{
-			ctLeads := A_Index
+		if (IsObject(leads["RA"])) {
+			leads.A := true
 		}
-		if (ctLeads = 1) {
-			enc_type .= "SINGLE "
-		} else if (ctLeads = 2) {
-			enc_type .= "DUAL "
-		} else if (ctLeads > 2) {
-			enc_type .= "BIV "
+		if (IsObject(leads["RV"]) || IsObject(leads["LV"])) {
+			leads.V := true
+		}
+		if (IsObject(leads["RV"]) && IsObject(leads["LV"])) {
+			leads.M := true
+		}
+		if (leads.M) {
+			enc_type .= "BIV"
+		} else
+		if (leads.A && leads.V) {
+			enc_type .= "DUAL"
+		} else
+		{
+			enc_type .= "SINGLE"
 		}
 	} 
 	
