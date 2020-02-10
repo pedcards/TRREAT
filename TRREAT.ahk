@@ -389,6 +389,7 @@ readFilesBSCI() {
 		LV_Modify(fileNum,"col8", tmp.bnk)
 	}
 	
+	progress, 100
 	bscDir := path.pdf "DataFiles\"
 	loop, Files, % bscDir "*", D												; Loop through subdirs of Emblem datafiles
 	{
@@ -1469,7 +1470,7 @@ SJM:
 	if (sjmLog~="Microny|Zephyr") {
 		gosub SJM_old
 	} else {
-		gosub SJM_meta															; 
+		gosub SJM_meta
 	}
 	
 	gosub fetchDem
