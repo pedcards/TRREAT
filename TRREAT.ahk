@@ -402,6 +402,7 @@ readFilesBSCI() {
 		dirlist .= Format("{:04}",dt) "|" dirdate "|" tmp "`n"
 	}
 	sort dirlist																; sort from most recent
+	dirlist := strX(dirlist,"",1,0,"`n",1,1)
 	Loop , parse, dirlist, `n, `n
 	{
 		dirName := StrSplit(A_LoopField,"|").3 "\Sessions\"
