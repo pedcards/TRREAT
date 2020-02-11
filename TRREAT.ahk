@@ -2239,13 +2239,13 @@ PrintOut:
 		leads.M := true
 	}
 	if (leads.M) {
-		enc_type .= "Multi"
+		enc_type .= "MULTI "
 	} else
 	if (leads.A && leads.V) {
-		enc_type .= "Dual"
+		enc_type .= "DUAL "
 	} else
 	{
-		enc_type .= "Single"
+		enc_type .= "SINGLE "
 	}
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
