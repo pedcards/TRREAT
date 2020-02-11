@@ -3403,13 +3403,13 @@ makeOBR() {
 			leads.M := true
 		}
 		if (leads.M) {
-			enc_type .= "BIV"
+			enc_type .= "BIV "
 		} else
 		if (leads.A && leads.V) {
-			enc_type .= "DUAL"
+			enc_type .= "DUAL "
 		} else
 		{
-			enc_type .= "SINGLE"
+			enc_type .= "SINGLE "
 		}
 	} 
 	
