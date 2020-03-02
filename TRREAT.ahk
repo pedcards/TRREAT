@@ -839,7 +839,7 @@ ActSign:
 	}
 	
 	FileRead, tmp, % path.report fileNam ".rtf"
-	tmp := RegExReplace(tmp,"\\fs22.*?DATE OF BIRTH.*?\\par")					; remove the temp text between annotations
+	tmp := RegExReplace(tmp,"\\b.*?DATE OF BIRTH.*?\\par")						; remove the temp text between annotations
 	FileDelete, % path.report fileNam ".rtf"
 	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
 	
@@ -2314,9 +2314,9 @@ PrintOut:
 	
 	rtfFtr := "}"
 	
-	rtfBody := "\pard"
+	rtfBody := "\pard\fs20"
 			. "{\*\annotation START}"
-			. "\fs22\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par "
+			. "\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par "
 			. "{\*\annotation END}"
 			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
