@@ -825,7 +825,7 @@ ActSign:
 	}
 	
 	FileRead, tmp, % path.report fileNam ".rtf"
-	tmp := RegExReplace(tmp,"\\fs22.*?DATE OF BIRTH.*?\\par")					; remove the temp text between annotations
+	tmp := RegExReplace(tmp,"\\fs22\\b.*?DATE OF BIRTH.*?\\par")					; remove the temp text between annotations
 	FileDelete, % path.report fileNam ".rtf"
 	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
 	
@@ -2251,7 +2251,7 @@ PrintOut:
 	
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
 			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
-			. "\pard\tx2160\fs22\lang9 `n"
+			. "\pard\tx2160 `n"
 			. "Transcriptionist\tab "	"<TrID:crd> \par `n"
 			. "Document Type\tab "		"<7:Q8> \par `n"
 			. "Clinic Title code\tab "	"<1035:PACE> \par `n"
@@ -2271,7 +2271,7 @@ PrintOut:
 	
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 	
-	rtfBody := "\tx1620\tx5220\tx7040`n"
+	rtfBody := "`n"
 	. "\fs22\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par `n"
 	. "\fs22\b\ul ANALYSIS DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
 	. printQ(is_remote
