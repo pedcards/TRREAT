@@ -633,10 +633,10 @@ fileLoop:
 	if (fileIn~="i).pdf$") {
 		Run, % fileIn
 		SplitPath, fileIn,,,,fileOut
-		FileDelete, % path.files fileOut ".txt"
-		RunWait, % path.files "pdftotext.exe -table """ fileIn """ """ path.files fileOut ".txt""" , , hide
-		eventlog("pdftotext " fileIn " -> " path.files fileOut ".txt")
-		FileRead, maintxt, % path.files fileOut ".txt"
+		FileDelete, % path.files "tmp\" fileOut ".txt"
+		RunWait, % path.files "pdftotext.exe -table """ fileIn """ """ path.files "tmp\" fileOut ".txt""" , , hide
+		eventlog("pdftotext " fileIn " -> " path.files "tmp\" fileOut ".txt")
+		FileRead, maintxt, % path.files "tmp\" fileOut ".txt"
 		cleanlines(maintxt)
 	}
 	
