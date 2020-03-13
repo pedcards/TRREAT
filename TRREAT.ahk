@@ -28,7 +28,7 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 ;~ chipDir:=path.chip																	; CHIPOTLE root
 ;~ pdfDir:=path.pdf																		; USB root
 ;~ hisDir:=path.his																		; 3M drop dir
-path.bin		:= path.trreat "bin\"													; helper exe files
+;~ path.bin		:= path.trreat "bin\"													; helper exe files
 path.files		:= path.trreat "files\"													; ini and xml files
 path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
 path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
@@ -633,10 +633,10 @@ fileLoop:
 	if (fileIn~="i).pdf$") {
 		Run, % fileIn
 		SplitPath, fileIn,,,,fileOut
-		FileDelete, % path.bin fileOut ".txt"
-		RunWait, % path.bin "pdftotext.exe -table """ fileIn """ """ path.bin fileOut ".txt""" , , hide
-		eventlog("pdftotext " fileIn " -> " path.bin fileOut ".txt")
-		FileRead, maintxt, % path.bin fileOut ".txt"
+		FileDelete, % path.files fileOut ".txt"
+		RunWait, % path.files "pdftotext.exe -table """ fileIn """ """ path.files fileOut ".txt""" , , hide
+		eventlog("pdftotext " fileIn " -> " path.files fileOut ".txt")
+		FileRead, maintxt, % path.files fileOut ".txt"
 		cleanlines(maintxt)
 	}
 	
@@ -2302,12 +2302,12 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	enc_dt.YMD
 	
-	FileDelete, % path.bin fileOut ".rtf"												; delete and generate RTF fileOut.rtf
-	FileAppend, % rtfOut, % path.bin fileOut ".rtf"
+	FileDelete, % path.files fileOut ".rtf"												; delete and generate RTF fileOut.rtf
+	FileAppend, % rtfOut, % path.files fileOut ".rtf"
 	
-	eventlog("Print output generated in " path.bin)
+	eventlog("Print output generated in " path.files)
 	
-	RunWait, % "WordPad.exe """ path.bin fileOut ".rtf"""								; launch fileNam in WordPad
+	RunWait, % "WordPad.exe """ path.files fileOut ".rtf"""								; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
@@ -2330,7 +2330,7 @@ PrintOut:
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
 			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
 		}
-		FileMove, % path.bin fileOut ".rtf", % path.report fileOut ".rtf", 1				; move RTF to the final directory
+		FileMove, % path.files fileOut ".rtf", % path.report fileOut ".rtf", 1				; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
 		fileDelete, % fileIn
 		
