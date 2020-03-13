@@ -832,6 +832,8 @@ ActSign:
 	MsgBox, 262177, Electronic signature, % "Confirm sign report as " user
 	IfMsgBox, OK
 	{
+		FormatTime, tmp_time, A_Now
+		tmp_sig := docs[l_usr].nameF " " docs[l_usr].nameL ", MD at " tmp_time
 		eventlog("Electronic signature")
 	} else {
 		eventlog("Cancel signature")
@@ -840,6 +842,7 @@ ActSign:
 	
 	FileRead, tmp, % path.report fileNam ".rtf"
 	tmp := RegExReplace(tmp,"\\b.*?DATE OF BIRTH.*?\\par")						; remove the temp text between annotations
+	tmp := RegExReplace(tmp,"\\par \}","\par Electronically authenticated by " tmp_sig ". }")
 	FileDelete, % path.report fileNam ".rtf"
 	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
 	
