@@ -19,16 +19,15 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
+	trreatDir := "\\childrens\files\HCTRREAT\prod\"										; need to define this before readIni
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
 
-;~ trreatDir:=path.trreat																; TRREAT root
 ;~ chipDir:=path.chip																	; CHIPOTLE root
 ;~ pdfDir:=path.pdf																		; USB root
 ;~ hisDir:=path.his																		; 3M drop dir
-;~ path.bin		:= path.trreat "bin\"													; helper exe files
+path.trreat		:= trreatDir															; TRREAT root
 path.files		:= path.trreat "files\"													; ini and xml files
 path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
 path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
