@@ -825,7 +825,7 @@ ActSign:
 	}
 	
 	FileRead, tmp, % path.report fileNam ".rtf"
-	tmp := RegExReplace(tmp,"\\fs22\\b.*?DATE OF BIRTH.*?\\par")					; remove the temp text between annotations
+	tmp := RegExReplace(tmp,"\\b.*?DATE OF BIRTH.*?\\par")						; remove the temp text between annotations
 	FileDelete, % path.report fileNam ".rtf"
 	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
 	
