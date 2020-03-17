@@ -18,7 +18,7 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	trreatDir := "\\childrens\files\HCCardiologyFiles\EP\TRREAT_files\"
+	trreatDir := "\\childrens\files\HCTRREAT\prod\"										; need to define this before readIni
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
@@ -990,9 +990,9 @@ mdtQuickLookII:
 	labels[1] := ["IPG","IPG_SN","Encounter"
 				, "Name","MRN","Physician","null"]
 	fieldvals(inirep,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
-	}
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
 	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 	
 	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
@@ -1061,10 +1061,10 @@ mdtQuickLookII:
 	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
 	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
 	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
-	fields[2] := ["Mode Switch","Mode","V. Pacing","AdaptivCRT"
+	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT"
 				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
-				, "Paced AV","Sensed AV"]
-	labels[2] := ["Mode Switch","Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV"]
+				, "Paced AV","Sensed AV","Mode Switch"]
+	labels[2] := ["Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
 	scanParams(qltbl,2,"par",1)
 	
 	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
@@ -1130,9 +1130,9 @@ mdtQuickLookII:
 	labels[1] := ["IPG","IPG_SN","Encounter"
 				, "Name","MRN","Physician","null"]
 	fieldvals(dev,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
-	}
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
 	
 	dev := stregX(fintxt,"Device Status",1,1,"Parameter Summary",1)
 	fields[1] := ["Device Status", "Battery Voltage","Remaining Longevity","`n"]
@@ -1149,7 +1149,7 @@ mdtQuickLookII:
 	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
 	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
-	fintbl := RegExReplace(fintbl,"\s+\(based on initial interrogation\)")
+	fintbl := RegExReplace(fintbl,"\s+\(.*?based on.*?\)")
 	fintbl := stregX(fintbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
 	fintbl := stregX(fintbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
@@ -1198,8 +1198,9 @@ mdtQuickLookII:
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
-	fields[1] := ["Mode Switch","Mode","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV"]
-	labels[1] := ["Mode Switch","Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
+	fields[1] := ["Mode  ","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV","Mode Switch"]
+	labels[1] := ["Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV","Mode Switch"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
+	tmp := onecol(param)
 	scanParams(onecol(param),1,"par",1)
 	
 	par := parsetable(stregx(fintxt,"Pacing Details",1,0,"AV Therapies",1))
@@ -1240,6 +1241,9 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null","History","null","IPG_impl","null"]
 			fieldvals(inirep,1,"dev")
+			fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+				? tmp 
+				: "Dr. " trim(tmp," `n")
 			
 			iniBlk := stregX(inirep,"Pacemaker Status",1,0,"Parameter Summary",1)
 			
@@ -1312,6 +1316,9 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null"]
 			fieldvals(finRep,1,"dev")
+			fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+				? tmp 
+				: "Dr. " trim(tmp," `n")
 			
 			finBlk := stregX(finRep,"Patient Name",1,0,"Pacemaker Status",0)
 			finBlk := stregX(finBlk,"Pacemaker Model",1,0,"Pacemaker Status",1)
@@ -1347,7 +1354,7 @@ mdtAdapta:
 		if instr(finRep,"Permanent Parameters") {
 			perm := oneCol(stregX(finRep,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
-			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
+			fields[1] := ["Mode   ","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
 			
