@@ -1057,7 +1057,7 @@ mdtQuickLookII:
 	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
 	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
-	fintbl := RegExReplace(fintbl,"\s+\(based on initial interrogation\)")
+	fintbl := RegExReplace(fintbl,"\s+\(.*?based on.*?\)")
 	fintbl := stregX(fintbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
 	fintbl := stregX(fintbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
