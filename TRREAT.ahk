@@ -1149,6 +1149,9 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null","History","null","IPG_impl","null"]
 			fieldvals(inirep,1,"dev")
+			fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+				? tmp 
+				: "Dr. " trim(tmp," `n")
 			
 			iniBlk := stregX(inirep,"Pacemaker Status",1,0,"Parameter Summary",1)
 			
@@ -1221,6 +1224,9 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null"]
 			fieldvals(finRep,1,"dev")
+			fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+				? tmp 
+				: "Dr. " trim(tmp," `n")
 			
 			finBlk := stregX(finRep,"Patient Name",1,0,"Pacemaker Status",0)
 			finBlk := stregX(finBlk,"Pacemaker Model",1,0,"Pacemaker Status",1)
