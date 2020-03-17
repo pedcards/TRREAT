@@ -1256,7 +1256,7 @@ mdtAdapta:
 		if instr(finRep,"Permanent Parameters") {
 			perm := oneCol(stregX(finRep,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
-			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
+			fields[1] := ["Mode   ","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
 			
