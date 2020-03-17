@@ -898,9 +898,9 @@ mdtQuickLookII:
 	labels[1] := ["IPG","IPG_SN","Encounter"
 				, "Name","MRN","Physician","null"]
 	fieldvals(inirep,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
-	}
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
 	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 	
 	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
@@ -1038,9 +1038,9 @@ mdtQuickLookII:
 	labels[1] := ["IPG","IPG_SN","Encounter"
 				, "Name","MRN","Physician","null"]
 	fieldvals(dev,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
-	}
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
 	
 	dev := stregX(fintxt,"Device Status",1,1,"Parameter Summary",1)
 	fields[1] := ["Device Status", "Battery Voltage","Remaining Longevity","`n"]
