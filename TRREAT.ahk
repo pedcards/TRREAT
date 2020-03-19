@@ -32,7 +32,7 @@ path.compl		:= path.trreat "golive\completed\"										; signed rtf with PDF an
 path.paceart	:= path.trreat "golive\paceart\"										; PaceArt import xml
 path.hl7in		:= path.trreat "golive\epic\Orders\"									; inbound Epic ORM
 path.outbound	:= path.trreat "golive\epic\OutboundHL7\"								; outbound ORU for Ensemble
-path.onbase		:= path.trreat "golive\onbase"											; onbase DRIP folder for PDFs
+path.onbase		:= path.trreat "golive\onbase\"											; onbase DRIP folder for PDFs
 
 worklist := path.files "worklist.xml"
 
@@ -2351,6 +2351,11 @@ PrintOut:
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	enc_dt.YMD
+	onbaseFile := "TRREAT_"
+			. fldval["dev-ordernum"] "_" 
+			. enc_dt.YMD "_" 
+			. fldval["dev-NameL"] "_" 
+			. fldval["dev-MRN"] ".pdf"
 	
 	FileDelete, % path.files fileOut ".rtf"												; delete and generate RTF fileOut.rtf
 	FileAppend, % rtfOut, % path.files fileOut ".rtf"
@@ -2380,8 +2385,9 @@ PrintOut:
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
 			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
 		}
-		FileMove, % path.files fileOut ".rtf", % path.report fileOut ".rtf", 1				; move RTF to the final directory
+		FileMove, % path.files fileOut ".rtf", % path.report fileOut ".rtf", 1			; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
+		FileCopy, % fileIn, % path.onbase onbaseFile, 1
 		fileDelete, % fileIn
 		
 		t_now := A_Now
