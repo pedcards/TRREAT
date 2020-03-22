@@ -2308,12 +2308,12 @@ PrintOut:
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	enc_dt.YMD
 	
-	FileDelete, % path.files fileOut ".rtf"												; delete and generate RTF fileOut.rtf
-	FileAppend, % rtfOut, % path.files fileOut ".rtf"
+	FileDelete, % path.files "tmp\" fileOut ".rtf"										; delete and generate RTF fileOut.rtf
+	FileAppend, % rtfOut, % path.files "tmp\" fileOut ".rtf"
 	
-	eventlog("Print output generated in " path.files)
+	eventlog("Print output generated in " path.files "tmp")
 	
-	RunWait, % "WordPad.exe """ path.files fileOut ".rtf"""								; launch fileNam in WordPad
+	RunWait, % "WordPad.exe """ path.files "tmp\" fileOut ".rtf"""						; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
@@ -2336,7 +2336,7 @@ PrintOut:
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
 			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
 		}
-		FileMove, % path.files fileOut ".rtf", % path.report fileOut ".rtf", 1				; move RTF to the final directory
+		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
 		fileDelete, % fileIn
 		
