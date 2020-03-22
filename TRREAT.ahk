@@ -2335,6 +2335,8 @@ PrintOut:
 					. "`n"
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
 			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
+			
+			FileCopy, % fileIn, % path.paceart "done\"
 		}
 		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
