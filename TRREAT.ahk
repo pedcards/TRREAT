@@ -969,10 +969,10 @@ mdtQuickLookII:
 	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
 	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
 	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
-	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT"
+	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT","V-V Pace Delay"
 				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
 				, "Paced AV","Sensed AV","Mode Switch"]
-	labels[2] := ["Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
+	labels[2] := ["Mode","CRT_VP","CRT_VV","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
 	scanParams(qltbl,2,"par",1)
 	
 	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
@@ -1106,8 +1106,10 @@ mdtQuickLookII:
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
-	fields[1] := ["Mode  ","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV","Mode Switch"]
-	labels[1] := ["Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV","Mode Switch"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
+	fields[1] := ["Mode  ","Lower","Upper Track","Upper Sensor"
+		,"V. Pacing","AdaptivCRT","V-V Pace Delay"
+		,"Paced AV","Sensed AV","Mode Switch"]
+	labels[1] := ["Mode","LRL","URL","USR","CRT_VP","CRT_VV","CRT_VV","PAV","SAV","Mode Switch"]				; Scan for "Mode Switch" first, so can find plain "Mode" second
 	tmp := onecol(param)
 	scanParams(onecol(param),1,"par",1)
 	
