@@ -2109,7 +2109,8 @@ pmPrint:
 	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". "
 	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
 	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
-	. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
+	. printQ(fldval["par-Mode"],"Brady programming mode is ###")
+	. printQ(fldval["par-LRL"],", lower rate ###")
 	. printQ(fldval["par-URL"],", upper tracking rate ###")
 	. printQ((substr(fldval["par-Mode"],0,1)="R"),printQ(fldval["par-USR"],", upper sensor rate ###"))
 	. printQ(fldval["par-ADL"],", ADL rate ###") . ". "
