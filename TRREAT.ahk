@@ -2115,6 +2115,7 @@ pmPrint:
 	. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
 	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
 	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
+	. printQ(fldval["par-CRT_VP"],"Ventricular pace sequence ###" . printQ(fldval["par-CRT_VV"]," (###)") ". `n")
 	. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
 	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
 	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
