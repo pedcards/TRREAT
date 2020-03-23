@@ -1061,10 +1061,10 @@ mdtQuickLookII:
 	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
 	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
 	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
-	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT"
+	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT","V-V Pace Delay"
 				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
 				, "Paced AV","Sensed AV","Mode Switch"]
-	labels[2] := ["Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
+	labels[2] := ["Mode","CRT_VP","CRT_VV","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
 	scanParams(qltbl,2,"par",1)
 	
 	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
@@ -1198,8 +1198,10 @@ mdtQuickLookII:
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
-	fields[1] := ["Mode  ","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV","Mode Switch"]
-	labels[1] := ["Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV","Mode Switch"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
+	fields[1] := ["Mode  ","Lower","Upper Track","Upper Sensor"
+		,"V. Pacing","AdaptivCRT","V-V Pace Delay"
+		,"Paced AV","Sensed AV","Mode Switch"]
+	labels[1] := ["Mode","LRL","URL","USR","CRT_VP","CRT_VV","CRT_VV","PAV","SAV","Mode Switch"]				; Scan for "Mode Switch" first, so can find plain "Mode" second
 	tmp := onecol(param)
 	scanParams(onecol(param),1,"par",1)
 	
@@ -1696,9 +1698,9 @@ SJM_meta:
 	sjmVals(1,"leads")
 	
 	fields[1] := ["(\x1C)Mode(\x1c)","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
-				, "Paced AV Delay","Sensed AV Delay"]
+				, "Paced AV Delay","Sensed AV Delay","Ventricular Pacing Chamber","Interventricular Pace Delay"]
 	labels[1] := ["Mode","LRL","URL","USR"
-				, "PAV","SAV"]
+				, "PAV","SAV","CRT_VP","CRT_VV"]
 	sjmVals(1,"par")
 	
 	fields[1] := ["(\x1C)VF Detection Interval","(\x1C)VT-1 Detection Interval"
@@ -2208,6 +2210,7 @@ pmPrint:
 	. printQ(fldval["par-ADL"],", ADL rate ###") . ". "
 	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. ")
 	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. ")
+	. printQ(fldval["par-CRT_VP"],"Ventricular pace sequence ###" . printQ(fldval["par-CRT_VV"]," (###)") ". ")
 	. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
 	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
 	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
@@ -2357,12 +2360,12 @@ PrintOut:
 			. fldval["dev-NameL"] "_" 
 			. fldval["dev-MRN"] ".pdf"
 	
-	FileDelete, % path.files fileOut ".rtf"												; delete and generate RTF fileOut.rtf
-	FileAppend, % rtfOut, % path.files fileOut ".rtf"
+	FileDelete, % path.files "tmp\" fileOut ".rtf"										; delete and generate RTF fileOut.rtf
+	FileAppend, % rtfOut, % path.files "tmp\" fileOut ".rtf"
 	
-	eventlog("Print output generated in " path.files)
+	eventlog("Print output generated in " path.files "tmp")
 	
-	RunWait, % "WordPad.exe """ path.files fileOut ".rtf"""								; launch fileNam in WordPad
+	RunWait, % "WordPad.exe """ path.files "tmp\" fileOut ".rtf"""						; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
@@ -2384,8 +2387,10 @@ PrintOut:
 					. "`n"
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
 			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
+			
+			FileCopy, % fileIn, % path.paceart "done\"
 		}
-		FileMove, % path.files fileOut ".rtf", % path.report fileOut ".rtf", 1			; move RTF to the final directory
+		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
 		FileCopy, % fileIn, % path.onbase onbaseFile, 1
 		fileDelete, % fileIn
