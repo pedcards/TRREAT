@@ -1602,9 +1602,9 @@ SJM_meta:
 	sjmVals(1,"leads")
 	
 	fields[1] := ["(\x1C)Mode(\x1c)","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
-				, "Paced AV Delay","Sensed AV Delay"]
+				, "Paced AV Delay","Sensed AV Delay","Ventricular Pacing Chamber","Interventricular Pace Delay"]
 	labels[1] := ["Mode","LRL","URL","USR"
-				, "PAV","SAV"]
+				, "PAV","SAV","CRT_VP","CRT_VV"]
 	sjmVals(1,"par")
 	
 	fields[1] := ["(\x1C)VF Detection Interval","(\x1C)VT-1 Detection Interval"
