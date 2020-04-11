@@ -978,8 +978,8 @@ mdtQuickLookII:
 	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
 	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
 				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
-	labels[2] := ["AT/AF","VF","FVT","VT"
-				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	labels[2] := ["ATAF","VF","FVT","VT"
+				, "Rx_ATAF","Rx_VF","Rx_FVT","Rx_VT"]
 	scanParams(parseTable(qltbl),2,"detect",1)
 	
 	inirep := columns(qltxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
@@ -1095,8 +1095,8 @@ mdtQuickLookII:
 	fintbl := stregX(fintxt,"Detection",1,0,"(Changes)|(Enhancement)|(Clinical Status)",1)
 	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
 				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
-	labels[2] := ["AT/AF","VF","FVT","VT"
-				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	labels[2] := ["ATAF","VF","FVT","VT"
+				, "Rx_ATAF","Rx_VF","Rx_FVT","Rx_VT"]
 	scanParams(parseTable(fintbl),2,"detect",1)
 	
 /*	FINAL: PARAMETERS
@@ -1748,20 +1748,20 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//Programming/Tachycardia",1,"detect")
 	
-	fields[1] := ["/Episode[Type='AF_AT']/Count:AT/AF"
-				, "/Episode[Type='VF_VT']/Count:VT/VF"
+	fields[1] := ["/Episode[Type='AF_AT']/Count:ATAF"
+				, "/Episode[Type='VF_VT']/Count:VTVF"
 				, "/Episode[Type='SVT']/Count:SVT"
 				, "/Episode[Type='V_NST']/Count:VNST"
 				, "/Episode[Type='VT']/Count:VT"
 				, "/Episode[Type='FVT']/Count:FVT"
-				, "/Therapy[Chamber='RIGHT_ATRIUM']/ATP/Delivered:Rx_AT/AF"
+				, "/Therapy[Chamber='RIGHT_ATRIUM']/ATP/Delivered:Rx_ATAF"
 				, "/Therapy[Chamber='RIGHT_ATRIUM']/Shocks/Delivered:A_Shocked"
 				, "/Therapy[Chamber='RIGHT_ATRIUM']/Shocks/Aborted:A_Aborted"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/ATP/Delivered:Rx_VATP"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Delivered:V_Shocked"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Aborted:V_Aborted"
 				. ""]
-	xmlFld("//Statistics/Detections_Therapies",1,"detect")
+	xmlFld("//Statistics/Detections_Therapies",1,"event")
 	
 	loop, % (i:=yp.selectNodes("//PatientPassiveDevice[Status='ACTIVE']")).length
 	{
@@ -2121,7 +2121,7 @@ pmPrint:
 	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
 	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
 	. printQ(fldval["dev-AP"],"A-paced ###%. ") . printQ(fldval["dev-VP"],"V-paced ###%. ")
-	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###" printQ(fldval["detect-Rx_AT/AF"],", Rx ###") ". ")
+	. printQ(fldval["detect-ATAF"],"AT/AF detection ###" printQ(fldval["detect-Rx_ATAF"],", Rx ###") ". ")
 	. printQ(fldval["detect-VF"],"VF detection ###" printQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
 	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
 	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
