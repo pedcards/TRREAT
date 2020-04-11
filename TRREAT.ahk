@@ -2129,7 +2129,7 @@ pmPrint:
 	. "\fs22\par `n"
 	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
 	
-	for k,v in ["RA","RV","LV","HV"]
+	for k,v in ["RA","RV","RV2","RV3","LV","LV2","HV"]
 	{
 		if !isobject(leads[v]) {
 			continue
