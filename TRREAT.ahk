@@ -2163,9 +2163,10 @@ normLead(lead				; RA, RV, LV 												) {
 		,P_pol				; Pacing polarity
 		,S_thr				; Sensing threshold
 		,S_sens				; Sensing programmed sensitivity
-		,S_pol)				; Sensing polarity
+		,S_pol				; Sensing polarity
+		,HV_imp="")			; HV impedance
 {
-	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol) {			; ALL parameters in pre or post are NULL
+	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol && !HV_imp) {	; ALL parameters in pre or post are NULL
 		eventlog("Lead " lead " all null values!")
 		return error																	; Do not populate leads[]
 	}
@@ -2173,8 +2174,7 @@ normLead(lead				; RA, RV, LV 												) {
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
 	leads[lead,"imp"]  		:= printQ(P_imp,"Pacing impedance ###") 
-							. printQ(fldval["leads-" lead "_HVimp"]
-							, printQ(P_imp,". ") " Defib impedance ###")
+							. printQ(HV_imp,printQ(P_imp,". ") "Defib impedance ###")
 	leads[lead,"cap"]  		:= P_thr
 	leads[lead,"output"]	:= P_out
 	leads[lead,"pace pol"] 	:= P_pol
