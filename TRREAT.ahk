@@ -1821,7 +1821,7 @@ PaceartReadXml:
 				, "/VVDelay:CRT_VV[ms]"
 				. ""]
 	xmlFld("//Programming/HeartFailure",1,"par")
-	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV<LV"
+	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV>LV"
 	
 	fields[1] := ["APVPPercent:ApVp[%]"
 				, "ASVPPercent:AsVp[%]"
@@ -1868,7 +1868,8 @@ PaceartReadXml:
 			, k.pacing_pol
 			, k.sensing_thr
 			, k.sensitivity_amp
-			, k.sensitivity_pol)
+			, k.sensitivity_pol
+			, k.HV_imped)
 	}
 	
 	return
@@ -1894,10 +1895,11 @@ readXmlLead(k) {
 		res.ch .= num+1
 	}
 	if (k.selectSingleNode("Device/Comments").text~="HV") {
+		if !(res.chamb) {
+			res.chamb := "HV"
+			res.ch := "HV"
+		}
 		fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
-	}
-	if (res.model ~= "6937") {
-		return res
 	}
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
@@ -1915,7 +1917,7 @@ readXmlLead(k) {
 	res.cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
 	res.sensing_thr := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
 	res.pacing_imped := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
-	;~ fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+	res.HV_imped := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	
 	return res
 }
@@ -2222,7 +2224,7 @@ pmPrint:
 	. "\par\par "
 	. "\b\ul LEAD INFORMATION\ul0\b0\par "
 	
-	for k,v in ["RA","RV","LV","HV"]
+	for k,v in ["RA","RV","RV2","RV3","LV","LV2","HV"]
 	{
 		if !isobject(leads[v]) {
 			continue
@@ -2255,9 +2257,10 @@ normLead(lead				; RA, RV, LV 												) {
 		,P_pol				; Pacing polarity
 		,S_thr				; Sensing threshold
 		,S_sens				; Sensing programmed sensitivity
-		,S_pol)				; Sensing polarity
+		,S_pol				; Sensing polarity
+		,HV_imp="")			; HV impedance
 {
-	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol) {			; ALL parameters in pre or post are NULL
+	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol && !HV_imp) {	; ALL parameters in pre or post are NULL
 		eventlog("Lead " lead " all null values!")
 		return error																	; Do not populate leads[]
 	}
@@ -2265,8 +2268,7 @@ normLead(lead				; RA, RV, LV 												) {
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
 	leads[lead,"imp"]  		:= printQ(P_imp,"Pacing impedance ###") 
-							. printQ(fldval["leads-" lead "_HVimp"]
-							, printQ(P_imp,". ") " Defib impedance ###")
+							. printQ(HV_imp,printQ(P_imp,". ") "Defib impedance ###")
 	leads[lead,"cap"]  		:= P_thr
 	leads[lead,"output"]	:= P_out
 	leads[lead,"pace pol"] 	:= P_pol
