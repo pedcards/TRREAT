@@ -2238,7 +2238,7 @@ PrintOut:
 		enc_trans :=																	; transmission date is null
 	}
 	
-	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]))
+	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]) || (fldval["dev-Type"]="ICD"))
 		? "ICD "
 		: "PM "
 	
