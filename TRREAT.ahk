@@ -1800,10 +1800,11 @@ readXmlLead(k) {
 		res.ch .= num+1
 	}
 	if (k.selectSingleNode("Device/Comments").text~="HV") {
+		if !(res.chamb) {
+			res.chamb := "HV"
+			res.ch := "HV"
+		}
 		fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
-	}
-	if (res.model ~= "6937") {
-		return res
 	}
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
@@ -1821,7 +1822,7 @@ readXmlLead(k) {
 	res.cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
 	res.sensing_thr := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
 	res.pacing_imped := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
-	;~ fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+	res.HV_imped := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	
 	return res
 }
