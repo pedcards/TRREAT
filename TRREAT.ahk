@@ -1774,7 +1774,8 @@ PaceartReadXml:
 			, k.pacing_pol
 			, k.sensing_thr
 			, k.sensitivity_amp
-			, k.sensitivity_pol)
+			, k.sensitivity_pol
+			, k.HV_imped)
 	}
 	
 	return
