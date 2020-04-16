@@ -3221,33 +3221,56 @@ ParseDate(x) {
 				: "20" d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2})\s+(\d{4})",d) {							; Dec 21, 2018
+	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2}),?\s+(\d{4})",d) {					; Dec 21, 2018
 		date.mmm := d1
 		date.mm := zdigit(objhasvalue(mo,d1))
 		date.dd := zdigit(d2)
 		date.yyyy := d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"\b(\d{4})-?(\d{2})-?(\d{2})\b",d) {								; 20150103 or 2015-01-03
+	else if RegExMatch(x,"\b(\d{4})[\-\.](\d{2})[\-\.](\d{2})\b",d) {					; 2015-01-03
 		date.yyyy := d1
 		date.mm := d2
 		date.mmm := mo[d2]
 		date.dd := d3
 		date.date := trim(d)
 	}
+	else if RegExMatch(x,"\b(19|20\d{2})(\d{2})(\d{2})((\d{2})(\d{2})(\d{2})?)?\b",d)  {	; 20150103174307 or 20150103
+		date.yyyy := d1
+		date.mm := d2
+		date.mmm := mo[d2]
+		date.dd := d3
+		date.date := d1 "-" d2 "-" d3
+		
+		time.hr := d5
+		time.min := d6
+		time.sec := d7
+		time.time := d5 ":" d6 . printQ(d7,":###")
+	}
 	
-	if RegExMatch(x,"i)(\d{1,2}):(\d{2})(:\d{2})?(.*AM|PM)?",t) {						; 17:42 PM
-		time.hr := zdigit(t1)
-		time.min := t2
-		time.sec := trim(t3," :")
-		time.ampm := trim(t4)
-		time.time := trim(t)
+	if RegExMatch(x,"iO)(\d+):(\d{2})(:\d{2})?(:\d{2})?(.*)?(AM|PM)?",t) {				; 17:42 PM
+		hasDays := (t.value[4]) ? true : false 											; 4 nums has days
+		time.days := (hasDays) ? t.value[1] : ""
+		time.hr := trim(t.value[1+hasDays])
+		if (time.hr>23) {
+			time.days := floor(time.hr/24)
+			time.hr := mod(time.hr,24)
+			DHM:=true
+		}
+		time.min := trim(t.value[2+hasDays]," :")
+		time.sec := trim(t.value[3+hasDays]," :")
+		time.ampm := trim(t.value[5])
+		time.time := trim(t.value)
 	}
 
 	return {yyyy:date.yyyy, mm:date.mm, mmm:date.mmm, dd:date.dd, date:date.date
 			, YMD:date.yyyy date.mm date.dd
 			, MDY:date.mm "/" date.dd "/" date.yyyy
-			, hr:time.hr, min:time.min, sec:time.sec, ampm:time.ampm, time:time.time}
+			, days:zdigit(time.days)
+			, hr:zdigit(time.hr), min:zdigit(time.min), sec:zdigit(time.sec)
+			, ampm:time.ampm, time:time.time
+			, DHM:zdigit(time.days) ":" zdigit(time.hr) ":" zdigit(time.min) " (DD:HH:MM)" 
+ 			, DT:date.mm "/" date.dd "/" date.yyyy " at " zdigit(time.hr) ":" zdigit(time.min) ":" zdigit(time.sec) }
 }
 
 year4dig(x) {
