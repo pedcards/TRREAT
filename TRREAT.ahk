@@ -958,7 +958,7 @@ mdtQuickLookII:
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
 			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
-			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
 			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
@@ -1130,7 +1130,7 @@ mdtQuickLookII:
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
 			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
-			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
 			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
@@ -1444,7 +1444,7 @@ bsciZoomView:
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
 			,fldval["Vlead-imp"],fldval["Vlead-cap"],fldval["leads-VP_thr"],fldval["RVlead-Pol_pace"]
-			,fldval["Vlead-sensing"],fldval["leads-VS_thr"],fldval["leads-RV_Pol_sens"])
+			,fldval["Vlead-sensing"],fldval["leads-VS_thr"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
 			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["LVlead-Pol_pace"]
@@ -1634,7 +1634,7 @@ SJM_meta:
 			,strQ(fldval["leads-RV_Thr_Amp"],"###" strQ(fldval["leads-RV_Thr_PW"]," @ ###"))
 			,strQ(fldval["leads-RV_Pace_Amp"],"###" strQ(fldval["leads-RV_Pace_PW"]," @ ###"))
 			,fldval["leads-RV_Pol_pace"]
-			,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+			,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"],fldval["leads-LV_imp"]
 			,strQ(fldval["leads-LV_Thr_Amp"],"###" strQ(fldval["leads-LV_Thr_PW"]," @ ###"))
