@@ -1020,7 +1020,7 @@ mdtQuickLookII:
 		fields[1] := ["Threshold-.*Amplitude","Threshold-.*Pulse Width"]
 		labels[1] := ["Amp","PW"]
 		scanParams(thrTbl,1,"tmp",1)
-		if (thrVal := fldval["tmp-Amp"] printQ(fldval["tmp-PW"]," / ###")) {
+		if (thrVal := fldval["tmp-Amp"] strQ(fldval["tmp-PW"]," / ###")) {
 			leads[(thrLead="Atrial")?"RA":thrLead,"cap"] := thrVal
 		}
 	}
@@ -1403,21 +1403,21 @@ bsciZoomView:
 	fldfill("leads-RV_HVimp",fldval["Vlead-HVimp"])
 	
 	fldfill("dev-Alead"
-		, printQ(readBnk("PatientLeadAManufacturer"),"###") 
-		. printQ(readBnk("PatientLeadAModelNum"), " ###") 
-		. printQ(readBnk("PatientLeadASerialNum"), " (serial ###)"))
+		, strQ(readBnk("PatientLeadAManufacturer"),"###") 
+		. strQ(readBnk("PatientLeadAModelNum"), " ###") 
+		. strQ(readBnk("PatientLeadASerialNum"), " (serial ###)"))
 	fldfill("Alead-Pol_pace",readBnk("PatientLeadAPolarity"))
 	
 	fldfill("dev-RVlead"
-		, printQ(readBnk("PatientLeadV1Manufacturer"),"###") 
-		. printQ(readBnk("PatientLeadV1ModelNum"), " ###") 
-		. printQ(readBnk("PatientLeadV1SerialNum"), " (serial ###)"))
+		, strQ(readBnk("PatientLeadV1Manufacturer"),"###") 
+		. strQ(readBnk("PatientLeadV1ModelNum"), " ###") 
+		. strQ(readBnk("PatientLeadV1SerialNum"), " (serial ###)"))
 	fldfill("RVlead-Pol_pace",readBnk("PatientLeadV1Polarity"))
 	
 	fldfill("dev-LVlead"
-		, printQ(readBnk("PatientLeadV2Manufacturer"),"###") 
-		. printQ(readBnk("PatientLeadV2ModelNum"), " ###") 
-		. printQ(readBnk("PatientLeadV2SerialNum"), " (serial ###)"))
+		, strQ(readBnk("PatientLeadV2Manufacturer"),"###") 
+		. strQ(readBnk("PatientLeadV2ModelNum"), " ###") 
+		. strQ(readBnk("PatientLeadV2SerialNum"), " (serial ###)"))
 	fldfill("LVlead-Pol_pace",readBnk("PatientLeadV2Polarity"))
 	
 	ctr := stregX(maintxt,"(Ventricular )?Tachy Counters",1,0,"$",0)
@@ -1463,8 +1463,8 @@ SICD:
 	scanparams(txt,1,"dev",1)
 	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"EMBLEMTM","Emblem(TM)"))
 	fldfill("dev-HVlead"
-		, printQ(fldval["dev-HV"],"Boston Scientific ###")
-		. printQ(fldval["dev-HV_SN"]," (serial ###)"))
+		, strQ(fldval["dev-HV"],"Boston Scientific ###")
+		. strQ(fldval["dev-HV_SN"]," (serial ###)"))
 	
 	txt := onecol(stregX(maintxt,"Programmable\s+Parameters.*?\R",1,1,"Shock Polarity.*?\R",0))
 	txt := RegExReplace(txt,": ",":  ")
@@ -1476,7 +1476,7 @@ SICD:
 	fields[1] := ["^Post Shock Pacing","^Gain Setting","^Sensing Configuration"]
 	labels[1] := ["Mode","Gain","Pol_Sens"]
 	scanparams(txt1,1,"par",1)
-	fldval["par-Mode"] := printQ(fldval["par-Mode"],"Post-shock pacing ###")
+	fldval["par-Mode"] := strQ(fldval["par-Mode"],"Post-shock pacing ###")
 	
 	txt := onecol(stregx(maintxt,"Episode\s+Summary.*?\R",1,1,"1.800.CARDIAC",1))
 	txt := stregx(txt,"",1,0,"Americas",0)
@@ -1530,7 +1530,7 @@ SJM_old:
 				, "Encounter"]
 	sjmVals(1,"dev")
 	fldfill("dev-Name",pat_name)
-	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
+	fldfill("dev-IPG","SJM " fldval["dev-IPG"] strQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
 	fldfill("dev-IPG_impl",parseDate(fldval["dev-IPG_impl"]).MDY)
 	
@@ -1552,8 +1552,8 @@ SJM_old:
 	
 	normLead("R" (InStr(fldval["leads-Chamber"],"V")?"V":"A")
 		,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-Imped"]
-		,printQ(fldval["leads-Thr_Amp"],"###" printQ(fldval["leads-Thr_PW"]," @ ###"))
-		,printQ(fldval["leads-Pace_Amp"],"###" printQ(fldval["leads-Pace_PW"]," @ ###"))
+		,strQ(fldval["leads-Thr_Amp"],"###" strQ(fldval["leads-Thr_PW"]," @ ###"))
+		,strQ(fldval["leads-Pace_Amp"],"###" strQ(fldval["leads-Pace_PW"]," @ ###"))
 		,fldval["leads-RV_Pol_pace"]
 		,fldval["leads-Thr_Sens"],fldval["leads-Sensitivity"],fldval["leads-RV_Pol_sens"])
 	
@@ -1579,13 +1579,13 @@ SJM_meta:
 	fldfill("dev-AP",RegExReplace(fldval["dev-AP"]," %"))
 	fldfill("dev-VP",RegExReplace(fldval["dev-VP"]," %"))
 	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
-	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
+	fldfill("dev-IPG","SJM " fldval["dev-IPG"] strQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
-		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], ", serial ###"))
+		. strQ(fldval["dev-Alead_model"], " ###") strQ(fldval["dev-Alead_SN"], ", serial ###"))
 	fldfill("dev-RVlead",fldval["dev-RVlead_man"] 
-		. printQ(fldval["dev-RVlead_model"], " ###") printQ(fldval["dev-RVlead_SN"], ", serial ###"))
+		. strQ(fldval["dev-RVlead_model"], " ###") strQ(fldval["dev-RVlead_SN"], ", serial ###"))
 	fldfill("dev-LVlead",fldval["dev-LVlead_man"] 
-		. printQ(fldval["dev-LVlead_model"], " ###") printQ(fldval["dev-LVlead_SN"], ", serial ###"))
+		. strQ(fldval["dev-LVlead_model"], " ###") strQ(fldval["dev-LVlead_SN"], ", serial ###"))
 	
 	fields[1] := ["Atrial Pulse Configuration","Atrial Pulse Width","Atrial Pulse Amplitude"
 				, "Atrial Sense Configuration","Atrial Sensitivity","(?<!\s)Atrial Signal Amplitude"
@@ -1616,7 +1616,7 @@ SJM_meta:
 	sjmVals(1,"detect")
 	fldfill("detect-VF",fldval["detect-VF"]?round(60000/RegExReplace(fldval["detect-VF"],"\D")):"")
 	fldfill("detect-VT",fldval["detect-VT"]?round(60000/RegExReplace(fldval["detect-VT"],"\D")):"")
-	fldfill("detect-Rx_VF",fldval["detect-VF0"] printQ(fldval["detect-VF1"],", ###"))
+	fldfill("detect-Rx_VF",fldval["detect-VF0"] strQ(fldval["detect-VF1"],", ###"))
 	
 	fields[1] := ["AT/AF Episodes","VT/VF Episodes"]
 	labels[1] := ["ATAF","VT"]
@@ -1624,20 +1624,20 @@ SJM_meta:
 	
 	normLead("RA"
 			,fldval["dev-Alead"],fldval["dev-Alead_impl"],fldval["leads-RA_imp"]
-			,printQ(fldval["leads-RA_Thr_Amp"],"###" printQ(fldval["leads-RA_Thr_PW"]," @ ###"))
-			,printQ(fldval["leads-RA_Pace_Amp"],"###" printQ(fldval["leads-RA_Pace_PW"]," @ ###"))
+			,strQ(fldval["leads-RA_Thr_Amp"],"###" strQ(fldval["leads-RA_Thr_PW"]," @ ###"))
+			,strQ(fldval["leads-RA_Pace_Amp"],"###" strQ(fldval["leads-RA_Pace_PW"]," @ ###"))
 			,fldval["leads-RA_Pol_pace"]
 			,fldval["leads-RA_Thr_Sens"],fldval["leads-RA_Sensitivity"],fldval["leads-RA_Pol_sens"])
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-RV_imp"]
-			,printQ(fldval["leads-RV_Thr_Amp"],"###" printQ(fldval["leads-RV_Thr_PW"]," @ ###"))
-			,printQ(fldval["leads-RV_Pace_Amp"],"###" printQ(fldval["leads-RV_Pace_PW"]," @ ###"))
+			,strQ(fldval["leads-RV_Thr_Amp"],"###" strQ(fldval["leads-RV_Thr_PW"]," @ ###"))
+			,strQ(fldval["leads-RV_Pace_Amp"],"###" strQ(fldval["leads-RV_Pace_PW"]," @ ###"))
 			,fldval["leads-RV_Pol_pace"]
 			,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"],fldval["leads-LV_imp"]
-			,printQ(fldval["leads-LV_Thr_Amp"],"###" printQ(fldval["leads-LV_Thr_PW"]," @ ###"))
-			,printQ(fldval["leads-LV_Pace_Amp"],"###" printQ(fldval["leads-LV_Pace_PW"]," @ ###"))
+			,strQ(fldval["leads-LV_Thr_Amp"],"###" strQ(fldval["leads-LV_Thr_PW"]," @ ###"))
+			,strQ(fldval["leads-LV_Pace_Amp"],"###" strQ(fldval["leads-LV_Pace_PW"]," @ ###"))
 			,fldval["leads-LV_Pol_pace"]
 			,fldval["leads-LV_Thr_Sens"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
 
@@ -1684,7 +1684,7 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
-	fldfill("indication",printQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
+	fldfill("indication",strQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
 	
 	fields[1] := ["Device/Manufacturer:manufacturer"
 				, "Device/Model:model"
@@ -1703,7 +1703,7 @@ PaceartReadXml:
 				, "/Battery/Impedance:IPG_impedance[ohms]"
 				. ""]
 	xmlFld("//Encounter",1,"dev")
-	fldfill("dev-IPG",printQ(fldval["dev-manufacturer"],"###") printQ(fldval["dev-model"]," ###"))
+	fldfill("dev-IPG",strQ(fldval["dev-manufacturer"],"###") strQ(fldval["dev-model"]," ###"))
 	fldfill("dev-Encounter",parseDate(fldval["dev-Encounter"]).MDY)
 	
 	fields[1] := ["PacingMode:Mode"
@@ -1767,10 +1767,10 @@ PaceartReadXml:
 	{
 		k := readXmlLead(i.item(A_Index-1))
 		normLead(k.ch
-			, printQ(k.manu, "### ") printQ(k.model, "###") printQ(k.ser,", serial ###"), k.impl
+			, strQ(k.manu, "### ") strQ(k.model, "###") strQ(k.ser,", serial ###"), k.impl
 			, k.pacing_imped
-			, k.cap_amp printQ(k.cap_pw," / ###")
-			, k.pacing_amp printQ(k.pacing_pw," / ###")
+			, k.cap_amp strQ(k.cap_pw," / ###")
+			, k.pacing_amp strQ(k.pacing_pw," / ###")
 			, k.pacing_pol
 			, k.sensing_thr
 			, k.sensitivity_amp
@@ -1805,25 +1805,25 @@ readXmlLead(k) {
 			res.chamb := "HV"
 			res.ch := "HV"
 		}
-		fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+		fldval["leads-" res.ch "_HVimp"] := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	}
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
-	res.pacing_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	res.pacing_amp := printQ(readNodeVal(base "/Amplitude"),"### V")
-	res.pacing_pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
-	res.pacing_adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
+	res.pacing_pol := strQ(readNodeVal(base "//Polarity"),"###")
+	res.pacing_amp := strQ(readNodeVal(base "/Amplitude"),"### V")
+	res.pacing_pw := strQ(readNodeVal(base "/PulseWidth"),"### ms")
+	res.pacing_adaptive := strQ(readNodeVal(base "/AdaptationMode"),"###")
 	
 	base := "//Programming//SensingData[Chamber='" res.chamb "']"
-	res.sensitivity_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	res.sensitivity_amp := printQ(readNodeVal(base "//Amplitude"),"### mV")
+	res.sensitivity_pol := strQ(readNodeVal(base "//Polarity"),"###")
+	res.sensitivity_amp := strQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" res.chamb "']"
-	res.cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
-	res.cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
-	res.sensing_thr := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
-	res.pacing_imped := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
-	res.HV_imped := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+	res.cap_amp := strQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
+	res.cap_pw := strQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
+	res.sensing_thr := strQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
+	res.pacing_imped := strQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
+	res.HV_imped := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	
 	return res
 }
@@ -1849,7 +1849,7 @@ xmlFld(base,blk,pre="") {
 		unit := strX(lbl,"[",1,1,"]",0,1)
 		lbl := strX(lbl,"",1,0,"[",1,1)
 		
-		fldval[pre "-" lbl] := printQ(res, "###" . printQ(unit," ###"))
+		fldval[pre "-" lbl] := strQ(res, "###" . strQ(unit," ###"))
 	}
 	return
 }
@@ -2097,8 +2097,8 @@ readSjm(lbl) {
 		break																	; and break out of loop
 	}
 	return RegExReplace(el3,"[^[:ascii:]]") 
-		. printQ(RegExReplace(el4,"[^[:ascii:]]")," ###") 
-		. printQ(RegExReplace(el5,"[^[:ascii:]]")," ###")						; return: value ( units)( whatever el5 is)
+		. strQ(RegExReplace(el4,"[^[:ascii:]]")," ###") 
+		. strQ(RegExReplace(el5,"[^[:ascii:]]")," ###")						; return: value ( units)( whatever el5 is)
 }
 
 pmPrint:
@@ -2108,25 +2108,25 @@ pmPrint:
 	}
 	rtfBody := "\fs22\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n\fs18 "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
-	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". "
-	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
-	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
-	. printQ(fldval["par-Mode"],"Brady programming mode is ###")
-	. printQ(fldval["par-LRL"],", lower rate ###")
-	. printQ(fldval["par-URL"],", upper tracking rate ###")
-	. printQ((substr(fldval["par-Mode"],0,1)="R"),printQ(fldval["par-USR"],", upper sensor rate ###"))
-	. printQ(fldval["par-ADL"],", ADL rate ###") . ". "
-	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. ")
-	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. ")
-	. printQ(fldval["par-CRT_VP"],"Ventricular pace sequence ###" . printQ(fldval["par-CRT_VV"]," (###)") ". ")
-	. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
-	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
-	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
-	. printQ(fldval["dev-AP"],"A-paced ###%. ") . printQ(fldval["dev-VP"],"V-paced ###%. ")
-	. printQ(fldval["detect-ATAF"],"AT/AF detection ###" printQ(fldval["detect-Rx_ATAF"],", Rx ###") ". ")
-	. printQ(fldval["detect-VF"],"VF detection ###" printQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
-	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
-	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
+	. strQ(fldval["dev-IPG_impl"],", implanted ###") . strQ(fldval["dev-Physician"]," by ###") ". "
+	. strQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
+	. strQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . strQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
+	. strQ(fldval["par-Mode"],"Brady programming mode is ###")
+	. strQ(fldval["par-LRL"],", lower rate ###")
+	. strQ(fldval["par-URL"],", upper tracking rate ###")
+	. strQ((substr(fldval["par-Mode"],0,1)="R"),strQ(fldval["par-USR"],", upper sensor rate ###"))
+	. strQ(fldval["par-ADL"],", ADL rate ###") . ". "
+	. strQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. ")
+	. strQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. ")
+	. strQ(fldval["par-CRT_VP"],"Ventricular pace sequence ###" . strQ(fldval["par-CRT_VV"]," (###)") ". ")
+	. strQ(fldval["dev-Sensed"],"Sensed ###. ") . strQ(fldval["dev-Paced"],"Paced ###. ")
+	. strQ(fldval["dev-AsVs"],"AS-VS ###  ") . strQ(fldval["dev-AsVp"],"AS-VP ###  ")
+	. strQ(fldval["dev-ApVs"],"AP-VS ###  ") . strQ(fldval["dev-ApVp"],"AP-VP ###  ")
+	. strQ(fldval["dev-AP"],"A-paced ###%. ") . strQ(fldval["dev-VP"],"V-paced ###%. ")
+	. strQ(fldval["detect-ATAF"],"AT/AF detection ###" strQ(fldval["detect-Rx_ATAF"],", Rx ###") ". ")
+	. strQ(fldval["detect-VF"],"VF detection ###" strQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
+	. strQ(fldval["detect-FVT"],"FVT detection ###" strQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
+	. strQ(fldval["detect-VT"],"VT detection ###" strQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
 	. "\par `n"
 	. "\fs22\par `n"
 	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
@@ -2146,7 +2146,7 @@ pmPrint:
 Return
 }
 
-printQ(var1,txt,null:="") {
+strQ(var1,txt,null:="") {
 /*	Print Query - Returns text based on presence of var
 	var1	= var to query
 	txt		= text to return with ### on spot to insert var1 if present
@@ -2174,8 +2174,8 @@ normLead(lead				; RA, RV, LV 												) {
 	global leads, fldval
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
-	leads[lead,"imp"]  		:= printQ(P_imp,"Pacing impedance ###") 
-							. printQ(HV_imp,printQ(P_imp,". ") "Defib impedance ###")
+	leads[lead,"imp"]  		:= strQ(P_imp,"Pacing impedance ###") 
+							. strQ(HV_imp,strQ(P_imp,". ") "Defib impedance ###")
 	leads[lead,"cap"]  		:= P_thr
 	leads[lead,"output"]	:= P_out
 	leads[lead,"pace pol"] 	:= P_pol
@@ -2188,15 +2188,15 @@ return
 printLead(lead) {
 	global rtfBody, leads
 	rtfBody .= "\b " lead " lead: \b0 " 
-	. printQ(leads[lead,"model"],"###" printQ(leads[lead,"date"],", implanted ###") ". ")
-	. printQ(leads[lead,"imp"],"###. ")
-	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
-	. printQ(leads[lead,"output"],"Pacing output ###. ")
-	. printQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
-	. printQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing " 
+	. strQ(leads[lead,"model"],"###" strQ(leads[lead,"date"],", implanted ###") ". ")
+	. strQ(leads[lead,"imp"],"###. ")
+	. strQ(leads[lead,"cap"],"Capture threshold ###. ")
+	. strQ(leads[lead,"output"],"Pacing output ###. ")
+	. strQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
+	. strQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing " 
 		. ((leads[lead,"sens"]~="N/R")?"not measured/detected":"###") ". ")
-	. printQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
-	. printQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
+	. strQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
+	. strQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
 	. "\par `n"
 }
 
@@ -2205,23 +2205,23 @@ printEvents()
 	global rtfBody, fldval
 	if (fldval["leads-RV_HVimp"]) {
 		txt := ""
-		. printQ(fldval["event-AHR"]?fldval["event-AHR"]:"0","There were ### Atrial High Rate episodes. ")
-		. printQ(fldval["event-VHR"]?fldval["event-VHR"]:"0","There were ### Ventricular High Rate episodes. ")
-		. printQ(fldval["event-VF"]?fldval["event-VF"]:"0","### VF episodes detected. ")
-		. printQ(fldval["event-VT"]?fldval["event-VT"]:"0","### VT episodes detected. ")
+		. strQ(fldval["event-AHR"]?fldval["event-AHR"]:"0","There were ### Atrial High Rate episodes. ")
+		. strQ(fldval["event-VHR"]?fldval["event-VHR"]:"0","There were ### Ventricular High Rate episodes. ")
+		. strQ(fldval["event-VF"]?fldval["event-VF"]:"0","### VF episodes detected. ")
+		. strQ(fldval["event-VT"]?fldval["event-VT"]:"0","### VT episodes detected. ")
 	}
 	txt .= ""
-	. printQ(fldval["event-VTNS"]?fldval["event-VTNS"]:"","### NS-VT episodes detected. ")
-	. printQ(fldval["event-ATAF"]?fldval["event-ATAF"]:"","### AT/AF episodes detected. ")
-	. printQ(fldval["event-V_Paced"]?fldval["event-V_Paced"]:"","### VT episodes pace-terminated. ")
-	. printQ(fldval["event-V_Shocked"]?fldval["event-V_Shocked"]:"","### VT/VF episodes shock-terminated. ")
-	. printQ(fldval["event-V_Aborted"]?fldval["event-V_Aborted"]:"","### VT/VF episodes aborted. ")
-	. printQ(fldval["event-A_Paced"]?fldval["event-A_Paced"]:"","### AT episodes pace-terminated. ")
-	. printQ(fldval["event-A_Shocked"]?fldval["event-A_Shocked"]:"","### AT/AF episodes shock-terminated. ")
-	. printQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
-	. printQ(fldval["event-Obs"],"\par ### ")
+	. strQ(fldval["event-VTNS"]?fldval["event-VTNS"]:"","### NS-VT episodes detected. ")
+	. strQ(fldval["event-ATAF"]?fldval["event-ATAF"]:"","### AT/AF episodes detected. ")
+	. strQ(fldval["event-V_Paced"]?fldval["event-V_Paced"]:"","### VT episodes pace-terminated. ")
+	. strQ(fldval["event-V_Shocked"]?fldval["event-V_Shocked"]:"","### VT/VF episodes shock-terminated. ")
+	. strQ(fldval["event-V_Aborted"]?fldval["event-V_Aborted"]:"","### VT/VF episodes aborted. ")
+	. strQ(fldval["event-A_Paced"]?fldval["event-A_Paced"]:"","### AT episodes pace-terminated. ")
+	. strQ(fldval["event-A_Shocked"]?fldval["event-A_Shocked"]:"","### AT/AF episodes shock-terminated. ")
+	. strQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
+	. strQ(fldval["event-Obs"],"\par ### ")
 	
-	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18 `n###\par `n") 
+	rtfBody .= strQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18 `n###\par `n") 
 return	
 }
 
@@ -2284,19 +2284,19 @@ PrintOut:
 	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
 	
 	rtfBody := "`n"
-	. "\fs22\b\ul DATE OF BIRTH: " printQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par `n"
+	. "\fs22\b\ul DATE OF BIRTH: " strQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par `n"
 	. "\fs22\b\ul ANALYSIS DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
-	. printQ(is_remote
+	. strQ(is_remote
 		,"\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n"
 		. enc_trans.MDY "\par `n")
 	. "\par `n"
 	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
 	. "Device interrogation " enc_type "\par `n"
 	. "Perfomed by " tech ".\par\par\fs22 `n"
-	. printQ(fldval["indication"]
+	. strQ(fldval["indication"]
 		, "\b\ul INDICATION FOR DEVICE\ul0\b0\par\fs18 `n"
 		. "###\par\par\fs22 `n")
-	. printQ(fldval["dependent"]
+	. strQ(fldval["dependent"]
 		, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par\fs18 `n"
 		. "###\par\par\fs22 `n")
 	. rtfBody . "\fs22\par `n" 
@@ -2355,7 +2355,7 @@ PrintOut:
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
 			xl.addElement("status",edID,"Pending")
-			xl.addElement("paceart",edID,printQ(is_remote,"True"))
+			xl.addElement("paceart",edID,strQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
 			xl.addElement("report",edID,path.report fileOut ".rtf")
@@ -3245,7 +3245,7 @@ ParseDate(x) {
 		time.hr := d5
 		time.min := d6
 		time.sec := d7
-		time.time := d5 ":" d6 . printQ(d7,":###")
+		time.time := d5 ":" d6 . strQ(d7,":###")
 	}
 	
 	if RegExMatch(x,"iO)(\d+):(\d{2})(:\d{2})?(:\d{2})?(.*)?(AM|PM)?",t) {				; 17:42 PM
