@@ -2426,7 +2426,6 @@ PrintOut:
 			;~ err := whr.ResponseText													; the http response
 		}
 	}
-	gosub parseGUI
 	
 	return
 }
