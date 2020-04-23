@@ -233,13 +233,22 @@ readFilesMDT() {
 				eventlog("MDT: newer version of " j " _" k )
 			}
 		}
-		fnam := StrSplit(tmp.file,"_")
-		tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
-		tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
-		tmp.type := fnam.3
-		tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
-		tmp.file := path.pdf tmp.file
-		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		
+		if instr(tmp.file,"SmartSyncPDF") {
+			fnam := StrSplit(RegExReplace(tmp.file,"SmartSyncPDF."),"_")
+			tmp.name := RegExReplace(tmp.file,"i).pdf$")
+			tmp.date := parsedate(fnam.1 "-" fnam.2 "-" fnam.3).YMD
+			tmp.file := path.pdf tmp.file
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		} else {
+			fnam := StrSplit(tmp.file,"_")
+			tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
+			tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
+			tmp.type := fnam.3
+			tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
+			tmp.file := path.pdf tmp.file
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		}
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
 			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
