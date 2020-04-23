@@ -648,7 +648,7 @@ fileLoop:
 		cleanlines(maintxt)
 	}
 	
-	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+	if (maintxt~="Medtronic,\s+Inc|Medtronic Software") {						; PM and ICD reports use common subs
 		eventlog("Medtronic identified.")
 		gosub Medtronic
 	}
@@ -874,9 +874,12 @@ Medtronic:
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {							; or scan more current QuickLook II reports
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
 		eventlog("QuickLookII report.")
 		gosub mdtQuickLookII
+	} else if (maintxt~="Medtronic\s+Application ID") {							; or new iPad report
+		eventlog("Medtronic Application report.")
+		gosub mdtApplication
 	} else {																	; or something else
 		eventlog("No match.")
 		MsgBox NO MATCH
