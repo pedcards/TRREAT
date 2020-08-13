@@ -18,7 +18,7 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	trreatDir := "\\childrens\files\HCTRREAT\prod\"										; need to define this before readIni
+	trreatDir := "\\childrens\files\HCTRREAT\TEST\"										; need to define this before readIni
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
@@ -26,13 +26,13 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 ;~ chipDir:=path.chip																	; CHIPOTLE root
 ;~ pdfDir:=path.pdf																		; USB root
 path.trreat		:= trreatDir															; TRREAT root
-path.files		:= path.trreat "golive\files\"											; ini and xml files
-path.report		:= path.trreat "golive\pending\"										; parsed reports and rtf pending
-path.compl		:= path.trreat "golive\completed\"										; signed rtf with PDF and meta files
-path.paceart	:= path.trreat "golive\paceart\"										; PaceArt import xml
-path.hl7in		:= path.trreat "golive\epic\Orders\"									; inbound Epic ORM
-path.outbound	:= path.trreat "golive\epic\OutboundHL7\"								; outbound ORU for Ensemble
-path.onbase		:= path.trreat "golive\onbase\"											; onbase DRIP folder for PDFs
+path.files		:= path.trreat "files\"													; ini and xml files
+path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
+path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
+path.paceart	:= path.trreat "paceart\"												; PaceArt import xml
+path.hl7in		:= path.trreat "epic\Orders\"											; inbound Epic ORM
+path.outbound	:= path.trreat "epic\OutboundHL7\"										; outbound ORU for Ensemble
+path.onbase		:= path.trreat "onbase\"												; onbase DRIP folder for PDFs
 
 worklist := path.files "worklist.xml"
 
