@@ -238,13 +238,22 @@ readFilesMDT() {
 				eventlog("MDT: newer version of " j " _" k )
 			}
 		}
-		fnam := StrSplit(tmp.file,"_")
-		tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
-		tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
-		tmp.type := fnam.3
-		tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
-		tmp.file := path.pdf tmp.file
-		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		
+		if instr(tmp.file,"SmartSyncPDF") {
+			fnam := StrSplit(RegExReplace(tmp.file,"SmartSyncPDF."),"_")
+			tmp.name := RegExReplace(tmp.file,"i).pdf$")
+			tmp.date := parsedate(fnam.1 "-" fnam.2 "-" fnam.3).YMD
+			tmp.file := path.pdf tmp.file
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		} else {
+			fnam := StrSplit(tmp.file,"_")
+			tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
+			tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
+			tmp.type := fnam.3
+			tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
+			tmp.file := path.pdf tmp.file
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		}
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
 			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
@@ -655,7 +664,7 @@ fileLoop:
 		cleanlines(maintxt)
 	}
 	
-	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+	if (maintxt~="Medtronic,\s+Inc|Medtronic Software") {						; PM and ICD reports use common subs
 		eventlog("Medtronic identified.")
 		gosub Medtronic
 	}
@@ -956,9 +965,12 @@ Medtronic:
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {							; or scan more current QuickLook II reports
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
 		eventlog("QuickLookII report.")
 		gosub mdtQuickLookII
+	} else if (maintxt~="Medtronic\s+Application ID") {							; or new iPad report
+		eventlog("Medtronic Application report.")
+		gosub mdtApplication
 	} else {																	; or something else
 		eventlog("No match.")
 		MsgBox NO MATCH
@@ -974,6 +986,135 @@ Medtronic:
 	gosub makeReport
 	
 return	
+}
+
+mdtApplication:
+{
+/*	INITIAL: QUICK LOOK
+	- Demographics
+	- Device info
+	- Check info
+*/
+	qltxt := maintxt
+	inirep := stregX(qltxt,"",1,1,"Device Status",1)
+	fields[1] := ["Device","Serial Number","Date of Visit"
+				, "Patient","ID","Physician","History","`n"]
+	labels[1] := ["IPG","IPG_SN","Encounter"
+				, "Name","MRN","Physician","Indication","null"]
+	fieldvals(inirep,1,"dev")
+	fldval["dev-Encounter"] := parsedate(fldval["dev-Encounter"]).MDY
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
+	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
+	
+	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
+	fields[1] := ["\(Implanted: ","\)"
+				, "Battery Voltage","`n"
+				, "Remaining Longevity","`n"]
+	labels[1] := ["IPG_impl","null"
+				, "IPG_voltage","null"
+				, "IPG_longevity","null"]
+	fieldvals(inirep,1,"dev")
+	fldfill("IPG_longevity",cleanspace(strX(inirep,"Remaining Longevity",1,19,"`n",1)))
+	
+	qltbl := stregX(qltxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	qltbl := RegExReplace(qltbl,"\s+RRT.*?[\r\n]+")
+	qltbl := RegExReplace(qltbl,"\s+\(based on initial interrogation\)")
+	qltbl := stregX(qltbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
+	qltbl := stregX(qltbl "<<<", "   ",1,0,"<<<",1)
+	fields[2] := ["Atrial.*-Lead Impedance"
+				, "Atrial.*-Pacing Impedance"
+				, "Atrial.*-Capture Threshold"
+				, "Atrial.*-Measured On"
+				, "Atrial.*-In-Office Threshold"
+				, "Atrial.*-Programmed Amplitude"
+				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-In-Office .*Wave"
+				, "Atrial.*-Programmed Sensitivity"
+			, "RV.*-Lead Impedance"
+				, "RV.*-Pacing Impedance"
+				, "RV.*-Defibrillation Impedance"
+				, "RV.*-Capture Threshold"
+				, "RV.*-Measured On"
+				, "RV.*-In-Office Threshold"
+				, "RV.*-Programmed Amplitude"
+				, "RV.*-Measured .*Wave"
+				, "RV.*-In-Office .*Wave"
+				, "RV.*-Programmed Sensitivity"
+			, "LV.*-Lead Impedance"
+				, "LV.*-Pacing Impedance"
+				, "LV.*-Capture Threshold"
+				, "LV.*-Measured On"
+				, "LV.*-In-Office Threshold"
+				, "LV.*-Programmed Amplitude"
+				, "LV.*-Measured .*Wave"
+				, "LV.*-Programmed Sensitivity"]
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
+				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
+	scanParams(parseTable(qltbl),2,"leads",1)
+	
+	normLead("RA"
+			,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+			,fldval["leads-A_imp"],fldval["leads-A_cap"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
+			,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
+	normLead("RV"
+			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
+			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
+	normLead("LV"
+			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
+			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+			,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
+	
+	inirep := stregX(qltxt,"Parameter Summary",1,1,"Clinical Status",1)
+	qltbl := stregX(inirep,"Mode",1,0,"Detection",0)
+	qltbl := columns(qltbl,"Mode","Detection",0,"Lower\s+Rate",(qltbl~="Paced AV")?"Paced AV":"")
+	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
+	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
+	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
+	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT","V-V Pace Delay"
+				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
+				, "Paced AV","Sensed AV","Mode Switch"]
+	labels[2] := ["Mode","CRT_VP","CRT_VV","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
+	scanParams(qltbl,2,"par",1)
+	
+	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
+	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
+				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
+	labels[2] := ["ATAF","VF","FVT","VT"
+				, "Rx_ATAF","Rx_VF","Rx_FVT","Rx_VT"]
+	scanParams(parseTable(qltbl),2,"detect",1)
+	
+	inirep := columns(qltxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
+	
+	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
+	labels[1] := ["VF","VTNS","VT","ATAF"]
+	scanParams(stregX(inirep,"Monitored",1,0,"Therapy|Pacing",1),1,"event",1)
+	
+	inirep := columns(qltxt "<<<","Therapy Summary|(\s+)?Pacing","<<<",0,"Pacing\s+\(")
+	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
+				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
+	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
+				, "A_Paced","A_Shocked","A_Total","A_Aborted"]
+	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"event",1)
+	
+	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
+	if instr(iniRep,"Sensed") {															; No chamber specified
+		fields[2] := ["Sensed","Paced"]
+		labels[2] := ["Sensed","Paced"]
+	} else {
+		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","^AS","^AP","^VS","^VP"]
+		labels[2] := ["AsVs","AsVp","ApVs","ApVp","As","Ap","Vs","Vp"]
+	}
+	scanParams(iniRep,2,"dev",1)
+	
+	qlObs := stregX(maintxt,"Observations\s+\(",1,0,"Medtronic Software",1)
+	fldfill("event-Obs",qlObs)
+	
+	
+	return
 }
 
 mdtQuickLookII:
