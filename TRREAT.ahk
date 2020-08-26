@@ -18,7 +18,7 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	trreatDir := "\\childrens\files\HCTRREAT\TEST\"										; need to define this before readIni
+	trreatDir := ".\"										; need to define this before readIni
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
