@@ -197,7 +197,7 @@ return
 
 readFiles:
 {
-	readFilesMDT()
+	readFilesRootMDT()
 	readFilesSJM()
 	readFilesBSCI()
 	readFilesPaceart()
@@ -205,7 +205,7 @@ readFiles:
 return
 }
 
-readFilesMDT() {
+readFilesRootMDT() {
 /*	Read root - usually MEDT files
 */
 	global path, xl, filenum, WQlvP, WQlv, HLVp, HLV
