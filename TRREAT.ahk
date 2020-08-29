@@ -209,15 +209,37 @@ readFilesRootMDT() {
 /*	Read root - usually MEDT files
 */
 	global path, xl, filenum, WQlvP, WQlv, HLVp, HLV
+		, fields, labels, fldval
 	
 	progress, 40,Medtronic
+	Loop, files, % path.pdf "SmartSyncPDF*.pdf"									; first pass: Look for SmartSyncPDF files, rename
+	{
+		fields := []
+		labels := []
+		fldval := []
+		fullpath := A_LoopFileFullPath
+		filename := A_LoopFileName
+		
+		txt := readPDF(fullpath)
+		fields[1] := ["Device","Serial Number","Date of Visit"
+					, "Patient","ID","Physician","History","`n"]
+		labels[1] := ["IPG","IPG_SN","Encounter"
+					, "Name","MRN","Physician","Indication","null"]
+		fieldvals(txt,1)
+		dt := parseDate(fldval.Encounter)
+		newfnam := fldval.Name "_" fldval.IPG_SN "_SmartSync_" dt.mm "_" dt.dd "_" dt.YYYY ".pdf"
+		FileMove, % path.pdf filename, % path.pdf newfnam
+	}
+	
 	Loop, files, % path.pdf "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
+		tmp.fullpath := A_LoopFileFullPath
 		tmp.file := A_LoopFileName												; next file in PDFdir
 		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
 		}
+		
 		tmp.max := 1															; reset max k counter
 		Loop, files, % path.pdf strX(tmp.file,"",1,0,"_",0,1) "*.pdf"			; loop through all files with this "prefix"
 		{
@@ -234,21 +256,13 @@ readFilesRootMDT() {
 			}
 		}
 		
-		if instr(tmp.file,"SmartSyncPDF") {
-			fnam := StrSplit(RegExReplace(tmp.file,"SmartSyncPDF."),"_")
-			tmp.name := RegExReplace(tmp.file,"i).pdf$")
-			tmp.date := parsedate(fnam.1 "-" fnam.2 "-" fnam.3).YMD
-			tmp.file := path.pdf tmp.file
-			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
-		} else {
-			fnam := StrSplit(tmp.file,"_")
+		fnam := StrSplit(tmp.file,"_")
 			tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
 			tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
 			tmp.type := fnam.3
 			tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
 			tmp.file := path.pdf tmp.file
 			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
-		}
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
 			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
