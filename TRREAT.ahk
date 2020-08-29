@@ -639,13 +639,8 @@ fileLoop:
 	yp := maintxt := summBl := summ := sjmLog := ""
 	
 	if (fileIn~="i).pdf$") {
+		maintxt:=readPDF(fileIn)
 		Run, % fileIn
-		SplitPath, fileIn,,,,fileOut
-		FileDelete, % path.files "tmp\" fileOut ".txt"
-		RunWait, % path.files "pdftotext.exe -table """ fileIn """ """ path.files "tmp\" fileOut ".txt""" , , hide
-		eventlog("pdftotext " fileIn " -> " path.files "tmp\" fileOut ".txt")
-		FileRead, maintxt, % path.files "tmp\" fileOut ".txt"
-		cleanlines(maintxt)
 	}
 	
 	if (maintxt~="Medtronic,\s+Inc|Medtronic Software") {						; PM and ICD reports use common subs
