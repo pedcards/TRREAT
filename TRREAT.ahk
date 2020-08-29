@@ -673,6 +673,21 @@ fileLoop:
 	return
 }
 
+readPDF(fileIn, args="-table") {
+/*	Convert PDF to text using pdftotext.exe with optional args
+	output file generated in .\tmp\xxxxx.txt
+	text returned in result
+*/
+	global path
+	SplitPath, fileIn,,,,fileOut
+	FileDelete, % path.files "tmp\" fileOut ".txt"
+	RunWait, % path.files "pdftotext.exe " args " """ fileIn """ """ path.files "tmp\" fileOut ".txt""" , , hide
+	eventlog("pdftotext " fileIn " -> " path.files "tmp\" fileOut ".txt")
+	FileRead, txt, % path.files "tmp\" fileOut ".txt"
+	
+	return cleanlines(txt)
+}
+
 SignScan:
 {
 	if !FileExist(path.his) {
