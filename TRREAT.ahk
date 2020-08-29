@@ -234,7 +234,6 @@ readFilesRootMDT() {
 	Loop, files, % path.pdf "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
-		tmp.fullpath := A_LoopFileFullPath
 		tmp.file := A_LoopFileName												; next file in PDFdir
 		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
