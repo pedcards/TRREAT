@@ -2782,6 +2782,9 @@ fieldvals(x,bl,pre:="") {
 */
 	global fields, labels, fldval
 	
+	if (pre!="") {
+		pre := pre "-"
+	}
 	for k, i in fields[bl]
 	{
 		j := fields[bl][k+1]
@@ -2793,7 +2796,7 @@ fieldvals(x,bl,pre:="") {
 		cleanSpace(m)
 		cleanColon(m)
 		;~ fldval[pre "-" lbl] := m
-		fldfill(pre "-" lbl, m)
+		fldfill(pre . lbl, m)
 		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		;~ formatField(pre,lbl,m)
 	}
