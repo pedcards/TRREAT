@@ -897,12 +897,12 @@ Medtronic:
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
-		eventlog("QuickLookII report.")
-		gosub mdtQuickLookII
 	} else if (maintxt~="Medtronic\s+Application ID") {							; or new iPad report
 		eventlog("Medtronic Application report.")
 		gosub mdtApplication
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
+		eventlog("QuickLookII report.")
+		gosub mdtQuickLookII
 	} else {																	; or something else
 		eventlog("No match.")
 		MsgBox NO MATCH
