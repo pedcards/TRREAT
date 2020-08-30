@@ -3,14 +3,12 @@
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-;~ SetWorkingDir %A_ScriptDir%
+;~ SetWorkingDir %A_ScriptDir%							; Don't set workingdir so can read files from run dir
 ;~ FileInstall, pdftotext.exe, pdftotext.exe
 #Include includes
 
 Progress,100,Checking paths...,TRREAT
-SplitPath, A_ScriptDir,,fileDir
-
-IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
+IfInString, A_ScriptDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
 	trreatDir := ".\"
@@ -18,7 +16,7 @@ IfInString, fileDir, AhkProjects					; Change enviroment if run from development
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
-	trreatDir := ".\"										; need to define this before readIni
+	trreatDir := A_ScriptDir "\"														; need to define this before readIni
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
