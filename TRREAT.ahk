@@ -2938,10 +2938,10 @@ parseORM() {
 	
 	switch fldval.PV1_PtClass
 	{
-	case "O":
-		encType:="Outpatient"
-	Case "I":
-		encType:="Inpatient"
+		case "O": encType:="Outpatient"
+		case "I": encType:="Inpatient"
+		case "DS": encType:="Inpatient"
+		default: encType:="Outpatient"
 	}
 	location := encType
 	
