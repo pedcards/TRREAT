@@ -202,7 +202,7 @@ return
 
 readFiles:
 {
-	readFilesMDT()
+	readFilesRootMDT()
 	readFilesSJM()
 	readFilesBSCI()
 	readFilesPaceart()
@@ -210,12 +210,32 @@ readFiles:
 return
 }
 
-readFilesMDT() {
+readFilesRootMDT() {
 /*	Read root - usually MEDT files
 */
 	global path, xl, filenum, WQlvP, WQlv, HLVp, HLV
+		, fields, labels, fldval
 	
 	progress, 40,Medtronic
+	Loop, files, % path.pdf "SmartSyncPDF*.pdf"									; first pass: Look for SmartSyncPDF files, rename
+	{
+		fields := []
+		labels := []
+		fldval := []
+		fullpath := A_LoopFileFullPath
+		filename := A_LoopFileName
+		
+		txt := readPDF(fullpath)
+		fields[1] := ["Device","Serial Number","Date of Visit"
+					, "Patient","ID","Physician","History","`n"]
+		labels[1] := ["IPG","IPG_SN","Encounter"
+					, "Name","MRN","Physician","Indication","null"]
+		fieldvals(txt,1)
+		dt := parseDate(fldval.Encounter)
+		newfnam := fldval.Name "_" fldval.IPG_SN "_SmartSync_" dt.mm "_" dt.dd "_" dt.YYYY ".pdf"
+		FileMove, % path.pdf filename, % path.pdf newfnam
+	}
+	
 	Loop, files, % path.pdf "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
@@ -223,6 +243,7 @@ readFilesMDT() {
 		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
 		}
+		
 		tmp.max := 1															; reset max k counter
 		Loop, files, % path.pdf strX(tmp.file,"",1,0,"_",0,1) "*.pdf"			; loop through all files with this "prefix"
 		{
@@ -239,21 +260,13 @@ readFilesMDT() {
 			}
 		}
 		
-		if instr(tmp.file,"SmartSyncPDF") {
-			fnam := StrSplit(RegExReplace(tmp.file,"SmartSyncPDF."),"_")
-			tmp.name := RegExReplace(tmp.file,"i).pdf$")
-			tmp.date := parsedate(fnam.1 "-" fnam.2 "-" fnam.3).YMD
-			tmp.file := path.pdf tmp.file
-			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
-		} else {
-			fnam := StrSplit(tmp.file,"_")
+		fnam := StrSplit(tmp.file,"_")
 			tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
 			tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
 			tmp.type := fnam.3
 			tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
 			tmp.file := path.pdf tmp.file
 			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
-		}
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
 			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
@@ -655,13 +668,8 @@ fileLoop:
 	yp := maintxt := summBl := summ := sjmLog := ""
 	
 	if (fileIn~="i).pdf$") {
+		maintxt:=readPDF(fileIn)
 		Run, % fileIn
-		SplitPath, fileIn,,,,fileOut
-		FileDelete, % path.files "tmp\" fileOut ".txt"
-		RunWait, % path.files "pdftotext.exe -table """ fileIn """ """ path.files "tmp\" fileOut ".txt""" , , hide
-		eventlog("pdftotext " fileIn " -> " path.files "tmp\" fileOut ".txt")
-		FileRead, maintxt, % path.files "tmp\" fileOut ".txt"
-		cleanlines(maintxt)
 	}
 	
 	if (maintxt~="Medtronic,\s+Inc|Medtronic Software") {						; PM and ICD reports use common subs
@@ -687,6 +695,21 @@ fileLoop:
 	
 	gosub parseGUI
 	return
+}
+
+readPDF(fileIn, args="-table") {
+/*	Convert PDF to text using pdftotext.exe with optional args
+	output file generated in .\tmp\xxxxx.txt
+	text returned in result
+*/
+	global path
+	SplitPath, fileIn,,,,fileOut
+	FileDelete, % path.files "tmp\" fileOut ".txt"
+	RunWait, % path.files "pdftotext.exe " args " """ fileIn """ """ path.files "tmp\" fileOut ".txt""" , , hide
+	eventlog("pdftotext " fileIn " -> " path.files "tmp\" fileOut ".txt")
+	FileRead, txt, % path.files "tmp\" fileOut ".txt"
+	
+	return cleanlines(txt)
 }
 
 SignScan:
@@ -965,12 +988,12 @@ Medtronic:
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
-		eventlog("QuickLookII report.")
-		gosub mdtQuickLookII
 	} else if (maintxt~="Medtronic\s+Application ID") {							; or new iPad report
 		eventlog("Medtronic Application report.")
 		gosub mdtApplication
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
+		eventlog("QuickLookII report.")
+		gosub mdtQuickLookII
 	} else {																	; or something else
 		eventlog("No match.")
 		MsgBox NO MATCH
@@ -2810,6 +2833,9 @@ fieldvals(x,bl,pre:="") {
 */
 	global fields, labels, fldval
 	
+	if (pre!="") {
+		pre := pre "-"
+	}
 	for k, i in fields[bl]
 	{
 		j := fields[bl][k+1]
@@ -2821,7 +2847,7 @@ fieldvals(x,bl,pre:="") {
 		cleanSpace(m)
 		cleanColon(m)
 		;~ fldval[pre "-" lbl] := m
-		fldfill(pre "-" lbl, m)
+		fldfill(pre . lbl, m)
 		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		;~ formatField(pre,lbl,m)
 	}
