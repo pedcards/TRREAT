@@ -3,41 +3,45 @@
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%
+;~ SetWorkingDir %A_ScriptDir%							; Don't set workingdir so can read files from run dir
 ;~ FileInstall, pdftotext.exe, pdftotext.exe
 #Include includes
 
 Progress,100,Checking paths...,TRREAT
-SplitPath, A_ScriptDir,,fileDir
-user := instr(A_UserName,"octe") ? "tc" : A_UserName
-
-IfInString, fileDir, AhkProjects					; Change enviroment if run from development vs production directory
+IfInString, A_ScriptDir, AhkProjects					; Change enviroment if run from development vs production directory
 {
 	isDevt := true
+	trreatDir := ".\"
 	path:=readIni("devpaths")
 	eventlog(">>>>> Started in DEVT mode.")
 } else {
 	isDevt := false
+	trreatDir := A_ScriptDir "\"														; need to define this before readIni
 	path:=readIni("paths")
 	eventlog(">>>>> Started in PROD mode. " A_ScriptName " ver " substr(tmp,1,12))
 }
 
-;~ trreatDir:=path.trreat
-;~ chipDir:=path.chip
-;~ pdfDir:=path.pdf
-;~ hisDir:=path.his
-path.bin		:= path.trreat "bin\"
-path.files		:= path.trreat "files\"
-path.report		:= path.trreat "pending\"
-path.compl		:= path.trreat "completed\"
-path.paceart	:= path.trreat "paceart\"
+;~ chipDir:=path.chip																	; CHIPOTLE root
+;~ pdfDir:=path.pdf																		; USB root
+path.trreat		:= trreatDir															; TRREAT root
+path.files		:= path.trreat "files\"													; ini and xml files
+path.report		:= path.trreat "pending\"												; parsed reports and rtf pending
+path.compl		:= path.trreat "completed\"												; signed rtf with PDF and meta files
+path.paceart	:= path.trreat "paceart\"												; PaceArt import xml
+path.hl7in		:= path.trreat "epic\Orders\"											; inbound Epic ORM
+path.outbound	:= path.trreat "epic\OutboundHL7\"										; outbound ORU for Ensemble
+path.onbase		:= path.trreat "onbase\"												; onbase DRIP folder for PDFs
 
 worklist := path.files "worklist.xml"
 
+user := instr(A_UserName,"octe") ? "tchun1" : A_UserName
 user_parse := readIni("user_parse")
 user_sign := readIni("user_sign")
 docs := readIni("docs")
 parsedocs(docs)
+
+initHL7()
+hl7DirMap := {}
 
 eventLog(">>>>> Session started...")
 if !FileExist(path.report) {
@@ -196,7 +200,7 @@ return
 
 readFiles:
 {
-	readFilesMDT()
+	readFilesRootMDT()
 	readFilesSJM()
 	readFilesBSCI()
 	readFilesPaceart()
@@ -204,12 +208,32 @@ readFiles:
 return
 }
 
-readFilesMDT() {
+readFilesRootMDT() {
 /*	Read root - usually MEDT files
 */
 	global path, xl, filenum, WQlvP, WQlv, HLVp, HLV
+		, fields, labels, fldval
 	
 	progress, 40,Medtronic
+	Loop, files, % path.pdf "SmartSyncPDF*.pdf"									; first pass: Look for SmartSyncPDF files, rename
+	{
+		fields := []
+		labels := []
+		fldval := []
+		fullpath := A_LoopFileFullPath
+		filename := A_LoopFileName
+		
+		txt := readPDF(fullpath)
+		fields[1] := ["Device","Serial Number","Date of Visit"
+					, "Patient","ID","Physician","History","`n"]
+		labels[1] := ["IPG","IPG_SN","Encounter"
+					, "Name","MRN","Physician","Indication","null"]
+		fieldvals(txt,1)
+		dt := parseDate(fldval.Encounter)
+		newfnam := fldval.Name "_" fldval.IPG_SN "_SmartSync_" dt.mm "_" dt.dd "_" dt.YYYY ".pdf"
+		FileMove, % path.pdf filename, % path.pdf newfnam
+	}
+	
 	Loop, files, % path.pdf "*.pdf"												; read all PDFs in root
 	{
 		tmp := []
@@ -217,6 +241,7 @@ readFilesMDT() {
 		if instr(tmp.maxstr,tmp.file) {											; in skiplist?
 			continue
 		}
+		
 		tmp.max := 1															; reset max k counter
 		Loop, files, % path.pdf strX(tmp.file,"",1,0,"_",0,1) "*.pdf"			; loop through all files with this "prefix"
 		{
@@ -232,13 +257,14 @@ readFilesMDT() {
 				eventlog("MDT: newer version of " j " _" k )
 			}
 		}
+		
 		fnam := StrSplit(tmp.file,"_")
-		tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
-		tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
-		tmp.type := fnam.3
-		tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
-		tmp.file := path.pdf tmp.file
-		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+			tmp.name := fnam.1			; strX(tmp.file,"",1,0,"_",1,1,n)
+			tmp.ser := fnam.2			; strX(tmp.file,"_",n-1,1,"_",1,1,n)
+			tmp.type := fnam.3
+			tmp.date := parseDate(fnam.4 "-" fnam.5 "-" fnam.6).YMD
+			tmp.file := path.pdf tmp.file
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
 			eventlog("MDT: Skipping " tmp.file ", already in worklist.")
@@ -352,22 +378,21 @@ readFilesBSCI() {
 		FileRead, bscBnk, % tmp.bnk												; need bscBnk for readBnk
 		td := trim(stregX(bscBnk,"Save Date:",1,1,"\R",1))						; get the DATE array
 		td := parseDate(RegExReplace(td," ","-"))
-		tmp.date := td.YMD
 		tmp.name := readBnk("PatientLastName") ", " readBnk("PatientFirstName")
 		tmp.dev := "BSCI " readBnk("SystemName") " " strX(readBnk("SystemModelNumber"),"",1,0,"-",1)
 		tmp.ser := readBnk("SystemSerialNumber")
-		tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+		tmp.node := "id[@date='" td.YMD "'][@ser='" tmp.ser "']"
 		
 		if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
-			eventlog("BSC: Skipping " tmp.date "\" tmp.ser ", already in worklist.")
+			eventlog("BSC: Skipping " td.YMD "\" tmp.ser ", already in worklist.")
 			continue															; skip reprocessing in WORK list
 		}
 		if IsObject(xl.selectSingleNode("/root/done/ " tmp.node)) {
 			fileNum += 1
-			LV_Add("", tmp.date)
+			LV_Add("", td.YMD)
 			LV_Modify(fileNum,"col2", tmp.name)									; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
-			eventlog("BSC: File " tmp.date "\" tmp.ser " already DONE.")
+			eventlog("BSC: File " td.YMD "\" tmp.ser " already DONE.")
 			continue
 		}
 		
@@ -378,7 +403,7 @@ readFilesBSCI() {
 		}
 		
 		fileNum += 1															; Add a row to the LV
-		LV_Add("", tmp.date)										; col1 is date
+		LV_Add("", td.YMD)														; col1 is date
 		LV_Modify(fileNum,"col2", tmp.name)
 		LV_Modify(fileNum,"col3", tmp.dev)
 		LV_Modify(fileNum,"col4", tmp.ser)
@@ -386,6 +411,79 @@ readFilesBSCI() {
 		LV_Modify(fileNum,"col6", "")
 		LV_Modify(fileNum,"col7", tmp.file)
 		LV_Modify(fileNum,"col8", tmp.bnk)
+	}
+	
+	progress, 100
+	bscDir := path.pdf "DataFiles\"
+	loop, Files, % bscDir "*", D												; Loop through subdirs of Emblem datafiles
+	{
+		tmp := A_LoopFileName
+		MMDD := substr(tmp,1,4)
+		YYYY := SubStr(tmp,5,4)
+		dirdate := YYYY MMDD 													; correct their weird date format
+		dt := A_Now
+		dt -= dirdate , Days													; calculate days since check
+		dirlist .= Format("{:04}",dt) "|" dirdate "|" tmp "`n"
+	}
+	sort dirlist																; sort from most recent
+	dirlist := strX(dirlist,"",1,0,"`n",1,1)
+	Loop , parse, dirlist, `n, `n
+	{
+		dirName := StrSplit(A_LoopField,"|").3 "\Sessions\"
+		name := {}
+		loop, Files, % bscDir dirName "*.hl7", F
+		{
+			snam := RegExReplace(A_LoopFileName,"__(.*)","__")
+			maxdate :=
+			loop, Files, % bscDir dirName snam "*.hl7"
+			{
+				fnam := A_LoopFileName
+				RegExMatch(fnam,"(.*)-(.*)-(.*)-(.*)__(.*)\.hl7",x)
+				dt := parseDate(x4).YMD RegExReplace(x5,"[.:]")
+				if (dt>maxdate) {
+					maxdate:=dt
+					maxfnam:=fnam
+				}
+			}
+			tmp := []
+			tmp.fnam := maxfnam
+			RegExMatch(tmp.fnam,"(.*)-(.*)-(.*)-(.*)__(.*)\.hl7",x)
+			tmp.name := x1
+			tmp.model := "BSCI " x2
+			tmp.ser := x3
+			tmp.date := parseDate(x4).YMD 
+			tmp.time := RegExReplace(x5,"[.:]")
+			dt := tmp.date tmp.time 
+			tmp.node := "id[@date='" tmp.date "'][@ser='" tmp.ser "']"
+			if instr(name[tmp.name],dt) {
+				continue
+			}
+			if IsObject(xl.selectSingleNode("/root/work/" tmp.node)) {
+				eventlog("BSC: Skipping " tmp.date "\" tmp.ser ", already in worklist.")
+				continue																; skip reprocessing in WORK list
+			}
+			if IsObject(xl.selectSingleNode("/root/done/ " tmp.node)) {
+				fileNum += 1
+				LV_Add("", tmp.date)
+				LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
+				LV_Modify(fileNum,"col3", "[DONE]")
+				eventlog("BSC: File " tmp.date "\" tmp.ser " already DONE.")
+				continue
+			}
+			name[tmp.name] .= dt "`n"
+			tmp.fnam := bscDir dirName tmp.fnam
+			tmp.file := bscDir dirName RegExReplace(fnam,".hl7",".pdf")
+			
+			fileNum += 1																; Add a row to the LV
+			LV_Add("", tmp.date)														; col1 is date
+			LV_Modify(fileNum,"col2", tmp.name)
+			LV_Modify(fileNum,"col3", tmp.model)
+			LV_Modify(fileNum,"col4", tmp.ser)
+			LV_Modify(fileNum,"col5", tmp.dev)
+			LV_Modify(fileNum,"col6", "")
+			LV_Modify(fileNum,"col7", tmp.file)
+			LV_Modify(fileNum,"col8", tmp.fnam)
+		}
 	}
 	
 	return
@@ -442,8 +540,13 @@ readFilesPaceart() {
 ParseName(x) {
 /*	Determine first and last name
 */
+	if (x="") {
+		return error
+	}
 	x := trim(x)																		; trim edges
+	x := RegExReplace(x,"\'","^")														; replace ['] with [^] to avoid XPATH errors
 	x := RegExReplace(x," \w "," ")														; remove middle initial: Troy A Johnson => Troy Johnson
+	x := RegExReplace(x,"(,.*?)( \w)$","$1")											; remove trailing MI: Johnston, Troy A => Johnston, Troy
 	x := RegExReplace(x,"i),?( JR| III| IV)$")											; Filter out name suffixes
 	x := RegExReplace(x,"\s+"," ",ct)													; Count " "
 	
@@ -457,7 +560,7 @@ ParseName(x) {
 		first := strX(x,"",1,0," ",1)
 		last := strX(x," ",1,1,"",0)
 	}
-	else																				; James Jacob Jingleheimer Schmidt
+	else if (ct>1)																		; James Jacob Jingleheimer Schmidt
 	{
 		x0 := x																			; make a copy to disassemble
 		n := 1
@@ -477,7 +580,11 @@ ParseName(x) {
 		first := RegExReplace(x," " last)
 	}
 	
-	return {first:first,last:last}
+	return {first:first
+			,last:last
+			,firstlast:first " " last
+			,lastfirst:last ", " first
+			,apostr:RegExReplace(x,"\^","'")}
 }
 
 parsePat:
@@ -497,6 +604,8 @@ parsePat:
 	pat_meta:=
 	pat_report:=
 	is_remote:=
+	is_remoteAlert:=
+	is_postop:=
 	LV_GetText(pat_date,fileNum,1)
 	LV_GetText(pat_name,fileNum,2)
 	LV_GetText(pat_dev,fileNum,3)
@@ -557,20 +666,15 @@ fileLoop:
 	yp := maintxt := summBl := summ := sjmLog := ""
 	
 	if (fileIn~="i).pdf$") {
+		maintxt:=readPDF(fileIn)
 		Run, % fileIn
-		SplitPath, fileIn,,,,fileOut
-		FileDelete, % path.bin fileOut ".txt"
-		RunWait, % path.bin "pdftotext.exe -table """ fileIn """ """ path.bin fileOut ".txt""" , , hide
-		eventlog("pdftotext " fileIn " -> " path.bin fileOut ".txt")
-		FileRead, maintxt, % path.bin fileOut ".txt"
-		cleanlines(maintxt)
 	}
 	
-	if (maintxt~="Medtronic,\s+Inc") {											; PM and ICD reports use common subs
+	if (maintxt~="Medtronic,\s+Inc|Medtronic Software") {						; PM and ICD reports use common subs
 		eventlog("Medtronic identified.")
 		gosub Medtronic
 	}
-	else if (maintxt~="Boston Scientific Corporation") {
+	else if (maintxt~="(Boston Scientific Corporation|800\.CARDIAC)") {
 		eventlog("Boston Scientific identified.")
 		gosub BSCI
 	}
@@ -587,15 +691,27 @@ fileLoop:
 		MsgBox No match!														; Attempt OCR on PDF?
 	}
 	
+	gosub parseGUI
 	return
+}
+
+readPDF(fileIn, args="-table") {
+/*	Convert PDF to text using pdftotext.exe with optional args
+	output file generated in .\tmp\xxxxx.txt
+	text returned in result
+*/
+	global path
+	SplitPath, fileIn,,,,fileOut
+	FileDelete, % path.files "tmp\" fileOut ".txt"
+	RunWait, % path.files "pdftotext.exe " args " """ fileIn """ """ path.files "tmp\" fileOut ".txt""" , , hide
+	eventlog("pdftotext " fileIn " -> " path.files "tmp\" fileOut ".txt")
+	FileRead, txt, % path.files "tmp\" fileOut ".txt"
+	
+	return cleanlines(txt)
 }
 
 SignScan:
 {
-	if !FileExist(path.his) {
-		MsgBox % "Requires 3M HIS dir`n""" path.his """"
-		ExitApp
-	}
 	l_users := {}
 	l_numusers :=
 	l_tabs := 
@@ -609,6 +725,7 @@ SignScan:
 		l_name := stregX(fileNam,"-\d+ ",1,1," #",1)		
 		l_ser  := stregX(fileNam," #",1,1," \d{6,8}",1)
 		l_date := strX(fileNam," ",0,1,"",0)
+		l_wqid := xl.getText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/wqid")
 		
 		if !Object(l_users[l_user]) {											; this user not present yet in l_users[]
 			l_tabs .= l_user . "|"												; add user to tab titles string
@@ -616,7 +733,8 @@ SignScan:
 		l_users[l_user,A_index] := {filename:fileNam							; creates l_users[l_user, x], where x is just a number
 			, name:l_name
 			, date:l_date
-			, ser:l_ser}
+			, ser:l_ser
+			, wqid:l_wqid}
 	}
 	eventlog("Report RTF dir scanned.")
 	gosub signGUI
@@ -627,13 +745,13 @@ Return
 SignGUI:
 {
 	Gui, sign:Destroy
-	Gui, sign:Add, Tab3, w600 vRepLV hwndRepH, % l_tabs								; Create a tab control (hwnd=RepH) with titles l_tabs
+	Gui, sign:Add, Tab3, w600 vRepLV hwndRepH, % l_tabs							; Create a tab control (hwnd=RepH) with titles l_tabs
 	Gui, sign:Default
 	for k in l_users															; loop through l_users
 	{
 		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
 		Gui, Tab, % k															; go to tab for the user
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, file|serial|Date|Name
+		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, file|serial|Date|Name|wqid
 		for v in l_users[k]														; loop through users in l_users
 		{
 			i := l_users[k,v]													; i is the element for each V
@@ -641,13 +759,15 @@ SignGUI:
 				, i.filename													; this is a hidden column 
 				, i.ser															; this is a hidden column
 				, i.date
-				, i.name)
+				, i.name
+				, i.wqid)
 		}
 		LV_ModifyCol()
 		LV_ModifyCol(1, "0")
 		LV_ModifyCol(2, "0")
 		LV_ModifyCol(3, "Autohdr")
 		LV_ModifyCol(4, "AutoHdr")
+		LV_ModifyCol(5, "0")
 	}
 	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
 	Gui, Show, AutoSize, TRREAT Reports Pile											; show GUI
@@ -674,6 +794,7 @@ SignRep:
 	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
 	LV_GetText(l_ser,l_row,2)													; get hidden serial number
 	LV_GetText(l_date,l_row,3)
+	LV_GetText(l_wqid,l_row,5)
 	
 	eventlog("Selected '" fileNam "'")
 	
@@ -701,7 +822,7 @@ SignActGui:
 	Gui, Act:Default
 	Gui, Add, Text,, % fileNam
 	Gui, Add, Button, vS_PDF gActPDF, View PDF
-	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO ESIG
+	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO EPIC
 	Gui, Color, EEAA99
 	
 	if !FileExist(path.compl fileNam ".pdf") {
@@ -728,34 +849,45 @@ ActSign:
 	Gui, Act:Hide
 	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
 	l_usr := substr(user,1,2)
-	if !(l_usr=l_tab) {													; first 2 chars of Citrix login don't match l_tab?
+	if !(l_usr=l_tab) {															; first 2 chars of Citrix login don't match l_tab?
 		MsgBox, 52, 
 			, % "Sign this report?`n`n"
 			. "Was originally assigned to " l_tab "."
-		IfMsgBox Yes															; signing someone else's report
+		IfMsgBox No																; signing someone else's report
 		{
-			FileRead, tmp, % path.report fileNam ".rtf"							; read the generated RTF file
-			tmp := RegExReplace(tmp
-				, "Dictating Phy #\\tab <8:(\d{6})>\\par"						; replace the original billing code
-				, "Dictating Phy #\tab <8:" docs[l_usr] ">\par")				; with yours
-			tmp := RegExReplace(tmp
-				, "Attending Phy #\\tab <9:(\d{6})>\\par"						; and replace the assigned Attg
-				, "Attending Phy #\tab <9:" docs[l_usr] ">\par")
-			FileDelete, % path.report fileNam ".rtf"
-			FileAppend, % tmp, % path.report fileNam ".rtf"						; generate a new RTF file
-			eventlog(l_tab " report signed by " l_usr ".") 
-		} else {
 			eventlog("Oops. Don't sign " l_tab "'s report.")
 			return																; not signing this report, return
 		}
 	}
-	if !(isDevt) {
-		FileCopy, % path.report fileNam ".rtf", % path.his . fileNam . ".rtf"
-		eventlog("Sent to HIS.")
+	MsgBox, 262177, Electronic signature, % "Confirm sign report as " user
+	IfMsgBox, OK
+	{
+		FormatTime, tmp_time, A_Now
+		tmp_sig := docs[l_usr].nameF " " docs[l_usr].nameL ", MD at " tmp_time
+		eventlog("Electronic signature")
+	} else {
+		eventlog("Cancel signature")
+		return
 	}
-	FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1		; move copy to "completed" folder
+	
+	FileRead, tmp, % path.report fileNam ".rtf"
+	tmp := RegExReplace(tmp,"\\b.*?DATE OF BIRTH.*?\\par")						; remove the temp text between annotations
+	tmp := RegExReplace(tmp,"\\par \}","\par Electronically authenticated by " tmp_sig ". }")
+	FileDelete, % path.report fileNam ".rtf"
+	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
+	
+	makeORU(l_wqid)
+	
+	hl7out.file := "TRREAT_ORU_" A_now
+	FileAppend, % hl7out.msg, % path.report hl7out.file							; create ORU file in pending
+	
+	FileCopy, % path.report hl7out.file, % path.outbound						; copy ORU to outbound folder for Ensemble
+	FileMove, % path.report hl7out.file, % path.compl fileNam ".hl7", 1			; move ORU to completed folder, renamed fileNam.hl7
+	FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1		; move RTF from pending to completed folder
+	eventlog("ORU sent to outbound.")
 	
 	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
+	removeNode("/root/orders/order[@id='" l_wqid "']")
 	xl.save(worklist)
 	
 	eventlog("Worklist.xml updated.")
@@ -764,28 +896,100 @@ ActSign:
 Return
 }
 
-;~ SignVerify(user)
-;~ {
-	;~ global docs
-	;~ InputBox, userIn, Sign, Enter CIS user name
-	;~ if !(userIn=user) {
-		;~ MsgBox, 16,, Wrong user name!
-		;~ return error
-	;~ }
-	;~ InputBox, numIn, Sign, Enter signature code
-	;~ if !(numIn=docs[substr(userIn,1,2)]) {
-		;~ MsgBox, 16,, Wrong signature number!
-		;~ return error
-	;~ }
-	;~ return numIn
-;~ }
+makeORU(wqid) {
+	global xl, fldval, hl7out, docs, path, filenam, isRemote, user
+	dict:=readIni("EpicResult")
+	
+	order := readWQ(wqid)
+	
+	hl7time := A_Now
+	hl7out := Object()
+	
+	buildHL7("MSH"
+		,{1:"^~\&"
+		, 2:"CVTRREAT"
+		, 3:"CVTRREAT"
+		, 4:"HS"
+		, 6:hl7time
+		, 8:"ORU^R01"
+		, 9:wqid
+		, 10:"T"
+		, 11:"2.5.1"})
+	
+	buildHL7("PID"
+		,{2:order.mrn
+		, 3:order.mrn "^^^^CHRMC"
+		, 5:parseName(order.name).last "^" parseName(order.name).first
+		, 7:parseDate(order.dob).YMD
+		, 8:substr(order.sex,1,1)
+		, 18:order.accountnum})
+	
+	buildHL7("PV1"
+		,{19:order.encnum
+		, 50:wqid})
+	
+	tmpDoc := docs[substr(user,1,2)]
+	buildHL7("OBR"
+		,{2:order.ordernum
+		, 3:order.accession
+		, 4:order.ordertype "^IMGEAP"
+		, 7:order.date
+		, 16:order.prov "^^^^^^MSOW_ORG_ID"
+		, 25:"F"
+		, 32:tmpDoc.NPI "^" tmpDoc.nameL "^" tmpDoc.nameF })
+	
+	File := path.report fileNam ".rtf"
+	FileRead, rtfStr, %File%
+	rtfStr := RegExReplace(rtfStr,"\R"," ")												; replace CRLF 
+	rtfStr := StrReplace(rtfStr,"|","\|")												; replace any "|" chars
+	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" esc with HL7 "\E" esc
+	buildHL7("OBX"
+		,{2:"FT"
+		, 3:"&GDT^PACEMAKER/ICD INTERROGATION"
+		, 5:rtfStr
+		, 11:"F"
+		, 14:hl7time})
+	
+	for key,val in dict																	; Loop through all values in Dict (from ini)
+	{
+		str:=StrSplit(val,"^")
+		buildHL7("OBX"																	; generate OBX for each value
+			,{2:"TX"
+			, 3:key "^" str[1] "^IMGLRR"
+			, 5:order[str[2]] 
+			, 11:"F"
+			, 14:hl7time})
+	}
+	
+	return
+}
+
+matchEAP(txt) {
+	
+	EAP := readIni("EpicOrderEAP")
+	top := 1.00
+	for key,val in EAP
+	{
+		str := RegExReplace(val,"^.*?\^")
+		fuzz := fuzzysearch(txt,str)
+		if (fuzz<top) {
+			top := fuzz
+			best := key
+		}
+	}
+	
+	return EAP[best]
+}
 
 Medtronic:
 {
 	if (maintxt~="Adapta|Sensia") {												; Scan Adapta family of devices
 		eventlog("Adapta report.")
 		gosub mdtAdapta
-	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {							; or scan more current QuickLook II reports
+	} else if (maintxt~="Medtronic\s+Application ID") {							; or new iPad report
+		eventlog("Medtronic Application report.")
+		gosub mdtApplication
+	} else if (maintxt~="(Quick Look II)|(Final:\s+Session Summary)") {			; or scan more current QuickLook II reports
 		eventlog("QuickLookII report.")
 		gosub mdtQuickLookII
 	} else {																	; or something else
@@ -805,6 +1009,135 @@ Medtronic:
 return	
 }
 
+mdtApplication:
+{
+/*	INITIAL: QUICK LOOK
+	- Demographics
+	- Device info
+	- Check info
+*/
+	qltxt := maintxt
+	inirep := stregX(qltxt,"",1,1,"Device Status",1)
+	fields[1] := ["Device","Serial Number","Date of Visit"
+				, "Patient","ID","Physician","History","`n"]
+	labels[1] := ["IPG","IPG_SN","Encounter"
+				, "Name","MRN","Physician","Indication","null"]
+	fieldvals(inirep,1,"dev")
+	fldval["dev-Encounter"] := parsedate(fldval["dev-Encounter"]).MDY
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
+	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
+	
+	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
+	fields[1] := ["\(Implanted: ","\)"
+				, "Battery Voltage","`n"
+				, "Remaining Longevity","`n"]
+	labels[1] := ["IPG_impl","null"
+				, "IPG_voltage","null"
+				, "IPG_longevity","null"]
+	fieldvals(inirep,1,"dev")
+	fldfill("IPG_longevity",cleanspace(strX(inirep,"Remaining Longevity",1,19,"`n",1)))
+	
+	qltbl := stregX(qltxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
+	qltbl := RegExReplace(qltbl,"\s+RRT.*?[\r\n]+")
+	qltbl := RegExReplace(qltbl,"\s+\(based on initial interrogation\)")
+	qltbl := stregX(qltbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
+	qltbl := stregX(qltbl "<<<", "   ",1,0,"<<<",1)
+	fields[2] := ["Atrial.*-Lead Impedance"
+				, "Atrial.*-Pacing Impedance"
+				, "Atrial.*-Capture Threshold"
+				, "Atrial.*-Measured On"
+				, "Atrial.*-In-Office Threshold"
+				, "Atrial.*-Programmed Amplitude"
+				, "Atrial.*-Measured .*Wave"
+				, "Atrial.*-In-Office .*Wave"
+				, "Atrial.*-Programmed Sensitivity"
+			, "RV.*-Lead Impedance"
+				, "RV.*-Pacing Impedance"
+				, "RV.*-Defibrillation Impedance"
+				, "RV.*-Capture Threshold"
+				, "RV.*-Measured On"
+				, "RV.*-In-Office Threshold"
+				, "RV.*-Programmed Amplitude"
+				, "RV.*-Measured .*Wave"
+				, "RV.*-In-Office .*Wave"
+				, "RV.*-Programmed Sensitivity"
+			, "LV.*-Lead Impedance"
+				, "LV.*-Pacing Impedance"
+				, "LV.*-Capture Threshold"
+				, "LV.*-Measured On"
+				, "LV.*-In-Office Threshold"
+				, "LV.*-Programmed Amplitude"
+				, "LV.*-Measured .*Wave"
+				, "LV.*-Programmed Sensitivity"]
+	labels[2] := ["A_imp","A_imp","A_cap","A_date","A_Pthr","A_output","A_Sthr","A_Sthr","A_sensitivity"
+				, "RV_imp","RV_imp","RV_HVimp","RV_cap","RV_date","RV_Pthr","RV_output","RV_Sthr","RV_Sthr","RV_sensitivity"
+				, "LV_imp","LV_imp","LV_cap","LV_date","LV_Pthr","LV_output","LV_Sthr","LV_sensitivity"]
+	scanParams(parseTable(qltbl),2,"leads",1)
+	
+	normLead("RA"
+			,fldval["dev-Alead"],fldval["dev-Alead_impl"]
+			,fldval["leads-A_imp"],fldval["leads-A_cap"],fldval["leads-A_output"],fldval["leads-A_Pol_pace"]
+			,fldval["leads-A_Sthr"],fldval["leads-A_Sensitivity"],fldval["leads-A_Pol_sens"])
+	normLead("RV"
+			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
+			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
+	normLead("LV"
+			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
+			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
+			,fldval["leads-LV_Sthr"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
+	
+	inirep := stregX(qltxt,"Parameter Summary",1,1,"Clinical Status",1)
+	qltbl := stregX(inirep,"Mode",1,0,"Detection",0)
+	qltbl := columns(qltbl,"Mode","Detection",0,"Lower\s+Rate",(qltbl~="Paced AV")?"Paced AV":"")
+	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
+	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
+	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
+	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT","V-V Pace Delay"
+				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
+				, "Paced AV","Sensed AV","Mode Switch"]
+	labels[2] := ["Mode","CRT_VP","CRT_VV","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
+	scanParams(qltbl,2,"par",1)
+	
+	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
+	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
+				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
+	labels[2] := ["ATAF","VF","FVT","VT"
+				, "Rx_ATAF","Rx_VF","Rx_FVT","Rx_VT"]
+	scanParams(parseTable(qltbl),2,"detect",1)
+	
+	inirep := columns(qltxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
+	
+	fields[1] := ["VF","VT-NS","VT","^AT/AF"]
+	labels[1] := ["VF","VTNS","VT","ATAF"]
+	scanParams(stregX(inirep,"Monitored",1,0,"Therapy|Pacing",1),1,"event",1)
+	
+	inirep := columns(qltxt "<<<","Therapy Summary|(\s+)?Pacing","<<<",0,"Pacing\s+\(")
+	fields[1] := ["VT/VF-Pace-Terminated","VT/VF-Shock-Terminated","VT/VF-Total Shocks","VT/VF-Aborted Charges"
+				, "AT/AF-Pace-Terminated","AT/AF-Shock-Terminated","AT/AF-Total Shocks","AT/AF-Aborted Charges"]
+	labels[1] := ["V_Paced","V_Shocked","V_Total","V_Aborted"
+				, "A_Paced","A_Shocked","A_Total","A_Aborted"]
+	scanParams(parseTable(stregX(inirep,"Therapy Summary",1,0,"Observations|Pacing",1)),1,"event",1)
+	
+	iniRep := instr(iniRep,"Event Counters") ? oneCol(iniRep) : iniRep
+	if instr(iniRep,"Sensed") {															; No chamber specified
+		fields[2] := ["Sensed","Paced"]
+		labels[2] := ["Sensed","Paced"]
+	} else {
+		fields[2] := ["AS.*VS","AS.*VP","AP.*VS","AP.*VP","^AS","^AP","^VS","^VP"]
+		labels[2] := ["AsVs","AsVp","ApVs","ApVp","As","Ap","Vs","Vp"]
+	}
+	scanParams(iniRep,2,"dev",1)
+	
+	qlObs := stregX(maintxt,"Observations\s+\(",1,0,"Medtronic Software",1)
+	fldfill("event-Obs",qlObs)
+	
+	
+	return
+}
+
 mdtQuickLookII:
 {
 /*	INITIAL INTERROGATION: QUICK LOOK II
@@ -819,9 +1152,9 @@ mdtQuickLookII:
 	labels[1] := ["IPG","IPG_SN","Encounter"
 				, "Name","MRN","Physician","null"]
 	fieldvals(inirep,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
-	}
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
 	fldfill("dev-IPG","Medtronic " RegExReplace(fldval["dev-IPG"],"Medtronic "))
 	
 	inirep := stregX(qltxt,"Device Status",1,0,"Parameter Summary",1)
@@ -878,7 +1211,7 @@ mdtQuickLookII:
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
 			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
-			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
 			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
@@ -890,17 +1223,17 @@ mdtQuickLookII:
 	qltbl := RegExReplace(qltbl,"Lower  Rate","Lower Rate ")
 	qltbl := RegExReplace(qltbl,"Upper  Track","Upper Track ")
 	qltbl := RegExReplace(qltbl,"Upper  Sensor","Upper Sensor ")
-	fields[2] := ["Mode Switch","Mode","V. Pacing","AdaptivCRT"
+	fields[2] := ["Mode  ","V. Pacing","AdaptivCRT","V-V Pace Delay"
 				, "Lower\s+Rate","Upper\s+Track","Upper\s+Sensor"
-				, "Paced AV","Sensed AV"]
-	labels[2] := ["Mode Switch","Mode","CRT_VP","CRT_VV","LRL","URL","USR","PAV","SAV"]
+				, "Paced AV","Sensed AV","Mode Switch"]
+	labels[2] := ["Mode","CRT_VP","CRT_VV","CRT_VV","LRL","URL","USR","PAV","SAV","Mode Switch"]
 	scanParams(qltbl,2,"par",1)
 	
 	qltbl := stregX(inirep "<<<","Detection",1,0,"<<<",1)
 	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
 				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
-	labels[2] := ["AT/AF","VF","FVT","VT"
-				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	labels[2] := ["ATAF","VF","FVT","VT"
+				, "Rx_ATAF","Rx_VF","Rx_FVT","Rx_VT"]
 	scanParams(parseTable(qltbl),2,"detect",1)
 	
 	inirep := columns(qltxt,"Clinical Status","Therapy Summary|Pacing",0,"Cardiac Compass")
@@ -941,7 +1274,7 @@ mdtQuickLookII:
 		fields[1] := ["Threshold-.*Amplitude","Threshold-.*Pulse Width"]
 		labels[1] := ["Amp","PW"]
 		scanParams(thrTbl,1,"tmp",1)
-		if (thrVal := fldval["tmp-Amp"] printQ(fldval["tmp-PW"]," / ###")) {
+		if (thrVal := fldval["tmp-Amp"] strQ(fldval["tmp-PW"]," / ###")) {
 			leads[(thrLead="Atrial")?"RA":thrLead,"cap"] := thrVal
 		}
 	}
@@ -959,9 +1292,9 @@ mdtQuickLookII:
 	labels[1] := ["IPG","IPG_SN","Encounter"
 				, "Name","MRN","Physician","null"]
 	fieldvals(dev,1,"dev")
-	if !instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") {
-		fldval["dev-Physician"] := "Dr. " . trim(tmp," `n")
-	}
+	fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+		? tmp 
+		: "Dr. " trim(tmp," `n")
 	
 	dev := stregX(fintxt,"Device Status",1,1,"Parameter Summary",1)
 	fields[1] := ["Device Status", "Battery Voltage","Remaining Longevity","`n"]
@@ -978,7 +1311,7 @@ mdtQuickLookII:
 	
 	fintbl := stregX(fintxt,"Remaining Longevity",1,0,"Parameter Summary",1,n)
 	fintbl := RegExReplace(fintbl,"\s+RRT.*years")
-	fintbl := RegExReplace(fintbl,"\s+\(based on initial interrogation\)")
+	fintbl := RegExReplace(fintbl,"\s+\(.*?based on.*?\)")
 	fintbl := stregX(fintbl "<<<", "[\r\n]+   ",1,0,"<<<",1)
 	fintbl := stregX(fintbl "<<<", "   ",1,0,"<<<",1)
 	fields[2] := ["Atrial.*-Lead Impedance"
@@ -1016,8 +1349,8 @@ mdtQuickLookII:
 	fintbl := stregX(fintxt,"Detection",1,0,"(Changes)|(Enhancement)|(Clinical Status)",1)
 	fields[2] := ["Rates-AT/AF","Rates-VF","Rates-FVT","Rates-VT"
 				, "Therapies-AT/AF","Therapies-VF","Therapies-FVT","Therapies-VT"]
-	labels[2] := ["AT/AF","VF","FVT","VT"
-				, "Rx_AT/AF","Rx_VF","Rx_FVT","Rx_VT"]
+	labels[2] := ["ATAF","VF","FVT","VT"
+				, "Rx_ATAF","Rx_VF","Rx_FVT","Rx_VT"]
 	scanParams(parseTable(fintbl),2,"detect",1)
 	
 /*	FINAL: PARAMETERS
@@ -1027,8 +1360,11 @@ mdtQuickLookII:
 	fintxt := stregX(maintxt,"Final: Parameters",1,0,"Medtronic, Inc.",0)
 	
 	param := RegExReplace(stregx(fintxt,"Pacing Summary.",1,1,"Pacing Details",1),"Mode","----",,1)				; Replace the title "Mode" to prevent interference with param scan
-	fields[1] := ["Mode Switch","Mode","Lower","Upper Track","Upper Sensor","V. Pacing","V-V Pace Delay","Paced AV","Sensed AV"]
-	labels[1] := ["Mode Switch","Mode","LRL","URL","USR","CRT_VP","CRT_VV","PAV","SAV"]							; Scan for "Mode Switch" first, so can find plain "Mode" second
+	fields[1] := ["Mode  ","Lower","Upper Track","Upper Sensor"
+		,"V. Pacing","AdaptivCRT","V-V Pace Delay"
+		,"Paced AV","Sensed AV","Mode Switch"]
+	labels[1] := ["Mode","LRL","URL","USR","CRT_VP","CRT_VV","CRT_VV","PAV","SAV","Mode Switch"]				; Scan for "Mode Switch" first, so can find plain "Mode" second
+	tmp := onecol(param)
 	scanParams(onecol(param),1,"par",1)
 	
 	par := parsetable(stregx(fintxt,"Pacing Details",1,0,"AV Therapies",1))
@@ -1047,7 +1383,7 @@ mdtQuickLookII:
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
 			,fldval["leads-RV_imp"],fldval["leads-RV_cap"],fldval["leads-RV_output"],fldval["leads-RV_Pol_pace"]
-			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+			,fldval["leads-RV_Sthr"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
 			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["leads-LV_Pol_pace"]
@@ -1069,6 +1405,9 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null","History","null","IPG_impl","null"]
 			fieldvals(inirep,1,"dev")
+			fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+				? tmp 
+				: "Dr. " trim(tmp," `n")
 			
 			iniBlk := stregX(inirep,"Pacemaker Status",1,0,"Parameter Summary",1)
 			
@@ -1106,13 +1445,14 @@ mdtAdapta:
 			iniBlk := stregX(inirep,"Parameter Summary",1,1,"Clinical Status",1)
 			iniTbl := stregX(iniBlk "<<<","Mode",1,0,"<<<",1)
 			iniTbl := columns(iniTbl "<<<","Mode","<<<",0,"Lower Rate",instr(iniTbl,"Paced AV")?"Paced AV":"")
-			fields[1] := ["Mode","Mode Switch","Detection Rate"
+			iniTbl := RegExReplace(iniTbl,"(\w)  (\w)","$1 $2")
+			fields[1] := ["Mode   ","Mode Switch","Detection Rate"
 						, "Lower Rate","Upper Tracking Rate","Upper Sensor Rate"
-						, "Search AV+","Paced AV","Sensed AV"]
+						, "Search AV\+","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","ModeSwitch","ModeSwitchRate"
 						, "LRL","URL","USR"
 						, "SearchAV","PAV","SAV"]
-			scanParams(iniTbl,1,"par")
+			scanParams(iniTbl,1,"par",1)
 			
 			iniBlk := stregX(inirep "<<<","Clinical Status",1,0,"<<<",0)
 			iniBlk := columns(iniBlk,"Clinical Status","<<<",0,"Pacing\s+\(")
@@ -1140,6 +1480,9 @@ mdtAdapta:
 			labels[1] := ["IPG","IPG_SN","Encounter","null"
 						, "Name","MRN","Physician","null"]
 			fieldvals(finRep,1,"dev")
+			fldval["dev-Physician"] := instr(tmp := RegExReplace(fldval["dev-Physician"],"\s(-+)|(\d{3}.\d{3}.\d{4})"),"Dr.") 
+				? tmp 
+				: "Dr. " trim(tmp," `n")
 			
 			finBlk := stregX(finRep,"Patient Name",1,0,"Pacemaker Status",0)
 			finBlk := stregX(finBlk,"Pacemaker Model",1,0,"Pacemaker Status",1)
@@ -1175,7 +1518,7 @@ mdtAdapta:
 		if instr(finRep,"Permanent Parameters") {
 			perm := oneCol(stregX(finRep,"Permanent Parameters(.*?)`n",1,1,"Medtronic Software",1))
 			param := strx(perm,"Permanent Parameters",1,0,"Refractory/Blanking",1,0)
-			fields[1] := ["Mode","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
+			fields[1] := ["Mode   ","Lower Rate","Upper Tracking Rate","Upper Sensor Rate","ADL Rate","Paced AV","Sensed AV"]
 			labels[1] := ["Mode","LRL","URL","USR","ADL","PAV","SAV"]
 			scanParams(fintxt,1,"par")
 			
@@ -1211,7 +1554,12 @@ BSCI:
 	if (pat_meta) {
 		FileRead, bscbnk, % pat_meta
 	}
-	gosub bsciZoomView
+	if instr(maintxt,"800.CARDIAC") {
+		eventlog("Boston Scientific Emblem identified.")
+		gosub SICD
+	} else {
+		gosub bsciZoomView
+	}
 	
 	gosub fetchDem
 	
@@ -1309,21 +1657,21 @@ bsciZoomView:
 	fldfill("leads-RV_HVimp",fldval["Vlead-HVimp"])
 	
 	fldfill("dev-Alead"
-		, printQ(readBnk("PatientLeadAManufacturer"),"###") 
-		. printQ(readBnk("PatientLeadAModelNum"), " ###") 
-		. printQ(readBnk("PatientLeadASerialNum"), " (serial ###)"))
+		, strQ(readBnk("PatientLeadAManufacturer"),"###") 
+		. strQ(readBnk("PatientLeadAModelNum"), " ###") 
+		. strQ(readBnk("PatientLeadASerialNum"), " (serial ###)"))
 	fldfill("Alead-Pol_pace",readBnk("PatientLeadAPolarity"))
 	
 	fldfill("dev-RVlead"
-		, printQ(readBnk("PatientLeadV1Manufacturer"),"###") 
-		. printQ(readBnk("PatientLeadV1ModelNum"), " ###") 
-		. printQ(readBnk("PatientLeadV1SerialNum"), " (serial ###)"))
+		, strQ(readBnk("PatientLeadV1Manufacturer"),"###") 
+		. strQ(readBnk("PatientLeadV1ModelNum"), " ###") 
+		. strQ(readBnk("PatientLeadV1SerialNum"), " (serial ###)"))
 	fldfill("RVlead-Pol_pace",readBnk("PatientLeadV1Polarity"))
 	
 	fldfill("dev-LVlead"
-		, printQ(readBnk("PatientLeadV2Manufacturer"),"###") 
-		. printQ(readBnk("PatientLeadV2ModelNum"), " ###") 
-		. printQ(readBnk("PatientLeadV2SerialNum"), " (serial ###)"))
+		, strQ(readBnk("PatientLeadV2Manufacturer"),"###") 
+		. strQ(readBnk("PatientLeadV2ModelNum"), " ###") 
+		. strQ(readBnk("PatientLeadV2SerialNum"), " (serial ###)"))
 	fldfill("LVlead-Pol_pace",readBnk("PatientLeadV2Polarity"))
 	
 	ctr := stregX(maintxt,"(Ventricular )?Tachy Counters",1,0,"$",0)
@@ -1332,15 +1680,15 @@ bsciZoomView:
 	labels[1] := ["VHR","VTNS","V_Paced","V_Shocked","V_Aborted","AHR"]
 	scanParams(ctrT,1,"event",1)
 
-	ctrB := stregX(ctr,"Brady Counters",1,0,"$",0)
+	ctrB := stregX(ctr,"Brady Counters",1,0,"Page \d+ of",0)
 	if (ctr~="(A Paced)|(V Paced)") {
-		fields[1] := ["% A Paced","% V Paced"]
+		fields[1] := ["Since Last Reset-% A Paced","Since Last Reset-% V Paced"]
 		labels[1] := ["AP","VP"]
 	} else {
 		fields[1] := ["% Paced"]
 		labels[1] := [substr(fldval["par-Mode"],1,1) "P"]
 	}
-	scanParams(ctrB,1,"dev",1)
+	scanParams(parseTable(ctrB),1,"dev",1)
 	
 	normLead("RA"
 			,fldval["dev-Alead"],fldval["dev-Alead_impl"]
@@ -1349,13 +1697,57 @@ bsciZoomView:
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"]
 			,fldval["Vlead-imp"],fldval["Vlead-cap"],fldval["leads-VP_thr"],fldval["RVlead-Pol_pace"]
-			,fldval["Vlead-sensing"],fldval["leads-VS_thr"],fldval["leads-RV_Pol_sens"])
+			,fldval["Vlead-sensing"],fldval["leads-VS_thr"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"]
 			,fldval["leads-LV_imp"],fldval["leads-LV_cap"],fldval["leads-LV_output"],fldval["LVlead-Pol_pace"]
 			,fldval["leads-LV_Sensitivity"],fldval["leads-LV_Sthr"],fldval["leads-LV_Pol_sens"])
 
 	return
+}
+
+SICD:
+{
+	txt := onecol(stregX(maintxt,"",1,0,"Programmable\s+Parameters",1))
+	txt := RegExReplace(txt,": ",":  ")
+	fields[1] := ["Patient Name","^Follow-up Date","^Last Follow-up Date","Implant Date"
+				, "Device Model#","Device Serial#","Electrode Model#","Electrode Serial#"]
+	labels[1] := ["Name","Encounter","Last_ck","IPG_impl"
+				, "IPG","IPG_SN","HV","HV_SN"]
+	scanparams(txt,1,"dev",1)
+	fldfill("dev-IPG","Boston Scientific " RegExReplace(fldval["dev-IPG"],"EMBLEMTM","Emblem(TM)"))
+	fldfill("dev-HVlead"
+		, strQ(fldval["dev-HV"],"Boston Scientific ###")
+		. strQ(fldval["dev-HV_SN"]," (serial ###)"))
+	
+	txt := onecol(stregX(maintxt,"Programmable\s+Parameters.*?\R",1,1,"Shock Polarity.*?\R",0))
+	txt := RegExReplace(txt,": ",":  ")
+	txt1 := stregX(txt,"Current Device Settings",1,0,"Initial Device Settings",1)
+	txt2 := stregX(txt,"Initial Device Settings",1,0,">>>end",1)
+	fields[1] := ["^Shock Zone","^Conditional Shock Zone"]
+	labels[1] := ["VF","VT"]
+	scanparams(txt1,1,"tachy",1)
+	fields[1] := ["^Post Shock Pacing","^Gain Setting","^Sensing Configuration"]
+	labels[1] := ["Mode","Gain","Pol_Sens"]
+	scanparams(txt1,1,"par",1)
+	fldval["par-Mode"] := strQ(fldval["par-Mode"],"Post-shock pacing ###")
+	
+	txt := onecol(stregx(maintxt,"Episode\s+Summary.*?\R",1,1,"1.800.CARDIAC",1))
+	txt := stregx(txt,"",1,0,"Americas",0)
+	txt := RegExReplace(txt,": ",":  ")
+	fields[1] := ["Remaining Battery Life to ERI"]
+	labels[1] := ["Battery_stat"]
+	scanparams(txt,1,"dev",1)
+	fields[1] := ["^Untreated Episodes","^Treated Episodes"]
+	labels[1] := ["V_Aborted","V_Shocked"]
+	scanparams(txt,1,"event",1)
+	
+	normLead("HV"
+			,fldval["dev-HVlead"],fldval["dev-HVlead_impl"] 
+			,"","","",""
+			,"",fldval["par-Gain"],fldval["par-Pol_Sens"])
+	
+	return	
 }
 
 SJM:
@@ -1366,8 +1758,10 @@ SJM:
 	} 
 	FileRead, sjmLog, % pat_meta
 	if (sjmLog~="Microny|Zephyr") {
+		eventlog("Old SJM report.")
 		gosub SJM_old
 	} else {
+		eventlog("Newer SJM report.")
 		gosub SJM_meta															; 
 	}
 	
@@ -1392,13 +1786,13 @@ SJM_old:
 				, "Encounter"]
 	sjmVals(1,"dev")
 	fldfill("dev-Name",pat_name)
-	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
+	fldfill("dev-IPG","SJM " fldval["dev-IPG"] strQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
-	fldfill("dev-IPG_impl",niceDate(fldval["dev-IPG_impl"]))
+	fldfill("dev-IPG_impl",parseDate(fldval["dev-IPG_impl"]).MDY)
 	
 	fields[1] := ["Lead Chamber","Lead Type"
 				, ".. Pulse Amplitude",".. Pulse Width","Lead Impedance","P/R Sensitivity",
-				, "Vario Capture Threshold","Test Pulse Width","E/R Sensitivity"]
+				, "Vario Capture Threshold","Test Pulse Width","P/R Signal"]
 	labels[1] := ["Chamber","Type"
 				, "Pace_Amp","Pace_PW","Imped","Sensitivity"
 				, "Thr_Amp","Thr_PW","Thr_Sens"]
@@ -1408,10 +1802,14 @@ SJM_old:
 	labels[1] := ["Mode","LRL","USR"]
 	sjmVals(1,"par")
 	
+	tmp := xl.selectSingleNode("//id[@ser='" pat_ser "']/lead")
+	fldval["dev-lead"] := fldval["dev-RVlead"] := tmp.text
+	fldval["dev-leadimpl"] := fldval["dev-RVlead_impl"] := tmp.getAttribute("date")
+	
 	normLead("R" (InStr(fldval["leads-Chamber"],"V")?"V":"A")
 		,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-Imped"]
-		,printQ(fldval["leads-Thr_Amp"],"###" printQ(fldval["leads-Thr_PW"]," @ ###"))
-		,printQ(fldval["leads-Pace_Amp"],"###" printQ(fldval["leads-Pace_PW"]," @ ###"))
+		,strQ(fldval["leads-Thr_Amp"],"###" strQ(fldval["leads-Thr_PW"]," @ ###"))
+		,strQ(fldval["leads-Pace_Amp"],"###" strQ(fldval["leads-Pace_PW"]," @ ###"))
 		,fldval["leads-RV_Pol_pace"]
 		,fldval["leads-Thr_Sens"],fldval["leads-Sensitivity"],fldval["leads-RV_Pol_sens"])
 	
@@ -1437,13 +1835,13 @@ SJM_meta:
 	fldfill("dev-AP",RegExReplace(fldval["dev-AP"]," %"))
 	fldfill("dev-VP",RegExReplace(fldval["dev-VP"]," %"))
 	fldfill("dev-Encounter", parseDate(fldval["dev-Encounter"]).MDY)
-	fldfill("dev-IPG","SJM " fldval["dev-IPG"] printQ(fldval["dev-IPG_model"], " ###"))
+	fldfill("dev-IPG","SJM " fldval["dev-IPG"] strQ(fldval["dev-IPG_model"], " ###"))
 	fldfill("dev-Alead",fldval["dev-Alead_man"] 
-		. printQ(fldval["dev-Alead_model"], " ###") printQ(fldval["dev-Alead_SN"], ", serial ###"))
+		. strQ(fldval["dev-Alead_model"], " ###") strQ(fldval["dev-Alead_SN"], ", serial ###"))
 	fldfill("dev-RVlead",fldval["dev-RVlead_man"] 
-		. printQ(fldval["dev-RVlead_model"], " ###") printQ(fldval["dev-RVlead_SN"], ", serial ###"))
+		. strQ(fldval["dev-RVlead_model"], " ###") strQ(fldval["dev-RVlead_SN"], ", serial ###"))
 	fldfill("dev-LVlead",fldval["dev-LVlead_man"] 
-		. printQ(fldval["dev-LVlead_model"], " ###") printQ(fldval["dev-LVlead_SN"], ", serial ###"))
+		. strQ(fldval["dev-LVlead_model"], " ###") strQ(fldval["dev-LVlead_SN"], ", serial ###"))
 	
 	fields[1] := ["Atrial Pulse Configuration","Atrial Pulse Width","Atrial Pulse Amplitude"
 				, "Atrial Sense Configuration","Atrial Sensitivity","(?<!\s)Atrial Signal Amplitude"
@@ -1462,9 +1860,9 @@ SJM_meta:
 	sjmVals(1,"leads")
 	
 	fields[1] := ["(\x1C)Mode(\x1c)","Base Rate","Maximum Tracking Rate","Maximum Sensor Rate"
-				, "Paced AV Delay","Sensed AV Delay"]
+				, "Paced AV Delay","Sensed AV Delay","Ventricular Pacing Chamber","Interventricular Pace Delay"]
 	labels[1] := ["Mode","LRL","URL","USR"
-				, "PAV","SAV"]
+				, "PAV","SAV","CRT_VP","CRT_VV"]
 	sjmVals(1,"par")
 	
 	fields[1] := ["(\x1C)VF Detection Interval","(\x1C)VT-1 Detection Interval"
@@ -1474,7 +1872,7 @@ SJM_meta:
 	sjmVals(1,"detect")
 	fldfill("detect-VF",fldval["detect-VF"]?round(60000/RegExReplace(fldval["detect-VF"],"\D")):"")
 	fldfill("detect-VT",fldval["detect-VT"]?round(60000/RegExReplace(fldval["detect-VT"],"\D")):"")
-	fldfill("detect-Rx_VF",fldval["detect-VF0"] printQ(fldval["detect-VF1"],", ###"))
+	fldfill("detect-Rx_VF",fldval["detect-VF0"] strQ(fldval["detect-VF1"],", ###"))
 	
 	fields[1] := ["AT/AF Episodes","VT/VF Episodes"]
 	labels[1] := ["ATAF","VT"]
@@ -1482,20 +1880,20 @@ SJM_meta:
 	
 	normLead("RA"
 			,fldval["dev-Alead"],fldval["dev-Alead_impl"],fldval["leads-RA_imp"]
-			,printQ(fldval["leads-RA_Thr_Amp"],"###" printQ(fldval["leads-RA_Thr_PW"]," @ ###"))
-			,printQ(fldval["leads-RA_Pace_Amp"],"###" printQ(fldval["leads-RA_Pace_PW"]," @ ###"))
+			,strQ(fldval["leads-RA_Thr_Amp"],"###" strQ(fldval["leads-RA_Thr_PW"]," @ ###"))
+			,strQ(fldval["leads-RA_Pace_Amp"],"###" strQ(fldval["leads-RA_Pace_PW"]," @ ###"))
 			,fldval["leads-RA_Pol_pace"]
 			,fldval["leads-RA_Thr_Sens"],fldval["leads-RA_Sensitivity"],fldval["leads-RA_Pol_sens"])
 	normLead("RV"
 			,fldval["dev-RVlead"],fldval["dev-RVlead_impl"],fldval["leads-RV_imp"]
-			,printQ(fldval["leads-RV_Thr_Amp"],"###" printQ(fldval["leads-RV_Thr_PW"]," @ ###"))
-			,printQ(fldval["leads-RV_Pace_Amp"],"###" printQ(fldval["leads-RV_Pace_PW"]," @ ###"))
+			,strQ(fldval["leads-RV_Thr_Amp"],"###" strQ(fldval["leads-RV_Thr_PW"]," @ ###"))
+			,strQ(fldval["leads-RV_Pace_Amp"],"###" strQ(fldval["leads-RV_Pace_PW"]," @ ###"))
 			,fldval["leads-RV_Pol_pace"]
-			,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"])
+			,fldval["leads-RV_Thr_Sens"],fldval["leads-RV_Sensitivity"],fldval["leads-RV_Pol_sens"],fldval["leads-RV_HVimp"])
 	normLead("LV"
 			,fldval["dev-LVlead"],fldval["dev-LVlead_impl"],fldval["leads-LV_imp"]
-			,printQ(fldval["leads-LV_Thr_Amp"],"###" printQ(fldval["leads-LV_Thr_PW"]," @ ###"))
-			,printQ(fldval["leads-LV_Pace_Amp"],"###" printQ(fldval["leads-LV_Pace_PW"]," @ ###"))
+			,strQ(fldval["leads-LV_Thr_Amp"],"###" strQ(fldval["leads-LV_Thr_PW"]," @ ###"))
+			,strQ(fldval["leads-LV_Pace_Amp"],"###" strQ(fldval["leads-LV_Pace_PW"]," @ ###"))
 			,fldval["leads-LV_Pol_pace"]
 			,fldval["leads-LV_Thr_Sens"],fldval["leads-LV_Sensitivity"],fldval["leads-LV_Pol_sens"])
 
@@ -1542,7 +1940,7 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
-	fldfill("indication",printQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
+	fldfill("indication",strQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
 	
 	fields[1] := ["Device/Manufacturer:manufacturer"
 				, "Device/Model:model"
@@ -1561,7 +1959,7 @@ PaceartReadXml:
 				, "/Battery/Impedance:IPG_impedance[ohms]"
 				. ""]
 	xmlFld("//Encounter",1,"dev")
-	fldfill("dev-IPG",printQ(fldval["dev-manufacturer"],"###") printQ(fldval["dev-model"]," ###"))
+	fldfill("dev-IPG",strQ(fldval["dev-manufacturer"],"###") strQ(fldval["dev-model"]," ###"))
 	fldfill("dev-Encounter",parseDate(fldval["dev-Encounter"]).MDY)
 	
 	fields[1] := ["PacingMode:Mode"
@@ -1585,7 +1983,7 @@ PaceartReadXml:
 				, "/VVDelay:CRT_VV[ms]"
 				. ""]
 	xmlFld("//Programming/HeartFailure",1,"par")
-	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV<LV"
+	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV>LV"
 	
 	fields[1] := ["APVPPercent:ApVp[%]"
 				, "ASVPPercent:AsVp[%]"
@@ -1606,33 +2004,34 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//Programming/Tachycardia",1,"detect")
 	
-	fields[1] := ["/Episode[Type='AF_AT']/Count:AT/AF"
-				, "/Episode[Type='VF_VT']/Count:VT/VF"
+	fields[1] := ["/Episode[Type='AF_AT']/Count:ATAF"
+				, "/Episode[Type='VF_VT']/Count:VTVF"
 				, "/Episode[Type='SVT']/Count:SVT"
 				, "/Episode[Type='V_NST']/Count:VNST"
 				, "/Episode[Type='VT']/Count:VT"
 				, "/Episode[Type='FVT']/Count:FVT"
-				, "/Therapy[Chamber='RIGHT_ATRIUM']/ATP/Delivered:Rx_AT/AF"
+				, "/Therapy[Chamber='RIGHT_ATRIUM']/ATP/Delivered:Rx_ATAF"
 				, "/Therapy[Chamber='RIGHT_ATRIUM']/Shocks/Delivered:A_Shocked"
 				, "/Therapy[Chamber='RIGHT_ATRIUM']/Shocks/Aborted:A_Aborted"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/ATP/Delivered:Rx_VATP"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Delivered:V_Shocked"
 				, "/Therapy[Chamber='RIGHT_VENTRICLE']/Shocks/Aborted:V_Aborted"
 				. ""]
-	xmlFld("//Statistics/Detections_Therapies",1,"detect")
+	xmlFld("//Statistics/Detections_Therapies",1,"event")
 	
 	loop, % (i:=yp.selectNodes("//PatientPassiveDevice[Status='ACTIVE']")).length
 	{
 		k := readXmlLead(i.item(A_Index-1))
 		normLead(k.ch
-			, printQ(k.manu, "### ") printQ(k.model, "###") printQ(k.ser,", serial ###"), k.impl
+			, strQ(k.manu, "### ") strQ(k.model, "###") strQ(k.ser,", serial ###"), k.impl
 			, k.pacing_imped
-			, k.cap_amp printQ(k.cap_pw," / ###")
-			, k.pacing_amp printQ(k.pacing_pw," / ###")
+			, k.cap_amp strQ(k.cap_pw," / ###")
+			, k.pacing_amp strQ(k.pacing_pw," / ###")
 			, k.pacing_pol
 			, k.sensing_thr
 			, k.sensitivity_amp
-			, k.sensitivity_pol)
+			, k.sensitivity_pol
+			, k.HV_imped)
 	}
 	
 	return
@@ -1658,28 +2057,29 @@ readXmlLead(k) {
 		res.ch .= num+1
 	}
 	if (k.selectSingleNode("Device/Comments").text~="HV") {
-		fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
-	}
-	if (res.model ~= "6937") {
-		return res
+		if !(res.chamb) {
+			res.chamb := "HV"
+			res.ch := "HV"
+		}
+		fldval["leads-" res.ch "_HVimp"] := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	}
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
-	res.pacing_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	res.pacing_amp := printQ(readNodeVal(base "/Amplitude"),"### V")
-	res.pacing_pw := printQ(readNodeVal(base "/PulseWidth"),"### ms")
-	res.pacing_adaptive := printQ(readNodeVal(base "/AdaptationMode"),"###")
+	res.pacing_pol := strQ(readNodeVal(base "//Polarity"),"###")
+	res.pacing_amp := strQ(readNodeVal(base "/Amplitude"),"### V")
+	res.pacing_pw := strQ(readNodeVal(base "/PulseWidth"),"### ms")
+	res.pacing_adaptive := strQ(readNodeVal(base "/AdaptationMode"),"###")
 	
 	base := "//Programming//SensingData[Chamber='" res.chamb "']"
-	res.sensitivity_pol := printQ(readNodeVal(base "//Polarity"),"###")
-	res.sensitivity_amp := printQ(readNodeVal(base "//Amplitude"),"### mV")
+	res.sensitivity_pol := strQ(readNodeVal(base "//Polarity"),"###")
+	res.sensitivity_amp := strQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" res.chamb "']"
-	res.cap_amp := printQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
-	res.cap_pw := printQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
-	res.sensing_thr := printQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
-	res.pacing_imped := printQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
-	;~ fldval["leads-" res.ch "_HVimp"] := printQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+	res.cap_amp := strQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
+	res.cap_pw := strQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
+	res.sensing_thr := strQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
+	res.pacing_imped := strQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
+	res.HV_imped := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	
 	return res
 }
@@ -1705,7 +2105,7 @@ xmlFld(base,blk,pre="") {
 		unit := strX(lbl,"[",1,1,"]",0,1)
 		lbl := strX(lbl,"",1,0,"[",1,1)
 		
-		fldval[pre "-" lbl] := printQ(res, "###" . printQ(unit," ###"))
+		fldval[pre "-" lbl] := strQ(res, "###" . strQ(unit," ###"))
 	}
 	return
 }
@@ -1739,6 +2139,9 @@ fldfill(var,val) {
 	
 	if (val=="") {																; val is null
 		return																	; do nothing
+	}
+	if (val=="N/R") {
+		val := ""
 	}
 	
 	fldval[var] := trim(val," `t`r`n")											; set var as val
@@ -1869,9 +2272,9 @@ scanParams(txt,blk,pre:="par",rx:="") {
 		i := A_LoopField "  "
 		set := trim(strX(i,"",1,0,"  ",1,2)," :")								; Get leftmost column to first "  "
 		val := objHasValue(fields[blk],set,rx)
-		;~ if !(val) {
-			;~ continue
-		;~ }
+		if (val<1) {
+			continue
+		}
 		
 		RegExMatch(i															; Add "  " to end of scan string
 				,"O)" colstr													; Search "  text  " as each column 
@@ -1950,8 +2353,8 @@ readSjm(lbl) {
 		break																	; and break out of loop
 	}
 	return RegExReplace(el3,"[^[:ascii:]]") 
-		. printQ(RegExReplace(el4,"[^[:ascii:]]")," ###") 
-		. printQ(RegExReplace(el5,"[^[:ascii:]]")," ###")						; return: value ( units)( whatever el5 is)
+		. strQ(RegExReplace(el4,"[^[:ascii:]]")," ###") 
+		. strQ(RegExReplace(el5,"[^[:ascii:]]")," ###")						; return: value ( units)( whatever el5 is)
 }
 
 pmPrint:
@@ -1959,32 +2362,36 @@ pmPrint:
 	if !(enc_MD) {
 		return
 	}
-	rtfBody := "\fs22\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par`n\fs18 "
+	rtfBody := "\b\ul DEVICE INFORMATION AND INITIAL SETTINGS\ul0\b0\par "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
-	. printQ(fldval["dev-IPG_impl"],", implanted ###") . printQ(fldval["dev-Physician"]," by ###") ". `n"
-	. printQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
-	. printQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . printQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ") "`n"
-	. printQ(fldval["par-Mode"],"Brady programming mode is ### with lower rate " fldval["par-LRL"])
-	. printQ(fldval["par-URL"],", upper tracking rate ###")
-	. printQ((substr(fldval["par-Mode"],0,1)="R"),printQ(fldval["par-USR"],", upper sensor rate ###"))
-	. printQ(fldval["par-ADL"],", ADL rate ###") . ". `n"
-	. printQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. `n")
-	. printQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. `n")
-	. printQ(fldval["dev-Sensed"],"Sensed ###. ") . printQ(fldval["dev-Paced"],"Paced ###. ")
-	. printQ(fldval["dev-AsVs"],"AS-VS ###  ") . printQ(fldval["dev-AsVp"],"AS-VP ###  ")
-	. printQ(fldval["dev-ApVs"],"AP-VS ###  ") . printQ(fldval["dev-ApVp"],"AP-VP ###  ")
-	. printQ(fldval["dev-AP"],"A-paced ###%. ") . printQ(fldval["dev-VP"],"V-paced ###%. ")
-	. printQ(fldval["detect-AT/AF"],"AT/AF detection ###" printQ(fldval["detect-Rx_AT/AF"],", Rx ###") ". ")
-	. printQ(fldval["detect-VF"],"VF detection ###" printQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
-	. printQ(fldval["detect-FVT"],"FVT detection ###" printQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
-	. printQ(fldval["detect-VT"],"VT detection ###" printQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
-	. "\par `n"
-	. "\fs22\par `n"
-	. "\b\ul LEAD INFORMATION\ul0\b0\par`n\fs18 "
+	. strQ(fldval["dev-IPG_impl"],", implanted ###") . strQ(fldval["dev-Physician"]," by ###") ". "
+	. strQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
+	. strQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . strQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
+	. strQ(fldval["par-Mode"],"Brady programming mode is ###")
+	. strQ(fldval["par-LRL"],", lower rate ###")
+	. strQ(fldval["par-URL"],", upper tracking rate ###")
+	. strQ((substr(fldval["par-Mode"],0,1)="R"),strQ(fldval["par-USR"],", upper sensor rate ###"))
+	. strQ(fldval["par-ADL"],", ADL rate ###") . ". "
+	. strQ(fldval["par-Cap_Mgt"],"Adaptive mode is ###. ")
+	. strQ(fldval["par-PAV"],"Paced and sensed AV delays are " fldval["par-PAV"] " and " fldval["par-SAV"] ", respectively. ")
+	. strQ(fldval["par-CRT_VP"],"Ventricular pace sequence ###" . strQ(fldval["par-CRT_VV"]," (###)") ". ")
+	. strQ(fldval["dev-Sensed"],"Sensed ###. ") . strQ(fldval["dev-Paced"],"Paced ###. ")
+	. strQ(fldval["dev-AsVs"],"AS-VS ###  ") . strQ(fldval["dev-AsVp"],"AS-VP ###  ")
+	. strQ(fldval["dev-ApVs"],"AP-VS ###  ") . strQ(fldval["dev-ApVp"],"AP-VP ###  ")
+	. strQ(fldval["dev-AP"],"A-paced ###%. ") . strQ(fldval["dev-VP"],"V-paced ###%. ")
+	. strQ(fldval["detect-ATAF"],"AT/AF detection ###" strQ(fldval["detect-Rx_ATAF"],", Rx ###") ". ")
+	. strQ(fldval["detect-VF"],"VF detection ###" strQ(fldval["detect-Rx_VF"],", Rx ###") ". ")
+	. strQ(fldval["detect-FVT"],"FVT detection ###" strQ(fldval["detect-Rx_FVT"],", Rx ###") ". ")
+	. strQ(fldval["detect-VT"],"VT detection ###" strQ(fldval["detect-Rx_VT"],", Rx ###") ". ") 
+	. "\par\par "
+	. "\b\ul LEAD INFORMATION\ul0\b0\par "
 	
-	for k in leads
+	for k,v in ["RA","RV","RV2","RV3","LV","LV2","HV"]
 	{
-		printLead(k)
+		if !isobject(leads[v]) {
+			continue
+		}
+		printLead(v)
 	}
 	
 	printEvents()
@@ -1994,7 +2401,7 @@ pmPrint:
 Return
 }
 
-printQ(var1,txt,null:="") {
+strQ(var1,txt,null:="") {
 /*	Print Query - Returns text based on presence of var
 	var1	= var to query
 	txt		= text to return with ### on spot to insert var1 if present
@@ -2003,7 +2410,7 @@ printQ(var1,txt,null:="") {
 	return (var1="") ? null : RegExReplace(txt,"###",var1)
 }
 
-normLead(lead				; RA, RV, LV
+normLead(lead				; RA, RV, LV 												) {
 		,model				; Model name/ser
 		,date				; Date implanted
 		,P_imp				; Pacing impedance
@@ -2012,18 +2419,18 @@ normLead(lead				; RA, RV, LV
 		,P_pol				; Pacing polarity
 		,S_thr				; Sensing threshold
 		,S_sens				; Sensing programmed sensitivity
-		,S_pol)				; Sensing polarity
+		,S_pol				; Sensing polarity
+		,HV_imp="")			; HV impedance
 {
-	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol) {			; ALL parameters in pre or post are NULL
+	if (!P_imp && !P_thr && !P_out && !P_pol && !S_thr && !S_sens && !S_pol && !HV_imp) {	; ALL parameters in pre or post are NULL
 		eventlog("Lead " lead " all null values!")
 		return error																	; Do not populate leads[]
 	}
 	global leads, fldval
 	leads[lead,"model"] 	:= model
 	leads[lead,"date"]		:= date
-	leads[lead,"imp"]  		:= printQ(P_imp,"Pacing impedance ###") 
-							. printQ(fldval["leads-" lead "_HVimp"]
-							, printQ(P_imp,". ") " Defib impedance ###")
+	leads[lead,"imp"]  		:= strQ(P_imp,"Pacing impedance ###") 
+							. strQ(HV_imp,strQ(P_imp,". ") "Defib impedance ###")
 	leads[lead,"cap"]  		:= P_thr
 	leads[lead,"output"]	:= P_out
 	leads[lead,"pace pol"] 	:= P_pol
@@ -2035,17 +2442,17 @@ return
 
 printLead(lead) {
 	global rtfBody, leads
-	rtfBody .= "\b " lead " lead: \b0 " 
-	. printQ(leads[lead,"model"],"###" printQ(leads[lead,"date"],", implanted ###") ". ")
-	. printQ(leads[lead,"imp"],"###. ")
-	. printQ(leads[lead,"cap"],"Capture threshold ###. ")
-	. printQ(leads[lead,"output"],"Pacing output ###. ")
-	. printQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
-	. printQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing " 
+	rtfBody .= "\b " lead " lead:\b0  " 
+	. strQ(leads[lead,"model"],"###" strQ(leads[lead,"date"],", implanted ###") ". ")
+	. strQ(leads[lead,"imp"],"###. ")
+	. strQ(leads[lead,"cap"],"Capture threshold ###. ")
+	. strQ(leads[lead,"output"],"Pacing output ###. ")
+	. strQ(leads[lead,"pace pol"],"Pacing polarity ###. ")
+	. strQ(leads[lead,"sens"],((lead="RA")?"P":"")((lead="RV")?"R":"") "-wave sensing " 
 		. ((leads[lead,"sens"]~="N/R")?"not measured/detected":"###") ". ")
-	. printQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
-	. printQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
-	. "\par `n"
+	. strQ(leads[lead,"sensitivity"],"Sensitivity ###. ")
+	. strQ(leads[lead,"sens pol"],"Sensing polarity ###. ")
+	. "\par "
 }
 
 printEvents()
@@ -2053,96 +2460,55 @@ printEvents()
 	global rtfBody, fldval
 	if (fldval["leads-RV_HVimp"]) {
 		txt := ""
-		. printQ(fldval["event-AHR"]?fldval["event-AHR"]:"0","There were ### Atrial High Rate episodes. ")
-		. printQ(fldval["event-VHR"]?fldval["event-VHR"]:"0","There were ### Ventricular High Rate episodes. ")
-		. printQ(fldval["event-VF"]?fldval["event-VF"]:"0","### VF episodes detected. ")
-		. printQ(fldval["event-VT"]?fldval["event-VT"]:"0","### VT episodes detected. ")
+		. strQ(fldval["event-AHR"]?fldval["event-AHR"]:"0","There were ### Atrial High Rate episodes. ")
+		. strQ(fldval["event-VHR"]?fldval["event-VHR"]:"0","There were ### Ventricular High Rate episodes. ")
+		. strQ(fldval["event-VF"]?fldval["event-VF"]:"0","### VF episodes detected. ")
+		. strQ(fldval["event-VT"]?fldval["event-VT"]:"0","### VT episodes detected. ")
 	}
 	txt .= ""
-	. printQ(fldval["event-VTNS"]?fldval["event-VTNS"]:"","### NS-VT episodes detected. ")
-	. printQ(fldval["event-ATAF"]?fldval["event-ATAF"]:"","### AT/AF episodes detected. ")
-	. printQ(fldval["event-V_Paced"]?fldval["event-V_Paced"]:"","### VT episodes pace-terminated. ")
-	. printQ(fldval["event-V_Shocked"]?fldval["event-V_Shocked"]:"","### VT/VF episodes shock-terminated. ")
-	. printQ(fldval["event-V_Aborted"]?fldval["event-V_Aborted"]:"","### VT/VF episodes aborted. ")
-	. printQ(fldval["event-A_Paced"]?fldval["event-A_Paced"]:"","### AT episodes pace-terminated. ")
-	. printQ(fldval["event-A_Shocked"]?fldval["event-A_Shocked"]:"","### AT/AF episodes shock-terminated. ")
-	. printQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
-	. printQ(fldval["event-Obs"],"\par ### ")
+	. strQ(fldval["event-VTNS"]?fldval["event-VTNS"]:"","### NS-VT episodes detected. ")
+	. strQ(fldval["event-ATAF"]?fldval["event-ATAF"]:"","### AT/AF episodes detected. ")
+	. strQ(fldval["event-V_Paced"]?fldval["event-V_Paced"]:"","### VT episodes pace-terminated. ")
+	. strQ(fldval["event-V_Shocked"]?fldval["event-V_Shocked"]:"","### VT/VF episodes shock-terminated. ")
+	. strQ(fldval["event-V_Aborted"]?fldval["event-V_Aborted"]:"","### VT/VF episodes aborted. ")
+	. strQ(fldval["event-A_Paced"]?fldval["event-A_Paced"]:"","### AT episodes pace-terminated. ")
+	. strQ(fldval["event-A_Shocked"]?fldval["event-A_Shocked"]:"","### AT/AF episodes shock-terminated. ")
+	. strQ(fldval["event-A_Aborted"]?fldval["event-A_Aborted"]:"","### AT/AF episodes aborted. ")
+	. strQ(fldval["event-Obs"],"\par ")
 	
-	rtfBody .= printQ(txt,"\fs22\par\b\ul EVENTS\ul0\b0\par\fs18 `n###\par `n") 
+	rtfBody .= strQ(txt,"\par\b\ul EVENTS\ul0\b0\par ###\par ") 
 return	
 }
 
 PrintOut:
 {
-	FormatTime, enc_dictdate, A_now, yyyy MM dd hh mm t
-	if (is_remote) {
-		enc_type := "REMOTE "
-		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
-		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
-	} else {
-		enc_type := "IN-OFFICE "
-		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
-		enc_trans :=																	; transmission date is null
-	}
+	summ := strQ(fldval["dev-summary"],"###"
+			, "This represents a normal " strQ(format("{:L}",fldval["dev-EncType"]),"### ") "device check. The patient denies any device related symptoms. "
+			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
+			. "Routine follow up per implantable device protocol. ")	
 	
-	for k in leads
-	{
-		ctLeads := A_Index
-	}
-	enc_type .= (instr(leads["RV","imp"],"Defib"))
-		? "ICD "
-		: "PM "
-	if (ctLeads = 1) {
-		enc_type .= "Single"
-	} else if (ctLeads = 2) {
-		enc_type .= "Dual"
-	} else if (ctLeads > 2) {
-		enc_type .= "Multi"
-	}
+	rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
 	
-	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}}`n"
-			. "{\*\generator Riched20 10.0.14393}\viewkind4\uc1 `n"
-			. "\pard\tx2160\fs22\lang9 `n"
-			. "Transcriptionist\tab "	"<TrID:crd> \par `n"
-			. "Document Type\tab "		"<7:Q8> \par `n"
-			. "Clinic Title code\tab "	"<1035:PACE> \par `n"
-			. "Medical Record #\tab "	"<1:" fldval["dev-MRN"] ">\par `n"
-			. "Patient Name\tab "		"<2:" fldval["dev-Name"] ">\par `n"
-			. "CIS Encounter #\tab "	"<3: " format("{:012}",fldval["dev-Enc"]) " >\par `n"
-			. "Dictating Phy #\tab "	"<8:" docs[enc_MD].cumg ">\par `n"
-			. "Dictation Date\tab "		"<13:" enc_dt.MDY ">\par `n"
-			. "Job #\tab "				"<15:e> \par `n"
-			. "Service Date\tab "		"<31:" enc_dt.MDY ">\par `n"
-			. "Surgery Date\tab "		"<6:" enc_dt.MDY "> \par `n"
-			. "Attending Phy #\tab "	"<9:" docs[enc_MD].cumg "> \par `n"
-			. "Transcription Date\tab "	"<TS:" enc_dictdate "> \par `n"
-			. "Job No Search\tab "		"<JobNoSearch:NONE> \par `n"
-			. "<EndOfHeader>\par `n"
-			. "\par `n"
+	rtfFtr := "}"
 	
-	rtfFtr := "`n\fs22\par\par`n\{SEC XCOPY\} \par`n\{END\} \par`n}`r`n"
-	
-	rtfBody := "\tx1620\tx5220\tx7040" 
-	. "\fs22\b\ul ANALYSIS DATE:\ul0\b0\par\fs18 `n" enc_dt.MDY "\par `n"
-	. printQ(is_remote
-		,"\fs22\b\ul TRANSMISSION DATE:\ul0\b0\par\fs18 `n"
-		. enc_trans.MDY "\par `n")
-	. "\par `n"
-	. "\fs22\b\ul ENCOUNTER TYPE\ul0\b0\par\fs18 `n"
-	. "Device interrogation " enc_type "\par `n"
-	. "Perfomed by " tech ".\par\par\fs22 `n"
-	. printQ(fldval["indication"]
-		, "\b\ul INDICATION FOR DEVICE\ul0\b0\par\fs18 `n"
-		. "###\par\par\fs22 `n")
-	. printQ(fldval["dependent"]
-		, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par\fs18 `n"
-		. "###\par\par\fs22 `n")
-	. rtfBody . "\fs22\par `n" 
-	. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par\fs18 `n"
-	. summ . "\par `n"
-	. "\par `n"
-	. "\pard\tx2700\tx5220\tx7040 `n"
+	rtfBody := "\pard\fs20"
+			. "{\*\annotation START}"
+			. "\b\ul DATE OF BIRTH: " strQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par "
+			. "{\*\annotation END}"
+			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
+			. strQ(is_remote
+				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
+			. "\b\ul ENCOUNTER TYPE\ul0\b0\par "
+			. "Device interrogation " enc_type "\par\par "
+			. strQ(fldval["indication"]
+				, "\b\ul INDICATION FOR DEVICE\ul0\b0\par "
+				. "###\par\par ")
+			. strQ(fldval["dependent"]
+				, "\b\ul PACEMAKER DEPENDENT\ul0\b0\par "
+				. "###\par\par ")
+			. rtfBody "\par "
+			. "\b\ul ENCOUNTER SUMMARY\ul0\b0\par "
+			. summ "\par\par "
 	
 	rtfOut := rtfHdr . rtfBody . rtfFtr
 	
@@ -2152,13 +2518,18 @@ PrintOut:
 			.	(instr(nm,",") ? strX(nm,"",1,0,",",1,1) : strX(nm," ",1,1,"",0)) " "
 			.	"#" fldval["dev-IPG_SN"] " "
 			.	enc_dt.YMD
+	onbaseFile := "TRREAT_"
+			. fldval["dev-ordernum"] "_" 
+			. enc_dt.YMD "_" 
+			. fldval["dev-NameL"] "_" 
+			. fldval["dev-MRN"] ".pdf"
 	
-	FileDelete, % path.bin fileOut ".rtf"												; delete and generate RTF fileOut.rtf
-	FileAppend, % rtfOut, % path.bin fileOut ".rtf"
+	FileDelete, % path.files "tmp\" fileOut ".rtf"										; delete and generate RTF fileOut.rtf
+	FileAppend, % rtfOut, % path.files "tmp\" fileOut ".rtf"
 	
-	eventlog("Print output generated in " path.bin)
+	eventlog("Print output generated in " path.files "tmp")
 	
-	RunWait, % "WordPad.exe """ path.bin fileOut ".rtf"""								; launch fileNam in WordPad
+	RunWait, % "WordPad.exe """ path.files "tmp\" fileOut ".rtf"""						; launch fileNam in WordPad
 	MsgBox, 262180, , Report looks okay?
 	IfMsgBox, Yes
 	{
@@ -2180,18 +2551,23 @@ PrintOut:
 					. "`n"
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
 			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
+			
+			FileCopy, % fileIn, % path.paceart "done\"
 		}
-		FileMove, % path.bin fileOut ".rtf", % path.report fileOut ".rtf", 1				; move RTF to the final directory
+		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
+		FileCopy, % fileIn, % path.onbase onbaseFile, 1
 		fileDelete, % fileIn
 		
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
 		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
+			xl.addElement("wqid",edID,fldval["dev-wqid"])
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
+			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
 			xl.addElement("status",edID,"Pending")
-			xl.addElement("paceart",edID,printQ(is_remote,"True"))
+			xl.addElement("paceart",edID,strQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
 			xl.addElement("report",edID,path.report fileOut ".rtf")
@@ -2212,20 +2588,8 @@ PrintOut:
 			;~ err := whr.ResponseText													; the http response
 		}
 	}
-	gosub parseGUI
 	
 	return
-}
-
-Base64Dec( ByRef B64, ByRef Bin ) {  ; By SKAN / 18-Aug-2017
-; from https://autohotkey.com/boards/viewtopic.php?t=35964
-Local Rqd := 0, BLen := StrLen(B64)                 ; CRYPT_STRING_BASE64 := 0x1
-  DllCall( "Crypt32.dll\CryptStringToBinary", "Str",B64, "UInt",BLen, "UInt",0x1
-         , "UInt",0, "UIntP",Rqd, "Int",0, "Int",0 )
-  VarSetCapacity( Bin, 128 ), VarSetCapacity( Bin, 0 ),  VarSetCapacity( Bin, Rqd, 0 )
-  DllCall( "Crypt32.dll\CryptStringToBinary", "Str",B64, "UInt",BLen, "UInt",0x1
-         , "Ptr",&Bin, "UIntP",Rqd, "Int",0, "Int",0 )
-Return Rqd
 }
 
 columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
@@ -2467,6 +2831,9 @@ fieldvals(x,bl,pre:="") {
 */
 	global fields, labels, fldval
 	
+	if (pre!="") {
+		pre := pre "-"
+	}
 	for k, i in fields[bl]
 	{
 		j := fields[bl][k+1]
@@ -2478,7 +2845,7 @@ fieldvals(x,bl,pre:="") {
 		cleanSpace(m)
 		cleanColon(m)
 		;~ fldval[pre "-" lbl] := m
-		fldfill(pre "-" lbl, m)
+		fldfill(pre . lbl, m)
 		;~ MsgBox % i " ~ " j "`n" pre "-" lbl "`n" m
 		;~ formatField(pre,lbl,m)
 	}
@@ -2542,7 +2909,10 @@ cleanspace(ByRef txt) {
 
 ObjHasValue(aObj, aValue, rx:="") {
 ; modified from http://www.autohotkey.com/board/topic/84006-ahk-l-containshasvalue-method/	
-    for key, val in aObj
+    if (aValue="") {
+		return, false, errorlevel := 1
+	}
+	for key, val in aObj
 		if (rx) {
 			if (val ~= aValue) {														; aObj contains set of regex strings
 				return, key, Errorlevel := 0
@@ -2558,6 +2928,48 @@ ObjHasValue(aObj, aValue, rx:="") {
     return, false, errorlevel := 1
 }
 
+parseORM() {
+/*	parse fldval values to values
+	including aliases for both WQlist and readWQorder
+*/
+	global fldval
+	
+	switch fldval.PV1_PtClass
+	{
+		case "O": encType:="Outpatient"
+		case "I": encType:="Inpatient"
+		case "DS": encType:="Inpatient"
+		default: encType:="Outpatient"
+	}
+	location := encType
+	
+	return {date:parseDate(fldval.PV1_DateTime).YMD
+		, encDate:parseDate(fldval.PV1_DateTime).YMD
+		, nameL:fldval.PID_NameL
+		, nameF:fldval.PID_NameF
+		, name:fldval.PID_NameL strQ(fldval.PID_NameF,", ###")
+		, mrn:fldval.PID_PatMRN
+		, sex:fldval.PID_sex
+		, DOB:parseDate(fldval.PID_DOB).MDY
+		, prov:strQ(fldval.ORC_ProvCode
+			, fldval.ORC_ProvCode "^" fldval.ORC_ProvNameL "^" fldval.ORC_ProvNameF
+			, fldval.OBR_ProviderCode "^" fldval.OBR_ProviderNameL "^" fldval.OBR_ProviderNameF)
+		, type:encType
+		, loc:location
+		, accountnum:fldval.PID_AcctNum
+		, encnum:fldval.PV1_VisitNum
+		, order:fldval.ORC_ReqNum
+		, accession:fldval.ORC_FillerNum
+		, acct:location strQ(fldval.ORC_ReqNum,"_###") strQ(fldval.ORC_FillerNum,"-###")
+		, UID:tobase(fldval.ORC_ReqNum RegExReplace(fldval.ORC_FillerNum,"[^0-9]"),36)
+		, ind:strQ(fldval.OBR_ReasonCode,"###") strQ(fldval.OBR_ReasonText,"^###")
+		, indication:strQ(fldval.OBR_ReasonCode,"###") strQ(fldval.OBR_ReasonText,"^###")
+		, indicationCode:fldval.OBR_ReasonCode
+		, ordertype:fldval.OBR_TestCode "^" fldval.OBR_TestName
+		, orderCtrl:fldval.ORC_OrderCtrl
+		, ctrlID:fldval.MSH_CtrlID}
+}
+
 FetchDem:
 {
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
@@ -2565,100 +2977,209 @@ FetchDem:
 	}
 	y := new XML(path.chip "currlist.xml")
 	yArch := new XML(path.chip "archlist.xml")
-	SNstring := "/root/id/data/device[@SN='" fldval["dev-IPG_SN"] "']"
+	SNstring := "/root/id[data/device[@SN='" fldval["dev-IPG_SN"] "']]"
 	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
-		dx := k.parentNode
-		id := dx.parentNode
-		fldval["dev-MRN"] := id.getAttribute("mrn")								; set dev-MRN based on device SN
+		fldval["dev-MRN"] := k.getAttribute("mrn")								; set dev-MRN based on device SN
+		fldval["dev-NameL"] := k.selectSingleNode("demog/name_last").text
+		fldval["dev-NameF"] := k.selectSingleNode("demog/name_first").text
+		fldval["dev-Name"] := fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###")
 		eventlog("Device " fldval["dev-IPG_SN"] " found in currlist (" fldval["dev-MRN"] ").")
 	} else if IsObject(k := yArch.selectSingleNode(SNstring)) {					; Look in yArch if not in y
-		dx := k.parentNode
-		id := dx.parentNode
-		fldval["dev-MRN"] := id.getAttribute("mrn")
+		fldval["dev-MRN"] := k.getAttribute("mrn")
+		fldval["dev-NameL"] := k.selectSingleNode("demog/name_last").text
+		fldval["dev-NameF"] := k.selectSingleNode("demog/name_first").text
+		fldval["dev-Name"] := fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###")
 		eventlog("Device " fldval["dev-IPG_SN"] " found in archlist (" fldval["dev-MRN"] ").")
 	}
 	
-	getDem := true
 	fetchQuit := false
+	scanOrders()
+	matchOrder()
 	
-	gosub fetchGUI
-	
-	while (getDem) {									; Repeat until we get tired of this
-		clipboard :=
-		ClipWait, 2
-		if !ErrorLevel {								; clipboard has data
-			clk := parseClip(clipboard)
-			if !ErrorLevel {															; parseClip {field:value} matches valid data
-				if (clk.field = "Account Number") {
-					fldval["dev-Enc"] := clk.value
-					eventlog("CLK: Account number " clk.value)
-				}
-				if (clk.field = "MRN") {
-					fldval["dev-MRN"] := clk.value
-					eventlog("CLK: MRN " clk.value)
-				}
-				if (clk.field = "Name") {
-					fldval["dev-Name"] := clk.value
-					eventlog("CLK: Name " clk.value)
-				}
-			}
-			gosub fetchGUI							; Update GUI with new info
-		}
-	}
 	if (fetchQuit) {
 		return
 	}
 	
-	EncNum := fldval["dev-Enc"]
-	EncMRN := fldval["dev-MRN"]
-	
 	return
 }
 
-fetchGUI:
-{
-	fYd := 30,	fXd := 90														; fetchGUI delta Y, X
-	fX1 := 12,	fX2 := fX1+fXd													; x pos for title and input fields
-	fW1 := 80,	fW2 := 190														; width for title and input fields
-	fH := 20																	; line heights
-	fY := 10																	; y pos to start
-	EncNum := fldval["dev-Enc"]													; we need these non-array variables for the Gui statements
-	EncMRN := fldval["dev-MRN"]
-	EncName := (fldval["dev-Name"]~="[A-Z \-]+, [A-Z\-](?!=\s)")
-	demBits := ((EncNum~="\d{8}") && (EncMRN~="\d{6,7}") && EncName)			; clear the error check
-	/*	set this as true to skip demographics validation
-	*/
-		;~ dembits := true
-	/*
-	*/
+scanOrders() {
+	global xl, path, fldval, worklist
 	
-	Gui, fetch:Destroy
-	Gui, fetch:+AlwaysOnTop
+	xl := new XML(worklist)																; refresh worklist
+	if !IsObject(xl.selectSingleNode("/root/orders")) {
+		xl.addElement("orders","/root")
+	}
 	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encName)?"Default":"Red") , Name
-	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
-		. " readonly c" ((encName)?"Default":"Red") , % fldval["dev-Name"]
-	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encMRN~="\d{6,7}")?"Default":"Red") , MRN
-	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
-		. " readonly c" ((encMRN~="\d{6,7}")?"Default":"Red"), % fldval["dev-MRN"]
-	
-	Gui, fetch:Add, Text, % "x" fX1 " w" fW1 " h" fH " c" ((encNum~="\d{8}")?"Default":"Red") , Encounter
-	Gui, fetch:Add, Edit, % "x" fX2 " yP-4" " w" fW2 " h" fH 
-		. " readonly c" ((encNum~="\d{8}")?"Default":"Red"), % fldval["dev-Enc"]
-	
-	Gui, fetch:Add, Button, % "x" fX1 " yP+" fYD " h" fH+10 " w" fW1+fW2+10 " gfetchSubmit " ((demBits)?"":"Disabled"), Submit!
-	Gui, fetch:Show, AutoSize, % fldval["dev-Name"]
+	Loop, files, % path.hl7in "*"															; Scan incoming folder for new orders and add to Orders node
+	{
+		e0 := {}
+		fileIn := A_LoopFileName
+		if RegExMatch(fileIn,"_([a-zA-Z0-9]{4,})Z.hl7",i) {								; skip old files
+			continue
+		}
+		processhl7(A_LoopFileFullPath)
+		e0:=parseORM()
+		e0.orderNode := "/root/orders/order[ordernum='" e0.order "']"
+		if IsObject(k:=xl.selectSingleNode(e0.orderNode)) {								; ordernum node exists
+			e0.nodeCtrlID := k.selectSingleNode("ctrlID").text
+			if (e0.CtrlID < e0.nodeCtrlID) {											; order CtrlID is older than existing, somehow
+				FileDelete, % path.hl7in fileIn
+				eventlog("Order msg " fileIn " is outdated.")
+				continue
+			}
+			if (e0.orderCtrl="CA") {													; CAncel an order
+				FileDelete, % path.hl7in fileIn											; delete this order message
+				FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"							; and the previously processed hl7 file
+				removeNode(e0.orderNode)												; and the accompanying node
+				eventlog("Cancelled order " e0.order ".")
+				continue
+			}
+			FileDelete, % path.hl7in "*_" e0.UID "Z.hl7"								; delete previously processed hl7 file
+			removeNode(e0.orderNode)													; and the accompanying node
+			eventlog("Cleared order " e0.order " node.")
+		}
+		if (e0.orderCtrl="XO") {														; change an order
+			e0.orderNode := "/root/orders/order[accession='" e0.accession "']"
+			k := xl.selectSingleNode(e0.orderNode)
+			e0.nodeUID := k.getAttribute("id")
+			FileDelete, % path.hl7in "*_" e0.nodeUID "Z.hl7"
+			removeNode(e0.orderNode)
+			eventlog("Removed node id " e0.nodeUID " for replacement.")
+		}
+		
+		newID := "/root/orders/order[@id='" e0.UID "']"								; otherwise create a new node
+		xl.addElement("order","/root/orders",{id:e0.UID})
+		xl.addElement("ordernum",newID,e0.order)
+		xl.addElement("accession",newID,e0.accession)
+		xl.addElement("ctrlID",newID,e0.CtrlID)
+		xl.addElement("accountnum",newID,e0.accountnum)
+		xl.addElement("encnum",newID,e0.encnum)
+		xl.addElement("loctype",newID,e0.type)
+		xl.addElement("loc",newID,e0.loc)
+		xl.addElement("date",newID,e0.date)
+		xl.addElement("name",newID,e0.name)
+		xl.addElement("mrn",newID,e0.mrn)
+		xl.addElement("dob",newID,parsedate(e0.dob).YMD)
+		xl.addElement("sex",newID,e0.sex)
+		xl.addElement("prov",newID,e0.prov)
+		eventlog("Added order ID " e0.UID ".")
+		
+		fileOut := e0.MRN "_" 
+			. fldval["PID_nameL"] "^" fldval["PID_nameF"] "_"
+			. e0.date "_"
+			. e0.uid "Z.hl7"
+			
+		FileMove, %A_LoopFileFullPath%													; rename ORM file
+			, % path.hl7in "done\" fileOut												; and move to done subfolder
+	}
+	xl.save(worklist)
+		
 	return
 }
 
-fetchGuiClose:
-{
-	Gui, fetch:destroy
-	getDem := false																	; break out of fetchDem loop
-	fetchQuit := true
-	eventlog("Manual [x] out of fetchDem.")
-Return
+matchOrder() {
+	global fldval, xl, fetchQuit
+	static selbox, selbut
+	key := {}
+	
+	fldName := Format("{:U}",fldval["dev-Name"])
+	Loop, % (k:=xl.selectNodes("/root/orders/order")).length							; generate list of orders with fuzz levels
+	{
+		node := k.item(A_index-1)
+		nodeName := node.selectSingleNode("name").text
+		nodeMRN := node.selectSingleNode("mrn").text
+		nodeID := node.getAttribute("id")
+		nodeOrdernum := node.selectSingleNode("ordernum").text
+		nodeAccession := node.selectSingleNode("accession").text
+		nodeOrdertype := node.selectSingleNode("ordertype").text
+		nodeLocation := node.selectSingleNode("loctype").text
+		nodeDate := node.selectSingleNode("date").text
+		fuzz := fuzzysearch(nodename,fldName)
+		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "|" nodeLocation "|" nodeDate "`n"
+	}
+	Sort, list																			; sort by fuzz level
+	Loop, parse, list, `n
+	{
+		k := A_LoopField
+		if (k="") {
+			break
+		}
+		vals:=strsplit(k,"|")
+		key[A_Index] := {name:vals[3]													; build array of key{name,id,etc}
+						,id:vals[2]
+						,mrn:vals[4]
+						,ordernum:vals[5]
+						,accession:vals[6]
+						,location:vals[7]
+						,date:vals[8]}
+		keylist .= key[A_index].name " [" key[A_Index].ordernum " - " parseDate(key[A_Index].date).mdy "]|"
+	}
+	
+	if (keylist="") {
+		MsgBox, 262160, Empty orders, No active orders available!`n`nBe sure to "check-in" the order to send to TRREAT.
+		fetchQuit := true
+		eventlog("No orders released to incoming.")
+		return
+	}
+	
+	Gui, dev:Destroy
+	Gui, dev:Default
+	Gui, -MinimizeBox
+	Gui, Add, Text, w180 +Wrap
+		, % "Select the order that matches this patient:"
+	Gui, Font, s12
+	Gui, Add, ListBox																	; listbox and button
+		, h100 w600 vSelBox -vScroll AltSubmit gMatchOrderSelect
+		, % keylist
+	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
+	Gui, Show, AutoSize, Active orders
+	Gui, +AlwaysOnTop
+	
+	winwaitclose, Active orders
+	
+	if !(selbox) {																		; no selection
+		fetchQuit := true
+		return
+	}
+	
+	res := key[selbox]
+	fuzz := fuzzysearch(res.name , fldval["dev-name"]) 
+	if (fuzz > 0.20) {																	; possible bad match
+		MsgBox, 262196
+			, Possible name mismatch
+			, % "Order name: " res.Name "`n"
+			. "Report name: " fldval["dev-name"] "`n`n"
+			. "Keep " res.name "?"
+		IfMsgBox, No 
+		{
+			fetchQuit:=true
+			return
+		}
+	}
+	
+	fldval["dev-name"] := res.name
+		fldval["dev-nameL"] := parseName(res.name).last
+		fldval["dev-nameF"] := parseName(res.name).first
+	fldval["dev-MRN"] := res.mrn
+	fldval["dev-wqid"] := res.id
+	fldval["dev-ordernum"] := res.ordernum
+	fldval["dev-accession"] := res.accession
+	fldval["dev-location"] := res.location
+	
+	return 
+	
+	matchOrderSelect:
+	{
+		GuiControl, dev:Enable, Select order
+		return
+	}
+	
+	matchOrderSubmit:
+	{
+		Gui, dev:Submit
+		return
+	}
 }
 
 parseClip(clip) {
@@ -2682,19 +3203,6 @@ parseClip(clip) {
 	return Error																		; Anything else returns Error
 }
 
-fetchSubmit:
-{
-/*	some error checking
-	Check for required elements
-demVals := ["MRN","Account Number","DOB","Sex","Loc","Provider"]
-*/
-	Gui, fetch:Submit
-	Gui, fetch:Destroy
-	
-	getDem := false
-	return
-}
-
 saveChip:
 {
 	yID := y.selectSingleNode(MRNstring)
@@ -2714,7 +3222,7 @@ saveChip:
 	}
 	y.addElement("device"
 		,MRNstring "/data"
-		,{	au:A_UserName
+		,{	au:user
 		,	ed:A_Now
 		,	model:fldval["dev-IPG"]
 		,	SN:fldval["dev-IPG_SN"]} )
@@ -2736,12 +3244,42 @@ saveChip:
 	eventlog("Add new <device> node.","C")
 	eventlog("Add new <device> node to currlist.")
 	
+	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
+		xl.addElement("ordertype", orderString, matchEAP(enc_type))
+		xl.addElement("dependent", orderString, fldval["dependent"])
+		xl.addElement("model",	orderString, fldval["dev-IPG"])
+		xl.addElement("ser",	orderString, fldval["dev-IPG_SN"])
+		xl.addElement("mode",	orderString, fldval["par-Mode"])
+		xl.addElement("LRL",	orderString, fldval["par-LRL"])
+		xl.addElement("URL",	orderString, fldval["par-URL"])
+		xl.addElement("SAV",	orderString, fldval["par-SAV"])
+		xl.addElement("PAV",	orderString, fldval["par-PAV"])
+		xl.addElement("PVARP",	orderString, fldval["par-PVARP"])
+		xl.addElement("ApThr",	orderString, leads["RA","cap"])
+		xl.addElement("AsThr",	orderString, leads["RA","sens"])
+		xl.addElement("VpThr",	orderString, leads["RV","cap"])
+		xl.addElement("VsThr",	orderString, leads["RV","sens"])
+		xl.addElement("Ap",   	orderString, leads["RA","output"])
+		xl.addElement("As",   	orderString, leads["RA","sensitivity"])
+		xl.addElement("Vp",   	orderString, leads["RV","output"])
+		xl.addElement("Vs",   	orderString, leads["RV","sensitivity"])
+	xl.save(worklist)
+	
 	return
 }
 
 makeReport:
 {
-	is_remote := (fldval["dev-EncType"]="REMOTE") ? true : ""
+/*	Generate the elements of the report
+	- Pull Chipotle data if it exists (dependent, indication, primary EP), make necessary data node
+	- Validate data values
+	- Generate OBR_4 string, store in <order> for makeORU
+	- Device check performed by
+	- Normal text insert
+	- Save values to Chipotle and Orders
+	- Final print output and file routing
+*/
+	EncMRN := fldval["dev-MRN"]
 	MRNstring := "/root/id[@mrn='" EncMRN "']"
 	if !IsObject(y.selectSingleNode(MRNstring)) {
 		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
@@ -2753,53 +3291,55 @@ makeReport:
 	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
 		y.addElement("data",MRNstring)
 	}
-	
 	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
 	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
-	ciedGUI()
+	fldval["primaryEP"] := y.selectSingleNode(MRNstring "/prov").getAttribute("EP")
+	
+	ciedQuery()
 	if (fetchQuit) {
+		eventlog("fetchQuit ciedQuery.")
 		return
 	}
 	
-	tech := cMsgBox("Technician","Device check performed by:","Jenny Keylon, RN|Device rep","Q","")
-	if (tech="Close") {
-		fetchQuit := true
+	ciedCheck()
+	if (fetchQuit) {
+		eventlog("fetchQuit ciedCheck.")
 		return
 	}
-	
-	summ := fldval["dev-summary"]
-	if (summ="") {
-		summ := cMsgBox("Title","Choose a text","Normal device check|none","Q","")
-		if (summ="Close") {
-			fetchQuit := true
-			return
-		}
-		if instr(summ,"normal") {
-			summ := "This represents a normal " format("{:L}",fldval["dev-EncType"]) " device check. The patient denies any device related symptoms. "
-				. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
-				. "Routine follow up per implantable device protocol. "
-			eventlog("Normal summary template selected.")
-		} else {
-			summ := ""
-			eventlog("Blank report summary.")
-		}
-	}
+
+	makeOBR()
 	
 	gosub saveChip
-	
-	gosub checkEP
 	
 	gosub pmPrint
 	
 	return
 }
 
-ciedGUI() {
-	global fldval, tmpBtn, fetchQuit
+ciedQuery() {
+/*	For setting values related to this patient/device
+	Values are saved in Chipotle currlist.xml
+*/
+	global fldval, leads, fetchQuit, docs
+		, tmpLead, tmpLDate
 	static DepY, DepN, DepX, Ind
-	tmpBtn := ""
+		, DocGroup, tmpEP
+	tmpLead := ""
+	tmpLDate := ""
+	
+	tmpEP := []
 	
 	gui, cied:Destroy
+	
+	if (fldval["dev-IPG"]~="Microny") {
+		tmpLead := fldval["dev-lead"]
+		tmpLDate := fldval["dev-leadimpl"]
+		gui, cied:Add, Text, , Pacing lead
+		gui, cied:Add, Edit, w200 vtmpLead, % tmpLead
+		gui, cied:Add, Text, , Lead implant date
+		gui, cied:Add, Edit, w200 vtmpLDate, % tmpLDate
+		gui, cied:Add, Text
+	}
 	gui, cied:Add, Text, , Pacemaker dependent?
 	gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
 	gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
@@ -2808,84 +3348,278 @@ ciedGUI() {
 	gui, cied:Add, Text, , Indication for device
 	gui, cied:Add, Edit, r3 w200 vInd, % fldval["indication"]
 	gui, cied:Add, Text
-	gui, cied:Add, Button, w100 h30, OK
-	
-	gui, cied:Show, AutoSize
-	
-	loop
+	gui, cied:Add, Text, , Primary EP
+	gui, cied:Add, Radio, vDocGroup, Outside/None
+	for key,val in docs
 	{
-		if (tmpBtn) {
-			break
-		}
+		tmpName := val.abbrev
+		tmpEP[A_Index+1]:=tmpName
+		gui, cied:Add, Radio, % "Checked" (tmpName=fldval.primaryEP), % tmpName
 	}
-	gui, cied:Submit, NoHide
-	gui, cied:Destroy
+	gui, cied:Add, Text
+	gui, cied:Add, Button, w100 h30 , OK
 	
-	if (tmpBtn="x") {
+	gui, cied:Show, AutoSize, CIED Query
+	
+	WinWaitClose, CIED Query
+	
+	gui, cied:Destroy
+	return
+
+	ciedGuiEscape:
+	ciedGuiClose:
+	{
 		fetchQuit := true
+		gui, cied:Cancel
 		return
 	}
 	
-	fldval["dependent"] := (depY) 
-		? "Yes"
-			: (depN)
-		? "No"
-			: ""
-	fldval["indication"] := Ind
+	ciedButtonOK:
+	{
+		gui, cied:Submit
+		
+		fldval["dependent"] := (depY) 
+			? "Yes"
+				: (depN)
+			? "No"
+				: ""
+		
+		fldval["indication"] := Ind
+		
+		fldval["primaryEP"] := checkEP(tmpEP[docGroup])
+		
+		if (tmpLead) {
+			tmp:=instr(fldval["leads-chamber"],"V") ? "RV" : "RA"
+			leads[tmp].model := fldval["dev-lead"] := fldval["dev-RVlead"] := tmpLead
+			leads[tmp].date := fldval["dev-leadimpl"] := fldval["dev-RVlead_impl"] := tmpLDate
+		}
+		
+		return
+	}
+}
+
+ciedCheck() {
+/*	For setting values related to the performance of this check
+	To aid in determining procedure performed
+*/
+	global fldval, fetchQuit, enc_type, is_postop, is_remote, is_remoteAlert
+	static PeriOp_Y, PeriOp_N, chk_peri
+		, RemoteAlert_Y, RemoteAlert_N
+		, ChkInt, ChkPrg
+	tmpEP := []
+	
+	gui, cied2:Destroy
+	
+	if (fldval["dev-location"]="Inpatient") {											; Inpatient encounter, ask if peri-op check
+		chk_peri := true
+		gui, cied2:Font, w Bold Underline
+		gui, cied2:Add, Text, , Is this a peri-procedural check?
+		gui, cied2:Font, w Norm
+		gui, cied2:Add, Radio, vPeriOp_Y gcied2click, Yes								; is_postop := true
+		gui, cied2:Add, Radio, vPeriOp_N gcied2click, No								; is_postop := ""
+		gui, cied2:Add, Text
+	}
+	if (fldval["dev-EncType"]="REMOTE") {												; Inpatient encounter, ask if peri-op check
+		is_remote := true
+		gui, cied2:Font, w Bold Underline
+		gui, cied2:Add, Text, , Was this a scheduled check or remote alert?
+		gui, cied2:Font, w Norm
+		gui, cied2:Add, Radio, vRemoteAlert_N gcied2click, Scheduled					; is_remoteAlert := ""
+		gui, cied2:Add, Radio, vRemoteAlert_Y gcied2click, Acute						; is_remoteAlert := true
+		gui, cied2:Add, Text
+	} else {
+		gui, cied2:Font, w Bold Underline
+		gui, cied2:Add, Text, w400, Did this check involve checking thresholds, changing settings, or any other device programming?
+		gui, cied2:Font, w Norm
+		gui, cied2:Add, Radio, vChkPrg gcied2click, Yes									; fldval["dev-CheckType"] := "Programming"
+		gui, cied2:Add, Radio, vChkInt gcied2click, No									; fldval["dev-CheckType"] := "Interrogation"
+		gui, cied2:Add, Text
+	}
+	
+	gui, cied2:Add, Button, w100 h30 Disabled, OK
+	
+	gui, cied2:Show, AutoSize, Device Check Info
+	
+	WinWaitClose, Device Check Info
+	
+	gui, cied2:Destroy
 	
 	return
+	
+	cied2click:
+	{
+		gui, cied2:Submit, NoHide
+		prg := (ChkPrg or ChkInt)
+		peri := (PeriOp_Y or PeriOp_N)
+		alert := (RemoteAlert_Y or RemoteAlert_N)
+		
+		if (chk_peri) {																	; PeriOp
+			valid := (prg && peri)
+		} else {
+			valid := (prg)																; Inpt not PeriOp, all outpt
+		}
+		if (is_remote) {																; Remote
+			valid := (alert)
+		}
+			
+		if valid {
+			GuiControl, cied2:Enable, OK
+		}
+		return
+	}
+	
+	cied2GuiEscape:
+	cied2GuiClose:
+	{
+		fetchQuit := true
+		gui, cied2:Cancel
+		return
+	}
+	
+	cied2ButtonOK:
+	{
+		gui, cied2:Submit
+		
+		is_postop := (PeriOp_Y)
+		is_remoteAlert := (RemoteAlert_Y)
+		fldval["dev-CheckType"] := ChkPrg ? "PROGRAMMING" : "INTERROGATION"
+		
+		return
+	}
 }
 
-ciedGuiEscape:
-ciedGuiClose:
-{
-	tmpBtn := "x"
-	return
-}
-
-ciedButtonOK:
-{
-	tmpBtn := "ok"
-	return
-}
-
-checkEP:
-{
+checkEP(name) {
 /*	Find responsible EP
 	and/or assign to someone
 */
+	global y, fldval, mrnString, enc_MD, docs
 	yID := y.selectSingleNode(MRNstring)
 	
-	if !(yEP := yID.selectSingleNode("prov").getAttribute("EP")) {						; Assign a primary EP in prov if it does not exist
-		eventlog("No primary EP found.")
-		yEP := cMsgBox("No associated EP found"
-						,"Assign a primary EP`nClose [x] if none"
-						,"T. Chun|J. Salerno|S. Seslar"
-						,"Q","")
-		if !(yEP=="Close") {
-			yID.selectSingleNode("prov").setAttribute("EP", yEP)
-			yID.selectSingleNode("prov").setAttribute("au", A_UserName)
+	if (name!=fldval.PrimaryEP) {
+		MsgBox, 262180, Change, % "Change primary EP `n"
+			. "from '" fldval.PrimaryEP "'`n"
+			. "to '" name "'?"
+		IfMsgBox, Yes
+		{
+			yID.selectSingleNode("prov").setAttribute("EP", name)
+			yID.selectSingleNode("prov").setAttribute("au", user)
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
-			eventlog(yEP " set as primary EP.")
-			eventlog(yEP " set as primary EP.","C")
+			eventlog(name " set as primary EP.")
+			eventlog(name " set as primary EP.","C")
 			writeOut(MRNstring,"prov")
-		} 
+		} else {
+			name := fldval.PrimaryEP
+		}
 	}
 	
-	enc_MD := cMsgBox("Assign report"
-					, "Send report to:`n`n(primary EP is " yEP ").`n`n"
+	for key,val in docs
+	{
+		
+		doclist .= (name=val.abbrev ? "*" : "") format("{:U}",key) " - " val.abbrev "|"
+	}
+	tmp := cMsgBox("Assign report"
+					, "Send report to:`n`n(primary EP is " name ").`n`n"
 					. "Close [x] window to skip this step."
-					, ((yEP="T. Chun") ? "*" : "") . "&TC|"
-					. ((yEP="J. Salerno") ? "*" : "") . "&JS|"
-					. ((yEP="S. Seslar") ? "*" : "") . "&SS"
+					, trim(doclist," |")
 					, "Q","")
 	
-	if (enc_MD="Close") {
+	if (tmp="Close") {
 		enc_MD := ""
+	} else {
+		enc_MD := substr(tmp,1,2)
 	}
 	eventlog("Report assigned to " enc_MD ".")
 	
-	Return
+	Return name
+}
+
+makeOBR() {
+/*	Determine certain statuses
+	- is_remote = remote check
+	- is_postop = postop check
+	
+	- enc_dt = date object of device check date
+	- enc_trans = date object of transmit date from Paceart XML
+	
+	- enc_type = text of check type: OUTPATIENT, INPATIENT, POSTOP, REMOTE
+	- enc_type = append device type: PM, ICD, ILR, Leadless(?)
+	- enc_type = append lead type: Single, Dual, Multi
+*/
+	global fldval, leads
+		, is_remote, is_remoteAlert, is_postop
+		, enc_dt, enc_trans, enc_type
+	dict := readIni("EpicOrderEAP")
+	
+	if (fldval["dev-location"]="Outpatient") {
+		enc_type := "OUTPT "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	if (is_remote) {
+		enc_type := "REMOTE "
+		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
+		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
+		enc_type .= (is_remoteAlert) ? "ALERT " : ""									; include if remote alert
+		fldval["dev-CheckType"] := ""
+	} 
+	if (fldval["dev-location"]="Inpatient") {
+		enc_type := "INPT "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	if (is_postop) {
+		enc_type := "PERI-PROCEDURE "
+		enc_dt := parseDate(fldval["dev-Encounter"])									; report date is day of encounter
+		enc_trans :=																	; transmission date is null
+	}
+	
+	enc_type .= (instr(leads["RV","imp"],"Defib") || IsObject(leads["HV"]))
+		? "ICD "
+		: "PM "
+/*	Need to add in other types here for leadless, ILR, and SICD
+	Might need to insert these for Epic testing
+*/
+	if !(is_remote || is_postop) {
+		if (IsObject(leads["RA"])) {
+			leads.A := true
+		}
+		if (IsObject(leads["RV"]) || IsObject(leads["LV"])) {
+			leads.V := true
+		}
+		if (IsObject(leads["RV"]) && IsObject(leads["LV"])) {
+			leads.M := true
+		}
+		if (leads.M) {
+			enc_type .= "BIV "
+		} else
+		if (leads.A && leads.V) {
+			enc_type .= "DUAL "
+		} else
+		{
+			enc_type .= "SINGLE "
+		}
+	} 
+	
+	enc_type .= fldval["dev-CheckType"]
+	
+	return
+}
+
+readWQ(idx) {
+	global xl
+	
+	res := []
+	k := xl.selectSingleNode("//orders/order[@id='" idx "']")
+	Loop, % (ch:=k.selectNodes("*")).Length
+	{
+		i := ch.item(A_index-1)
+		node := i.nodeName
+		val := i.text
+		res[node]:=val
+	}
+	res.node := k.parentNode.nodeName 
+	
+	return res
 }
 
 FetchNode(node) {
@@ -3000,14 +3734,13 @@ FilePrepend( Text, Filename ) {
 ParseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	moStr := "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
-	dSep := "[\-_/]"																	; separation characters "-", "_", "/"
+	dSep := "[ \-\._/]"
 	date := []
 	time := []
 	x := RegExReplace(x,"[,\(\)]")
 	
 	if (x~="\d{4}.\d{2}.\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z") {
-		x := RegExReplace(x,"(\.\d+)Z","Z")
-		x := RegExReplace(x,"[TZ]"," ")
+		x := RegExReplace(x,"[TZ]","|")
 	}
 	if RegExMatch(x,"i)(\d{1,2})" dSep "(" moStr ")" dSep "(\d{4}|\d{2})",d) {			; 03-Jan-2015
 		date.dd := zdigit(d1)
@@ -3016,7 +3749,7 @@ ParseDate(x) {
 		date.yyyy := d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"i)\b(" moStr "|\d{1,2})\b" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
+	else if RegExMatch(x,"i)\b(" moStr "|\d{1,2})" dSep "(\d{1,2})" dSep "(\d{4}|\d{2})",d) {	; Jan-03-2015, 01-03-2015
 		date.dd := zdigit(d2)
 		date.mmm := objhasvalue(mo,d1) 
 			? d1
@@ -3031,40 +3764,56 @@ ParseDate(x) {
 				: "20" d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2})\s+(\d{4})",d) {							; Dec 21, 2018
+	else if RegExMatch(x,"i)(" moStr ")\s+(\d{1,2}),?\s+(\d{4})",d) {					; Dec 21, 2018
 		date.mmm := d1
 		date.mm := zdigit(objhasvalue(mo,d1))
 		date.dd := zdigit(d2)
 		date.yyyy := d3
 		date.date := trim(d)
 	}
-	else if RegExMatch(x,"\b(\d{4})-?(\d{2})-?(\d{2})\b",d) {								; 20150103 or 2015-01-03
+	else if RegExMatch(x,"\b(\d{4})[\-\.](\d{2})[\-\.](\d{2})\b",d) {					; 2015-01-03
 		date.yyyy := d1
 		date.mm := d2
 		date.mmm := mo[d2]
 		date.dd := d3
 		date.date := trim(d)
 	}
+	else if RegExMatch(x,"\b(19|20\d{2})(\d{2})(\d{2})((\d{2})(\d{2})(\d{2})?)?\b",d)  {	; 20150103174307 or 20150103
+		date.yyyy := d1
+		date.mm := d2
+		date.mmm := mo[d2]
+		date.dd := d3
+		date.date := d1 "-" d2 "-" d3
+		
+		time.hr := d5
+		time.min := d6
+		time.sec := d7
+		time.time := d5 ":" d6 . strQ(d7,":###")
+	}
 	
-	if RegExMatch(x,"i)(\d{1,2}):(\d{2})(:\d{2})?(.*AM|PM)?",t) {						; 17:42 PM
-		time.hr := zdigit(t1)
-		time.min := t2
-		time.sec := trim(t3," :")
-		time.ampm := trim(t4)
-		time.time := trim(t)
+	if RegExMatch(x,"iO)(\d+):(\d{2})(:\d{2})?(:\d{2})?(.*)?(AM|PM)?",t) {				; 17:42 PM
+		hasDays := (t.value[4]) ? true : false 											; 4 nums has days
+		time.days := (hasDays) ? t.value[1] : ""
+		time.hr := trim(t.value[1+hasDays])
+		if (time.hr>23) {
+			time.days := floor(time.hr/24)
+			time.hr := mod(time.hr,24)
+			DHM:=true
+		}
+		time.min := trim(t.value[2+hasDays]," :")
+		time.sec := trim(t.value[3+hasDays]," :")
+		time.ampm := trim(t.value[5])
+		time.time := trim(t.value)
 	}
 
 	return {yyyy:date.yyyy, mm:date.mm, mmm:date.mmm, dd:date.dd, date:date.date
 			, YMD:date.yyyy date.mm date.dd
 			, MDY:date.mm "/" date.dd "/" date.yyyy
-			, hr:time.hr, min:time.min, sec:time.sec, ampm:time.ampm, time:time.time}
-}
-
-niceDate(x) {
-	if !(x)
-		return error
-	FormatTime, x, % x, MM/dd/yyyy
-	return x
+			, days:zdigit(time.days)
+			, hr:zdigit(time.hr), min:zdigit(time.min), sec:zdigit(time.sec)
+			, ampm:time.ampm, time:time.time
+			, DHM:zdigit(time.days) ":" zdigit(time.hr) ":" zdigit(time.min) " (DD:HH:MM)" 
+ 			, DT:date.mm "/" date.dd "/" date.yyyy " at " zdigit(time.hr) ":" zdigit(time.min) ":" zdigit(time.sec) }
 }
 
 year4dig(x) {
@@ -3118,6 +3867,13 @@ stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 	*/
 }
 
+ToBase(n,b) {
+/*	from https://autohotkey.com/board/topic/15951-base-10-to-base-36-conversion/
+	n >= 0, 1 < b <= 36
+*/
+   Return (n < b ? "" : ToBase(n//b,b)) . ((d:=mod(n,b)) < 10 ? d : Chr(d+55))
+}
+
 readIni(section) {
 /*	Reads a set of variables
 	[section]					==	 		var1 := res1, var2 := res2
@@ -3140,7 +3896,7 @@ readIni(section) {
 		, i_type := []
 		, i_lines := []
 	i_type.var := i_type.obj := i_type.arr := false
-	IniRead,x,.\files\trreat.ini,% section
+	IniRead,x,% trreatDir "files\trreat.ini",% section
 	Loop, parse, x, `n,`r																; analyze section struction
 	{
 		i := A_LoopField
@@ -3184,7 +3940,7 @@ readIni(section) {
 	return i_res
 }
 
-parsedocs(list) {
+parsedocs(ByRef list) {
 /*	List = {XX:aaa^bbb^ccc^ddd, BB:eee^fff^ggg^hhh}
 	map = [last,first,npi,cumg]
 	
@@ -3206,12 +3962,15 @@ parsedocs(list) {
 		}
 		node.hl7 := node.NPI "^" node.nameL "^" node.nameF
 		node.eml := node.nameF "." node.nameL
+		node.abbrev := substr(node.nameF,1,1) ". " node.nameL
 		node.user := key
+		list.Delete(key)
 	}
 	return list
 }
 
-
 #Include strx.ahk
 #Include xml.ahk
 #Include CMsgBox.ahk
+#Include sift3.ahk
+#Include hl7.ahk
