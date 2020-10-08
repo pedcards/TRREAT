@@ -30,7 +30,7 @@ path.compl		:= path.trreat "completed\"												; signed rtf with PDF and met
 path.paceart	:= path.trreat "paceart\"												; PaceArt import xml
 path.hl7in		:= path.trreat "epic\Orders\"											; inbound Epic ORM
 path.outbound	:= path.trreat "epic\OutboundHL7\"										; outbound ORU for Ensemble
-path.onbase		:= path.trreat "onbase\"												; onbase DRIP folder for PDFs
+path.onbase		:= path.trreat "onbase\import\"											; onbase DRIP folder for PDFs
 
 worklist := path.files "worklist.xml"
 
