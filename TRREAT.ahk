@@ -942,6 +942,7 @@ makeORU(wqid) {
 	FileRead, rtfStr, %File%
 	rtfStr := RegExReplace(rtfStr,"\R"," ")												; replace CRLF 
 	rtfStr := StrReplace(rtfStr,"|","\|")												; replace any "|" chars
+	rtfStr := StrReplace(rtfStr,"\&","and")												; replace "&" chars, which break Epic RTF stream
 	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" esc with HL7 "\E" esc
 	buildHL7("OBX"
 		,{2:"FT"
