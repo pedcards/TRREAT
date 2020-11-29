@@ -5,7 +5,7 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 ;~ SetWorkingDir %A_ScriptDir%							; Don't set workingdir so can read files from run dir
 ;~ FileInstall, pdftotext.exe, pdftotext.exe
-#Include includes
+#Include %A_ScriptDir%\includes
 
 Progress,100,Checking paths...,TRREAT
 IfInString, A_ScriptDir, AhkProjects					; Change enviroment if run from development vs production directory
