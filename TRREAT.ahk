@@ -149,6 +149,7 @@ readList:
 		xl := new XML("<root/>")												; Create new XML if doesn't exist
 		xl.addElement("work", "root", {ed: A_Now})
 		xl.addElement("done", "root", {ed: A_Now})
+		xl.transformXML()
 		xl.save(worklist)
 		eventlog("New worklist.xml created.")
 	} else {
@@ -178,6 +179,7 @@ readList:
 			LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
 			LV_Modify(fileNum,"col3", "[DONE]")
 			archNode("/root/work/id[@date='" tmp.date "'][@ser='" tmp.ser "']")		; copy ID node to DONE
+			xl.transformXML()
 			xl.save(worklist)
 			eventlog("Node " tmp.date "/" tmp.ser "/" tmp.name " archived.")
 			continue
@@ -633,6 +635,7 @@ parsePat:
 		}
 		if instr(tmp,"Regenerate") {
 			removeNode(pat_node)
+			xl.transformXML()
 			xl.save(worklist)
 			eventlog("Node " pat_node " removed from worklist.")
 			FileDelete, % pat_report
@@ -642,6 +645,7 @@ parsePat:
 		}
 		if instr(tmp,"PaceArt") {
 			xl.setText(pat_node "/paceart","True")
+			xl.transformXML()
 			xl.save(worklist)
 			eventlog("PaceArt marked true.")
 			gosub ParseGUI
@@ -888,6 +892,7 @@ ActSign:
 	
 	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
 	removeNode("/root/orders/order[@id='" l_wqid "']")
+	xl.transformXML()
 	xl.save(worklist)
 	
 	eventlog("Worklist.xml updated.")
@@ -2572,6 +2577,7 @@ PrintOut:
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
 			xl.addElement("report",edID,path.report fileOut ".rtf")
+		xl.transformXML()
 		xl.save(worklist)
 		eventlog("Record added to worklist.xml")
 		
@@ -3074,6 +3080,7 @@ scanOrders() {
 		FileMove, %A_LoopFileFullPath%													; rename ORM file
 			, % path.hl7in "done\" fileOut												; and move to done subfolder
 	}
+	xl.transformXML()
 	xl.save(worklist)
 		
 	return
@@ -3264,6 +3271,7 @@ saveChip:
 		xl.addElement("As",   	orderString, leads["RA","sensitivity"])
 		xl.addElement("Vp",   	orderString, leads["RV","output"])
 		xl.addElement("Vs",   	orderString, leads["RV","sensitivity"])
+	xl.transformXML()
 	xl.save(worklist)
 	
 	return
