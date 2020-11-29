@@ -3131,7 +3131,7 @@ matchOrder() {
 		, % "Select the order that matches this patient:"
 	Gui, Font, s12
 	Gui, Add, ListBox																	; listbox and button
-		, h100 w600 vSelBox -vScroll AltSubmit gMatchOrderSelect
+		, h100 w600 vSelBox VScroll AltSubmit gMatchOrderSelect
 		, % keylist
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
 	Gui, Show, AutoSize, Active orders
