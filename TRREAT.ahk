@@ -2562,7 +2562,7 @@ PrintOut:
 		}
 		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
-		FileCopy, % fileIn, % path.onbase onbaseFile, 1
+		FileCopy, % path.compl fileOut ".pdf", % path.onbase onbaseFile, 1				; copy PDF from complete dir to OnBase dir
 		fileDelete, % fileIn
 		
 		t_now := A_Now
