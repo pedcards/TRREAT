@@ -984,6 +984,7 @@ matchEAP(txt) {
 		}
 	}
 	
+	eventlog("matchEAP: '" txt "' => '" EAP[best] "' (" best ")")
 	return EAP[best]
 }
 
