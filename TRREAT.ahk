@@ -982,9 +982,13 @@ matchEAP(txt) {
 			top := fuzz
 			best := key
 		}
+		if instr(str,txt) {
+			match := str
+		}
 	}
 	
 	eventlog("matchEAP: '" txt "' => '" EAP[best] "' (" best ")")
+	eventlog("matchEAP: match='" match "'")
 	return EAP[best]
 }
 
