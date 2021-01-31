@@ -3611,6 +3611,7 @@ makeOBR() {
 	} 
 	
 	enc_type .= fldval["dev-CheckType"]
+	eventlog("enc_type builder: " enc_type)
 	
 	return
 }
