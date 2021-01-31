@@ -906,6 +906,7 @@ makeORU(wqid) {
 	dict:=readIni("EpicResult")
 	
 	order := readWQ(wqid)
+	eventlog("makeORU: ordertype='" order.ordertype "'")
 	
 	hl7time := A_Now
 	hl7out := Object()
