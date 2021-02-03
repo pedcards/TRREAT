@@ -947,9 +947,11 @@ makeORU(wqid) {
 	File := path.report fileNam ".rtf"
 	FileRead, rtfStr, %File%
 	rtfStr := RegExReplace(rtfStr,"\R"," ")												; replace CRLF 
-	rtfStr := StrReplace(rtfStr,"|","\|")												; replace any "|" chars
-	rtfStr := StrReplace(rtfStr,"&","\T\")												; replace "&" chars, which break Epic RTF stream
-	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" esc with HL7 "\E" esc
+	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" chars (HL7 "\E\" esc)
+	rtfStr := StrReplace(rtfStr,"|","\F\")												; replace "|" chars (HL7 field separator)
+	rtfStr := StrReplace(rtfStr,"~","\R\")												; replace "~" chars (HL7 repetition seperator)
+	rtfStr := StrReplace(rtfStr,"^","\S\")												; replace "^" chars (HL7 component seperator)
+	rtfStr := StrReplace(rtfStr,"&","\T\")												; replace "&" chars (HL7 subcomponent seperator)
 	buildHL7("OBX"
 		,{2:"FT"
 		, 3:"&GDT^PACEMAKER/ICD INTERROGATION"
@@ -3748,6 +3750,7 @@ FilePrepend( Text, Filename ) {
     File.Close()
 }
 
+; Parse date strings in a variety of ways
 ParseDate(x) {
 	mo := ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	moStr := "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
