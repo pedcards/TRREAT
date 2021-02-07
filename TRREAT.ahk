@@ -2566,11 +2566,13 @@ PrintOut:
 			
 			FileCopy, % fileIn, % path.paceart "done\"
 		}
+		FileRead, rtfOut, % path.files "tmp\" fileOut ".rtf"							; reload edited RTF
 		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
 		FileCopy, % path.compl fileOut ".pdf", % path.onbase onbaseFile, 1				; copy PDF from complete dir to OnBase dir
 		fileDelete, % fileIn
 		
+		fileNam := path.report fileOut ".rtf"
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
 		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
