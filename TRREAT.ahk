@@ -2506,10 +2506,7 @@ PrintOut:
 	
 	rtfFtr := "}"
 	
-	rtfBody := "\pard\fs20"
-			. "{\*\annotation START}"
-			. "\b\ul DATE OF BIRTH: " strQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par "
-			. "{\*\annotation END}"
+	rtfBody := "\pard"
 			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
 				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
