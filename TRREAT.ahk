@@ -901,6 +901,7 @@ ActSign:
 Return
 }
 
+; Builds Epic ORU using values stored in <order\> node.
 makeORU(wqid) {
 	global xl, fldval, hl7out, docs, path, filenam, isRemote, user
 	dict:=readIni("EpicResult")
@@ -2506,7 +2507,7 @@ PrintOut:
 	
 	rtfFtr := "}"
 	
-	rtfBody := "\pard"
+	rtfBody := "\pard\f0"
 			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
 				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
