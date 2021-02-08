@@ -2573,7 +2573,6 @@ PrintOut:
 		FileCopy, % path.compl fileOut ".pdf", % path.onbase onbaseFile, 1				; copy PDF from complete dir to OnBase dir
 		fileDelete, % fileIn
 		
-		fileNam := path.report fileOut ".rtf"
 		t_now := A_Now
 		edID := "/root/work/id[@ed='" t_now "']"
 		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
@@ -2585,7 +2584,7 @@ PrintOut:
 			xl.addElement("paceart",edID,strQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
-			xl.addElement("report",edID,fileNam)
+			xl.addElement("report",edID,path.report fileOut ".rtf")
 		eventlog("Record added to worklist.xml")
 
 		xl.transformXML()
