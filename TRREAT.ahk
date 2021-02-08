@@ -2584,12 +2584,24 @@ PrintOut:
 			xl.addElement("paceart",edID,strQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
-			xl.addElement("report",edID,path.report fileOut ".rtf")
+			xl.addElement("report",edID,path.compl fileOut ".rtf")
 		eventlog("Record added to worklist.xml")
-
+		
+		l_wqid := fldval["dev-wqid"]
+		fileNam := fileOut
+		makeORU(l_wqid)
+		hl7out.file := "TRREAT_ORU_" A_now
+		FileAppend, % hl7out.msg, % path.report hl7out.file								; create ORU file in pending
+		FileCopy, % path.report hl7out.file, % path.outbound							; copy ORU to outbound folder for Ensemble
+		FileMove, % path.report hl7out.file, % path.compl fileNam ".hl7", 1				; move ORU to completed folder, renamed fileNam.hl7
+		FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1			; move RTF from pending to completed folder
+		eventlog("ORU sent to outbound.")
+		
+		removeNode("/root/orders/order[@id='" l_wqid "']")
 		xl.transformXML()
 		xl.save(worklist)
-		eventlog("Record added to worklist.xml")
+		
+		eventlog("Worklist.xml updated.")
 		
 		if !(isDevt) {
 			whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")							; initialize http request in object whr
