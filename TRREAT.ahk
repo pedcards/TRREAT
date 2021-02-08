@@ -36,7 +36,6 @@ worklist := path.files "worklist.xml"
 
 user := instr(A_UserName,"octe") ? "tchun1" : A_UserName
 user_parse := readIni("user_parse")
-user_sign := readIni("user_sign")
 docs := readIni("docs")
 parsedocs(docs)
 
