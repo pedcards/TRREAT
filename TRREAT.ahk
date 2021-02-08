@@ -66,28 +66,7 @@ MainLoop:
 	blk := Object()
 	blk2 := Object()
 	
-	if ObjHasValue(user_sign,user) {
-		role := "Sign"
-	} else {
-		role := "Parse"
-	}
-	if (ObjHasValue(user_sign,user) && ObjHasValue(user_parse,user)) {
-		role := cMsgBox("Administrator"													; offer to either PARSE or SIGN
-			, "Enter ROLE:"
-			, "*&Parse PDFs|&Sign reports"
-			, "Q","")
-	}
-	
-	if instr(role,"Sign") {
-		eventLog("SIGN module")
-		xl := new XML(worklist)															; load existing worklist
-		gosub signScan
-	}
-
-	if instr(role,"Parse") {
-		eventLog("PARSE module")
-		gosub parseGUI
-	}
+	gosub parseGUI
 	
 	WinWaitClose, TRREAT Reports
 	eventLog("<<<<< Session ended.")
