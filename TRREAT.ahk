@@ -35,7 +35,6 @@ path.onbase		:= path.trreat "onbase\import\"											; onbase DRIP folder for 
 worklist := path.files "worklist.xml"
 
 user := instr(A_UserName,"octe") ? "tchun1" : A_UserName
-user_parse := readIni("user_parse")
 docs := readIni("docs")
 parsedocs(docs)
 
