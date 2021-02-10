@@ -2302,7 +2302,7 @@ PrintOut:
 	
 	rtfFtr := "}"
 	
-	rtfBody := "\pard\f0"
+	rtfBody := "\pard\f0\fs22"
 			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
 				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
