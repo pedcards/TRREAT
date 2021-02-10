@@ -3071,6 +3071,7 @@ saveChip:
 	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
 		xl.addElement("ordertype", orderString, matchEAP(enc_type))
+		xl.addElement("reading", orderString, enc_MD)
 		xl.addElement("dependent", orderString, fldval["dependent"])
 		xl.addElement("model",	orderString, fldval["dev-IPG"])
 		xl.addElement("ser",	orderString, fldval["dev-IPG_SN"])
@@ -3133,7 +3134,7 @@ makeReport:
 		return
 	}
 
-	makeOBR()
+	buildEncType()
 	
 	gosub saveChip
 	
@@ -3359,7 +3360,8 @@ checkEP(name) {
 	Return name
 }
 
-makeOBR() {
+; Create enc_type based on office/remote/periop, device type 
+buildEncType() {
 /*	Determine certain statuses
 	- is_remote = remote check
 	- is_postop = postop check
