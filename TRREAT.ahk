@@ -730,7 +730,7 @@ makeORU(wqid) {
 		,{19:order.encnum
 		, 50:wqid})
 	
-	tmpDoc := docs[substr(user,1,2)]
+	tmpDoc := docs[order.reading]
 	buildHL7("OBR"
 		,{2:order.ordernum
 		, 3:order.accession
