@@ -742,7 +742,8 @@ makeORU(wqid) {
 	
 	File := path.report fileNam ".rtf"
 	FileRead, rtfStr, %File%
-	rtfStr := RegExReplace(rtfStr,"\R"," ")												; replace CRLF 
+	rtfStr := RegExReplace(rtfStr,"\\par\R","\par ")									; correct "\par" from WordPad
+	rtfStr := RegExReplace(rtfStr,"\R","")												; remove CRLF 
 	rtfStr := StrReplace(rtfStr,"\","\E\")												; replace "\" chars (HL7 "\E\" esc)
 	rtfStr := StrReplace(rtfStr,"|","\F\")												; replace "|" chars (HL7 field separator)
 	rtfStr := StrReplace(rtfStr,"~","\R\")												; replace "~" chars (HL7 repetition seperator)
