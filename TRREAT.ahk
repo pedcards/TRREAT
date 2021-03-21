@@ -35,8 +35,6 @@ path.onbase		:= path.trreat "onbase\import\"											; onbase DRIP folder for 
 worklist := path.files "worklist.xml"
 
 user := instr(A_UserName,"octe") ? "tchun1" : A_UserName
-user_parse := readIni("user_parse")
-user_sign := readIni("user_sign")
 docs := readIni("docs")
 parsedocs(docs)
 
@@ -67,28 +65,7 @@ MainLoop:
 	blk := Object()
 	blk2 := Object()
 	
-	if ObjHasValue(user_sign,user) {
-		role := "Sign"
-	} else {
-		role := "Parse"
-	}
-	if (ObjHasValue(user_sign,user) && ObjHasValue(user_parse,user)) {
-		role := cMsgBox("Administrator"													; offer to either PARSE or SIGN
-			, "Enter ROLE:"
-			, "*&Parse PDFs|&Sign reports"
-			, "Q","")
-	}
-	
-	if instr(role,"Sign") {
-		eventLog("SIGN module")
-		xl := new XML(worklist)															; load existing worklist
-		gosub signScan
-	}
-
-	if instr(role,"Parse") {
-		eventLog("PARSE module")
-		gosub parseGUI
-	}
+	gosub parseGUI
 	
 	WinWaitClose, TRREAT Reports
 	eventLog("<<<<< Session ended.")
@@ -122,6 +99,12 @@ parseGUI:
 	return
 }
 
+ParseGuiClose:
+{
+	eventlog("<<<<< Parse session closed.")
+	ExitApp
+}
+
 fixWQlvCols(lv) {
 	Gui, ListView, % lv
 	LV_ModifyCol(1, "Autohdr")													; when done, reformat the col widths
@@ -135,7 +118,6 @@ fixWQlvCols(lv) {
 	LV_ModifyCol(9, "0")														; hide the report col
 	return
 }
-
 
 readList:
 {
@@ -714,193 +696,7 @@ readPDF(fileIn, args="-table") {
 	return cleanlines(txt)
 }
 
-SignScan:
-{
-	l_users := {}
-	l_numusers :=
-	l_tabs := 
-	Loop, % path.report "*.rtf"
-	{
-		fileNam := RegExReplace(A_LoopFileName,"i)\.rtf")						; fileNam is name only without extension, no path
-		fileIn := A_LoopFileFullPath											; fileIn has complete path \\childrens\files\HCCardiologyFiles\EP\TRREAT reports\pending\steve.rtf
-		
-		l_user := strX(fileNam,"",1,0,"-",1)										; Get assigned EP from filename
-		l_mrn  := strX(fileNam,"-",1,1," ",1,1)
-		l_name := stregX(fileNam,"-\d+ ",1,1," #",1)		
-		l_ser  := stregX(fileNam," #",1,1," \d{6,8}",1)
-		l_date := strX(fileNam," ",0,1,"",0)
-		l_wqid := xl.getText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/wqid")
-		
-		if !Object(l_users[l_user]) {											; this user not present yet in l_users[]
-			l_tabs .= l_user . "|"												; add user to tab titles string
-		}
-		l_users[l_user,A_index] := {filename:fileNam							; creates l_users[l_user, x], where x is just a number
-			, name:l_name
-			, date:l_date
-			, ser:l_ser
-			, wqid:l_wqid}
-	}
-	eventlog("Report RTF dir scanned.")
-	gosub signGUI
-	
-Return
-}
-
-SignGUI:
-{
-	Gui, sign:Destroy
-	Gui, sign:Add, Tab3, w600 vRepLV hwndRepH, % l_tabs							; Create a tab control (hwnd=RepH) with titles l_tabs
-	Gui, sign:Default
-	for k in l_users															; loop through l_users
-	{
-		tmpHwnd := "HW" . k														; unique Hwnd (HWTC, etc)
-		Gui, Tab, % k															; go to tab for the user
-		Gui, Add, ListView, % "-Multi Grid NoSortHdr x10 y30 w600 h200 gSignRep vUsr" k " hwnd" tmpHwnd, file|serial|Date|Name|wqid
-		for v in l_users[k]														; loop through users in l_users
-		{
-			i := l_users[k,v]													; i is the element for each V
-			LV_Add(""
-				, i.filename													; this is a hidden column 
-				, i.ser															; this is a hidden column
-				, i.date
-				, i.name
-				, i.wqid)
-		}
-		LV_ModifyCol()
-		LV_ModifyCol(1, "0")
-		LV_ModifyCol(2, "0")
-		LV_ModifyCol(3, "Autohdr")
-		LV_ModifyCol(4, "AutoHdr")
-		LV_ModifyCol(5, "0")
-	}
-	GuiControl, ChooseString, RepLV, % substr(user,1,2)							; make this user the active tab
-	Gui, Show, AutoSize, TRREAT Reports Pile											; show GUI
-	
-	return
-}
-
-ParseGuiClose:
-eventlog("<<<<< Parse session closed.")
-ExitApp
-
-SignGUIClose:
-eventlog("<<<<< Sign session closed.")
-ExitApp
-
-SignRep:
-{
-	l_tab := A_GuiControl
-	Gui, Sign:ListView, % l_tab													; Select the LV passed to A_GuiControl
-	if !(l_row := LV_GetNext()) {												; will be 0 if selected row is an empty row
-		return
-	}
-	Gui, Sign:Hide
-	LV_GetText(fileNam,l_row,1)													; get hidden fileNam from LV(l_row,1)
-	LV_GetText(l_ser,l_row,2)													; get hidden serial number
-	LV_GetText(l_date,l_row,3)
-	LV_GetText(l_wqid,l_row,5)
-	
-	eventlog("Selected '" fileNam "'")
-	
-	tmp_usr := substr(fileNam,1,2)
-	l_usr := substr(user,1,2)
-	if !(l_usr=tmp_usr) {														; first user doesn't match that on filename?
-		MsgBox, 262196,
-			, % "Did you mean to open this report?`n`n"
-			. "Was originally assigned to " tmp_usr "."
-		IfMsgBox, No
-		{
-			eventlog("Oops. Didn't mean to open that.")
-			gosub SignScan
-			return
-		}
-	}
-	gosub SignActGUI
-	Gui, Sign:Show
-Return	
-}
-
-SignActGui:
-{
-	Gui, Act:Destroy
-	Gui, Act:Default
-	Gui, Add, Text,, % fileNam
-	Gui, Add, Button, vS_PDF gActPDF, View PDF
-	Gui, Add, Button, vS_rev gActSign Disabled, SEND TO EPIC
-	Gui, Color, EEAA99
-	
-	if !FileExist(path.compl fileNam ".pdf") {
-		GuiControl, Act:Disable, S_PDF
-	}
-	Gui, Act:+AlwaysOnTop -MinimizeBox -MaximizeBox
-	Gui, Show
-	
-	RunWait, % "WordPad.exe """ path.report fileNam ".rtf"""						; launch fileNam in WordPad
-	GuiControl, Act:Enable, S_rev
-Return
-}
-
-ActPDF:
-{
-	pdfNam := path.compl fileNam ".pdf"
-	run, % pdfNam
-	eventlog("PDF opened.")
-Return
-}
-
-ActSign:
-{
-	Gui, Act:Hide
-	l_tab := substr(l_tab,-1)													; get last 2 chars of l_tab
-	l_usr := substr(user,1,2)
-	if !(l_usr=l_tab) {															; first 2 chars of Citrix login don't match l_tab?
-		MsgBox, 52, 
-			, % "Sign this report?`n`n"
-			. "Was originally assigned to " l_tab "."
-		IfMsgBox No																; signing someone else's report
-		{
-			eventlog("Oops. Don't sign " l_tab "'s report.")
-			return																; not signing this report, return
-		}
-	}
-	MsgBox, 262177, Electronic signature, % "Confirm sign report as " user
-	IfMsgBox, OK
-	{
-		FormatTime, tmp_time, A_Now
-		tmp_sig := docs[l_usr].nameF " " docs[l_usr].nameL ", MD at " tmp_time
-		eventlog("Electronic signature")
-	} else {
-		eventlog("Cancel signature")
-		return
-	}
-	
-	FileRead, tmp, % path.report fileNam ".rtf"
-	tmp := RegExReplace(tmp,"\\b.*?DATE OF BIRTH.*?\\par")						; remove the temp text between annotations
-	tmp := RegExReplace(tmp,"\\par \}","\par Electronically authenticated by " tmp_sig ". }")
-	FileDelete, % path.report fileNam ".rtf"
-	FileAppend, % tmp, % path.report fileNam ".rtf"								; generate a new RTF file
-	
-	makeORU(l_wqid)
-	
-	hl7out.file := "TRREAT_ORU_" A_now
-	FileAppend, % hl7out.msg, % path.report hl7out.file							; create ORU file in pending
-	
-	FileCopy, % path.report hl7out.file, % path.outbound						; copy ORU to outbound folder for Ensemble
-	FileMove, % path.report hl7out.file, % path.compl fileNam ".hl7", 1			; move ORU to completed folder, renamed fileNam.hl7
-	FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1		; move RTF from pending to completed folder
-	eventlog("ORU sent to outbound.")
-	
-	xl.setText("/root/work/id[@date='" l_date "'][@ser='" l_ser "']/status","Signed")
-	removeNode("/root/orders/order[@id='" l_wqid "']")
-	xl.transformXML()
-	xl.save(worklist)
-	
-	eventlog("Worklist.xml updated.")
-	
-	Gosub signScan																; regenerate file list
-Return
-}
-
+; Builds Epic ORU using values stored in <order\> node.
 makeORU(wqid) {
 	global xl, fldval, hl7out, docs, path, filenam, isRemote, user
 	dict:=readIni("EpicResult")
@@ -934,14 +730,14 @@ makeORU(wqid) {
 		,{19:order.encnum
 		, 50:wqid})
 	
-	tmpDoc := docs[substr(user,1,2)]
+	tmpDoc := docs[order.reading]
 	buildHL7("OBR"
 		,{2:order.ordernum
 		, 3:order.accession
 		, 4:order.ordertype "^IMGEAP"
 		, 7:order.date
 		, 16:order.prov "^^^^^^MSOW_ORG_ID"
-		, 25:"F"
+		, 25:"P"
 		, 32:tmpDoc.NPI "^" tmpDoc.nameL "^" tmpDoc.nameF })
 	
 	File := path.report fileNam ".rtf"
@@ -956,7 +752,7 @@ makeORU(wqid) {
 		,{2:"FT"
 		, 3:"&GDT^PACEMAKER/ICD INTERROGATION"
 		, 5:rtfStr
-		, 11:"F"
+		, 11:"P"
 		, 14:hl7time})
 	
 	for key,val in dict																	; Loop through all values in Dict (from ini)
@@ -2506,10 +2302,7 @@ PrintOut:
 	
 	rtfFtr := "}"
 	
-	rtfBody := "\pard\fs20"
-			. "{\*\annotation START}"
-			. "\b\ul DATE OF BIRTH: " strQ(fldval["dev-dob"],"###","not available") "\ul0\b0\par\par "
-			. "{\*\annotation END}"
+	rtfBody := "\pard\f0\fs22"
 			. "\b\ul ANALYSIS DATE:\ul0\b0  " enc_dt.MDY "\par\par "
 			. strQ(is_remote
 				, "\b\ul TRANSMISSION DATE:\ul0\b0 " enc_trans.MDY "\par\par ")
@@ -2569,6 +2362,7 @@ PrintOut:
 			
 			FileCopy, % fileIn, % path.paceart "done\"
 		}
+		FileRead, rtfOut, % path.files "tmp\" fileOut ".rtf"							; reload edited RTF
 		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
 		FileCopy, % path.compl fileOut ".pdf", % path.onbase onbaseFile, 1				; copy PDF from complete dir to OnBase dir
@@ -2581,20 +2375,34 @@ PrintOut:
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
 			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
-			xl.addElement("status",edID,"Pending")
+			xl.addElement("status",edID,"Sent")
 			xl.addElement("paceart",edID,strQ(is_remote,"True"))
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
-			xl.addElement("report",edID,path.report fileOut ".rtf")
+			xl.addElement("report",edID,path.compl fileOut ".rtf")
+		eventlog("Record added to worklist.xml")
+		
+		l_wqid := fldval["dev-wqid"]
+		fileNam := fileOut
+		makeORU(l_wqid)
+		hl7out.file := "TRREAT_ORU_" A_now
+		FileAppend, % hl7out.msg, % path.report hl7out.file								; create ORU file in pending
+		FileCopy, % path.report hl7out.file, % path.outbound							; copy ORU to outbound folder for Ensemble
+		FileMove, % path.report hl7out.file, % path.compl fileNam ".hl7", 1				; move ORU to completed folder, renamed fileNam.hl7
+		FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1			; move RTF from pending to completed folder
+		eventlog("ORU sent to outbound.")
+		
+		removeNode("/root/orders/order[@id='" l_wqid "']")
 		xl.transformXML()
 		xl.save(worklist)
-		eventlog("Record added to worklist.xml")
+		
+		eventlog("Worklist.xml updated.")
 		
 		if !(isDevt) {
 			whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")							; initialize http request in object whr
 			whr.Open("GET"																; set the http verb to GET file "change"
 				, "https://depts.washington.edu/pedcards/change/direct.php?" 
-					. "do=trreat" 
+					. "do=sign" 
 					. "&to=" enc_MD
 				, true)
 			whr.Send()																	; SEND the command to the address
@@ -3263,6 +3071,7 @@ saveChip:
 	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
 		xl.addElement("ordertype", orderString, matchEAP(enc_type))
+		xl.addElement("reading", orderString, enc_MD)
 		xl.addElement("dependent", orderString, fldval["dependent"])
 		xl.addElement("model",	orderString, fldval["dev-IPG"])
 		xl.addElement("ser",	orderString, fldval["dev-IPG_SN"])
@@ -3325,7 +3134,7 @@ makeReport:
 		return
 	}
 
-	makeOBR()
+	buildEncType()
 	
 	gosub saveChip
 	
@@ -3551,7 +3360,8 @@ checkEP(name) {
 	Return name
 }
 
-makeOBR() {
+; Create enc_type based on office/remote/periop, device type 
+buildEncType() {
 /*	Determine certain statuses
 	- is_remote = remote check
 	- is_postop = postop check
