@@ -101,6 +101,14 @@ parseGUI:
 
 ParseGuiClose:
 {
+	Loop, files, % path.files "tmp\*"
+	{
+		dt := A_now
+		dt -= A_LoopFileTimeModified, Days
+		if (dt > 30) {
+			FileDelete, %A_LoopFileLongPath%
+		}
+	}
 	eventlog("<<<<< Parse session closed.")
 	ExitApp
 }
