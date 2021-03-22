@@ -163,7 +163,8 @@ readList:
 		tmp["file"] := k.selectSingleNode("file").text
 		tmp["meta"] := k.selectSingleNode("meta").text
 		tmp["report"] := k.selectSingleNode("report").text
-		if ((tmp.report) && (tmp.status="Signed") && (tmp.paceart)) {				; REPORT and SIGNED and PACEART all true
+		if (tmp.status="Sent") && (tmp.paceart="True" || tmp.file~="\.xml")			; SENT and in PACEART
+		{
 			fileNum += 1
 			LV_Add("", tmp.date)
 			LV_Modify(fileNum,"col2", tmp.name)										; add marker line if in DONE list
@@ -175,8 +176,8 @@ readList:
 			continue
 		}
 		
-		fileNum += 1															; Add a row to the LV
-		LV_Add("", tmp.date)								; col1 is date
+		fileNum += 1																; Add a row to the LV
+		LV_Add("", tmp.date)														; col1 is date
 		LV_Modify(fileNum,"col2", tmp.name)
 		LV_Modify(fileNum,"col3", tmp.dev)
 		LV_Modify(fileNum,"col4", tmp.ser)
