@@ -2387,6 +2387,8 @@ PrintOut:
 			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
 			xl.addElement("status",edID,"Sent")
 			xl.addElement("paceart",edID,strQ(is_remote,"True"))
+			xl.addElement("ordernum",edID,fldval["dev-ordernum"])
+			xl.addElement("accession",edID,fldval["dev-accession"])
 			xl.addElement("file",edID,path.compl fileOut ext)
 			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
 			xl.addElement("report",edID,path.compl fileOut ".rtf")
