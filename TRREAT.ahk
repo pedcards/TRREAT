@@ -79,10 +79,8 @@ parseGUI:
 {
 	Gui, Parse:Destroy
 	Gui, Parse:Default
-	Gui, Add, Tab3, vWQtab +HwndWQtab,Interrogations|Paceart saves
+	Gui, Add, Tab3, vWQtab +HwndWQtab,Paceart saves
 	
-	Gui, Tab, Interr
-	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlv hwndHLV, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	Gui, Tab, Paceart
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	
