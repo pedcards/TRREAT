@@ -86,8 +86,6 @@ parseGUI:
 	Gui, Tab, Paceart
 	Gui, Add, Listview, w800 -Multi Grid r12 gparsePat vWQlvP hwndHLVp, Date|Name|Device|Serial|Status|PaceArt|FileName|MetaData|Report
 	
-	gosub readList																		; read the worklist
-	
 	gosub readFiles																		; scan the folders
 	
 	fixWqlvCols("WQlv")
