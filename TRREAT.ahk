@@ -189,9 +189,9 @@ return
 
 readFiles:
 {
-	readFilesRootMDT()
-	readFilesSJM()
-	readFilesBSCI()
+	; readFilesRootMDT()
+	; readFilesSJM()
+	; readFilesBSCI()
 	readFilesPaceart()
 	
 return
