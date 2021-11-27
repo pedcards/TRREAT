@@ -3438,6 +3438,12 @@ buildEncType() {
 		}
 	} 
 	
+	if (fldval["dev-type"]="MONITOR") {
+		enc_type := "REMOTE MONITOR "
+		enc_dt := parseDate(substr(A_now,1,8))											; report date is date run (today)
+		enc_trans := parseDate(fldval["dev-Encounter"])									; transmission date is date sent
+	}
+
 	enc_type .= fldval["dev-CheckType"]
 	eventlog("enc_type builder: " enc_type)
 	
