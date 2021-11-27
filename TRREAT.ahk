@@ -1901,7 +1901,7 @@ readXmlLead(k) {
 }
 
 xmlFld(base,blk,pre="") {
-/*	Reads xxxxxx:yyyy from array blk
+/*	Reads xxxxxx:yyyy from array fields[blk]
 		xxxxxx = xpath appended to base, if xxxxxx[@aaa] will getAttribute @aaa
 		yyyy = fldval[label], if yyyy[bbb] will append bbb units to result from xxxxxx 
 */
