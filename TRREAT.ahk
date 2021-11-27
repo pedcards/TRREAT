@@ -3175,11 +3175,13 @@ ciedQuery() {
 		gui, cied:Add, Edit, w200 vtmpLDate, % tmpLDate
 		gui, cied:Add, Text
 	}
-	gui, cied:Add, Text, , Pacemaker dependent?
-	gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
-	gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
-	gui, cied:Add, Radio, vDepX, Clear
-	gui, cied:Add, Text
+	if !(fldval["dev-type"]="MONITOR") {
+		gui, cied:Add, Text, , Pacemaker dependent?
+		gui, cied:Add, Radio, % "vDepY Checked" (fldval["dependent"]="Yes"), Yes
+		gui, cied:Add, Radio, % "vDepN Checked" (fldval["dependent"]="No") , No
+		gui, cied:Add, Radio, vDepX, Clear
+		gui, cied:Add, Text
+	}
 	gui, cied:Add, Text, , Indication for device
 	gui, cied:Add, Edit, r3 w200 vInd, % fldval["indication"]
 	gui, cied:Add, Text
