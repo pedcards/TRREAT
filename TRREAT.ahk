@@ -3745,6 +3745,19 @@ divTime(sec,div) {
 	Return {val:xx,rem:rem}
 }
 
+utcTime(x) {
+/*	convert UTC time to local time
+
+*/
+	global utcDiff
+
+	k := ParseDate(x)
+	dt := k.ymd k.hr k.min k.sec
+	dt += utcDiff, Hours
+
+	Return dt
+}
+
 setUTC() {
 /*	Get UTC offset
 	and DST offset
