@@ -3724,6 +3724,25 @@ zDigit(x) {
 	return SubStr("0" . x, -1)
 }
 
+; Convert duration secs to DDHHMMSS
+calcDuration(sec) {
+	DD := divTime(sec,"D")
+	HH := divTime(DD.rem,"H")
+	MM := divTime(HH.rem,"M")
+	SS := MM.rem
+
+	return { DHM: zDigit(DD.val) ":" zDigit(HH.val) ":" zDigit(MM.val)
+			, DHMS: zDigit(DD.val) ":" zDigit(HH.val) ":" zDigit(MM.val) ":" zDigit(SS) 
+			, HMS: zDigit(HH.val) ":" zDigit(MM.val) ":" zDigit(SS) }
+}
+
+divTime(sec,div) {
+	static T:={D:86400,H:3600,M:60,S:1}
+	xx := Floor(sec/T[div])
+	rem := sec-xx*T[div]
+	Return {val:xx,rem:rem}
+}
+
 stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
 /*	modified version: searches from BS to "   "
 	h = Haystack
