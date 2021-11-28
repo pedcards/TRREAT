@@ -34,6 +34,8 @@ path.onbase		:= path.trreat "onbase\import\"											; onbase DRIP folder for 
 
 worklist := path.files "worklist.xml"
 
+utcDiff := setUTC()
+
 user := instr(A_UserName,"octe") ? "tchun1" : A_UserName
 docs := readIni("docs")
 parsedocs(docs)
@@ -3741,6 +3743,20 @@ divTime(sec,div) {
 	xx := Floor(sec/T[div])
 	rem := sec-xx*T[div]
 	Return {val:xx,rem:rem}
+}
+
+setUTC() {
+/*	Get UTC offset
+	and DST offset
+*/
+	VarSetCapacity(TIME_ZONE_INFORMATION, 172, 0)											;TIME_ZONE_ID_DAYLIGHT := 2 ;TIME_ZONE_ID_STANDARD := 1
+	vIsDST := (DllCall("GetTimeZoneInformation", Ptr,&TIME_ZONE_INFORMATION, UInt) = 2)		;TIME_ZONE_ID_UNKNOWN := 0 ;'Daylight saving time is not used'
+
+	tdif := A_Now
+	tdif -= A_NowUTC, Hours
+	tdif += vIsDST
+
+	Return tdif
 }
 
 stRegX(h,BS="",BO=1,BT=0, ES="",ET=0, ByRef N="") {
