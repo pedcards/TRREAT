@@ -1778,7 +1778,7 @@ PaceartReadXml:
 				. ""]
 	xmlFld("//Encounter",1,"dev")
 	fldfill("dev-IPG",strQ(fldval["dev-manufacturer"],"###") strQ(fldval["dev-model"]," ###"))
-	fldfill("dev-Encounter",parseDate(fldval["dev-Encounter"]).MDY)
+	fldfill("dev-Encounter",parseDate(utcTime(fldval["dev-Encounter"])).MDY)
 	
 	fields[1] := ["PacingMode:Mode"
 				, "LowerRate:LRL"
@@ -2309,12 +2309,6 @@ printMonitor()
 */
 	global rtfBody, fldval, yp
 
-	tdif := A_Now
-	tdif -= A_NowUTC, Hours
-	tdif += 1
-	; td := A_now
-	; td += -8, Hours
-
 	rtfBody := "\b\ul DEVICE INFORMATION\ul0\b0\par "
 	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
 	. strQ(fldval["dev-IPG_impl"],", implanted ###") . strQ(fldval["dev-Physician"]," by ###") ". \par\par"
@@ -2327,10 +2321,7 @@ printMonitor()
 		epId := ep.selectSingleNode("Id").Text
 		epType := ep.selectSingleNode("Type").getAttribute("nonconformingData") 
 				. ep.selectSingleNode("Type").Text
-		epDate := ep.selectSingleNode("Start").Text
-			x := ParseDate(epDate)
-			epDate := x.YMD x.hr x.min x.sec
-			epDate += tdif, Hours
+		epDate := utcTime(ep.selectSingleNode("Start").Text)
 		epDur := ep.selectSingleNode("Duration").Text
 		epAvgRate := ep.selectSingleNode("AverageVentricularRate").Text
 		epMaxRate := ep.selectSingleNode("MaximumVentricularRate").Text
