@@ -2296,12 +2296,52 @@ printEvents()
 return	
 }
 
+printMonitor()
+{
+/*	ILR reports do not have all of the same elements as other devices
+	Replaces rtfBody with barebones report
+*/
+	global rtfBody, fldval, yp
+
+	tdif := A_Now
+	tdif -= A_NowUTC, Hours
+	tdif += 1
+	; td := A_now
+	; td += -8, Hours
+
+	rtfBody := "\b\ul DEVICE INFORMATION\ul0\b0\par "
+	. fldval["dev-IPG"] ", serial number " fldval["dev-IPG_SN"] 
+	. strQ(fldval["dev-IPG_impl"],", implanted ###") . strQ(fldval["dev-Physician"]," by ###") ". \par\par"
+	. "\b\ul EVENTS\ul0\b0\par "
+
+	epstr := "//InterrogatedDeviceData/Episodes//Episode"
+	loop % (eps:=yp.selectNodes(epstr)).Length
+	{
+		ep := eps.item(A_Index-1)
+		epId := ep.selectSingleNode("Id").Text
+		epType := ep.selectSingleNode("Type").getAttribute("nonconformingData") 
+				. ep.selectSingleNode("Type").Text
+		epDate := ep.selectSingleNode("Start").Text
+			x := ParseDate(epDate)
+			epDate := x.YMD x.hr x.min x.sec
+			epDate += tdif, Hours
+		epDur := ep.selectSingleNode("Duration").Text
+		epAvgRate := ep.selectSingleNode("AverageVentricularRate").Text
+		epMaxRate := ep.selectSingleNode("MaximumVentricularRate").Text
+
+		rtfBody .= "Episode #" epId ": " ParseDate(epDate).DT ", Type """ epType """, "
+			. "Duration (HH:MM:SS) " calcDuration(epDur).HMS " \par "
+			. "*** \par\par "
+	}	
+	Return
+}
+
 PrintOut:
 {
 	summ := strQ(fldval["dev-summary"],"###"
 			, "This represents a normal " strQ(format("{:L}",fldval["dev-EncType"]),"### ") "device check. The patient denies any device related symptoms. "
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
-			. "Routine follow up per implantable device protocol. ")	
+			. "Routine follow up per implantable device protocol. ")
 	
 	; rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
 	rtfHdr := "{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Segoe UI;}}\viewkind4\uc1"
