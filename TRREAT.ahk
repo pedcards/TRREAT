@@ -2293,6 +2293,10 @@ printEvents()
 	. strQ(fldval["event-Obs"],"\par ")
 	
 	rtfBody .= strQ(txt,"\par\b\ul EVENTS\ul0\b0\par ###\par ") 
+
+	if (fldval["dev-type"]="MONITOR") {
+		printMonitor()
+	}
 return	
 }
 
