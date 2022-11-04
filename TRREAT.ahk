@@ -2376,7 +2376,7 @@ PrintOut:
 			. fldval["dev-ordernum"] "_" 
 			. enc_dt.YMD "_" 
 			. fldval["dev-NameL"] "_" 
-			. fldval["dev-MRN"] ".pdf"
+			. fldval["dev-MRN"]
 	
 	FileDelete, % path.files "tmp\" fileOut ".rtf"										; delete and generate RTF fileOut.rtf
 	FileAppend, % rtfOut, % path.files "tmp\" fileOut ".rtf"
@@ -2465,13 +2465,14 @@ extractXmlPdfs(fileOut,onbaseFile) {
 
 	loop, % (att := yp.selectNodes("//Encounter//Attachment//FileData")).Length
 	{
-		fName := path.compl fileOut "_" A_Index ".pdf"
+		suffix := "_" A_index ".pdf"
+		fName := path.compl fileOut suffix
 		nBytes := Base64Dec( att.item(A_Index-1).text, Bin )
 		ed_File := FileOpen( fName, "w")
 		ed_File.RawWrite(Bin, nBytes)
 		ed_File.Close
 
-		FileCopy, % fName, % path.onbase onbaseFile, 1									; copy PDF from complete dir to OnBase dir
+		FileCopy, % fName, % path.onbase onbaseFile suffix, 1							; copy PDF from complete dir to OnBase dir
 	}
 	Return
 }
