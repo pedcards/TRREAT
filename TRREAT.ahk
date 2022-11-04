@@ -2393,7 +2393,7 @@ PrintOut:
 			eventlog("META copied to " path.compl)
 		}
 		if (ext=".xml") {
-			extractXmlPdfs(fileOut)
+			extractXmlPdfs(fileOut,onbaseFile)
 			
 			fileWQ := enc_dt.MDY "," 			 										; date processed and MA user
 					. """" nm """" ","													; CIS name
@@ -2460,7 +2460,7 @@ PrintOut:
 	return
 }
 
-extractXmlPdfs(fileOut) {
+extractXmlPdfs(fileOut,onbaseFile) {
 	global yp, path
 
 	loop, % (att := yp.selectNodes("//Encounter//Attachment//FileData")).Length
