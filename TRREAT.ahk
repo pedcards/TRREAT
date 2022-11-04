@@ -2393,10 +2393,7 @@ PrintOut:
 			eventlog("META copied to " path.compl)
 		}
 		if (ext=".xml") {
-			nBytes := Base64Dec( yp.selectSingleNode("//Encounter//Attachment//FileData").text, Bin )
-			ed_File := FileOpen( path.compl fileOut ".pdf", "w")
-			ed_File.RawWrite(Bin, nBytes)
-			ed_File.Close
+			extractXmlPdfs(fileOut)
 			
 			fileWQ := enc_dt.MDY "," 			 										; date processed and MA user
 					. """" nm """" ","													; CIS name
@@ -2411,7 +2408,6 @@ PrintOut:
 		FileRead, rtfOut, % path.files "tmp\" fileOut ".rtf"							; reload edited RTF
 		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
-		FileCopy, % path.compl fileOut ".pdf", % path.onbase onbaseFile, 1				; copy PDF from complete dir to OnBase dir
 		fileDelete, % fileIn
 		
 		t_now := A_Now
@@ -2462,6 +2458,22 @@ PrintOut:
 	}
 	
 	return
+}
+
+extractXmlPdfs(fileOut) {
+	global yp, path
+
+	loop, % (att := yp.selectNodes("//Encounter//Attachment//FileData")).Length
+	{
+		fName := path.compl fileOut "_" A_Index ".pdf"
+		nBytes := Base64Dec( att.item(A_Index-1).text, Bin )
+		ed_File := FileOpen( fName, "w")
+		ed_File.RawWrite(Bin, nBytes)
+		ed_File.Close
+
+		FileCopy, % fName, % path.onbase onbaseFile, 1									; copy PDF from complete dir to OnBase dir
+	}
+	Return
 }
 
 columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
