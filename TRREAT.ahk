@@ -2865,9 +2865,9 @@ FetchDem:
 	SNstring := "/root/id[data/device[@SN='" fldval["dev-IPG_SN"] "']]"
 	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
 		fldval["dev-MRN"] := k.getAttribute("mrn")								; set dev-MRN based on device SN
-		fldval["dev-NameL"] := k.selectSingleNode("demog/name_last").text
-		fldval["dev-NameF"] := k.selectSingleNode("demog/name_first").text
-		fldval["dev-Name"] := fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###")
+		fldfill("dev-NameL",k.selectSingleNode("demog/name_last").text)
+		fldfill("dev-NameF",k.selectSingleNode("demog/name_first").text)
+		fldfill("dev-Name",fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###"))
 		eventlog("Device " fldval["dev-IPG_SN"] " found in currlist (" fldval["dev-MRN"] ").")
 	} else if IsObject(k := yArch.selectSingleNode(SNstring)) {					; Look in yArch if not in y
 		fldval["dev-MRN"] := k.getAttribute("mrn")
