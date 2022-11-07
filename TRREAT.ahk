@@ -2995,14 +2995,18 @@ matchOrder(full:="") {
 			break
 		}
 		vals:=strsplit(k,"|")
-		key[A_Index] := {name:vals[3]													; build array of key{name,id,etc}
-						,id:vals[2]
+		key[A_Index] := {name:vals[2]													; build array of key{name,id,etc}
+						,id:vals[3]
 						,mrn:vals[4]
-						,ordernum:vals[5]
-						,accession:vals[6]
-						,location:vals[7]
-						,date:vals[8]}
-		keylist .= key[A_index].name " [" key[A_Index].ordernum " - " parseDate(key[A_Index].date).mdy "]|"
+						,date:vals[5]
+						,location:vals[6]
+						,ordernum:vals[7]
+						,accession:vals[8]
+						,ordertype:vals[9]}
+		keylist .= key[A_index].name " [" parseDate(key[A_Index].date).mdy "] " 
+				; . key[A_Index].ordernum 
+				. regexreplace(key[A_index].ordertype,".*?- ")
+				. "|"
 	}
 	
 	if (keylist="") {
