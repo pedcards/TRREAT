@@ -2982,8 +2982,10 @@ matchOrder(full:="") {
 		nodeOrdertype := node.selectSingleNode("ordertype").text
 		nodeLocation := node.selectSingleNode("loctype").text
 		nodeDate := node.selectSingleNode("date").text
-		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "|" nodeLocation "|" nodeDate "`n"
+		fuzz := (full) ? "" : fuzzysearch(nodename,fldName)
+		if (fuzz<thresh) {
+			list .= fuzz "|" nodeName "|" nodeID "|" nodeMRN "|" nodeDate "|" nodeLocation "|" nodeOrdernum "|" nodeAccession "|" nodeOrdertype "`n"
+		}
 	}
 	Sort, list																			; sort by fuzz level
 	Loop, parse, list, `n
