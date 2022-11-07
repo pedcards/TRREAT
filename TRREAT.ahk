@@ -3025,11 +3025,11 @@ matchOrder(full:="") {
 	Gui, dev:Destroy
 	Gui, dev:Default
 	Gui, -MinimizeBox
-	Gui, Add, Text, w180 +Wrap
-		, % "Select the order that matches this patient:"
+	Gui, Add, Text, +Wrap
+		, % "Select the order that matches this patient:`n"
 	Gui, Font, s12
 	Gui, Add, ListBox																	; listbox and button
-		, h100 w600 vSelBox VScroll AltSubmit gMatchOrderSelect
+		, h100 w640 r6 vSelBox VScroll AltSubmit gMatchOrderSelect
 		, % keylist
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
 	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders, View all orders
