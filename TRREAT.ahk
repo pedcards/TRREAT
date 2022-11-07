@@ -2964,10 +2964,11 @@ scanOrders() {
 	return
 }
 
-matchOrder() {
+matchOrder(full:="") {
 	global fldval, xl, fetchQuit
 	static selbox, selbut
 	key := {}
+	thresh := (full) ? 1.0 : 0.15														; % fuzz tolerated, "all" = everything
 	
 	fldName := Format("{:U}",fldval["dev-Name"])
 	Loop, % (k:=xl.selectNodes("/root/orders/order")).length							; generate list of orders with fuzz levels
