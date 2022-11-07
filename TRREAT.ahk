@@ -2961,7 +2961,7 @@ scanOrders() {
 			. e0.uid "Z.hl7"
 			
 		FileMove, %A_LoopFileFullPath%													; rename ORM file
-			, % path.hl7in "done\" fileOut												; and move to done subfolder
+			, % path.hl7in fileOut
 	}
 	xl.transformXML()
 	xl.save(worklist)
