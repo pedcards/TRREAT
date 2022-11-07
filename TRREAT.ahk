@@ -2411,19 +2411,19 @@ PrintOut:
 		fileDelete, % fileIn
 		
 		t_now := A_Now
-		edID := "/root/work/id[@ed='" t_now "']"
-		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
+		edID := "/root/done/id[@ed='" t_now "']"
+		xl.addElement("id","/root/done",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
 			xl.addElement("wqid",edID,fldval["dev-wqid"])
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
-			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
-			xl.addElement("status",edID,"Sent")
-			xl.addElement("paceart",edID,strQ(is_remote,"True"))
-			xl.addElement("ordernum",edID,fldval["dev-ordernum"])
-			xl.addElement("accession",edID,fldval["dev-accession"])
-			xl.addElement("file",edID,path.compl fileOut ext)
-			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
-			xl.addElement("report",edID,path.compl fileOut ".rtf")
+			; xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
+			; xl.addElement("status",edID,"Sent")
+			; xl.addElement("paceart",edID,strQ(is_remote,"True"))
+			; xl.addElement("ordernum",edID,fldval["dev-ordernum"])
+			; xl.addElement("accession",edID,fldval["dev-accession"])
+			; xl.addElement("file",edID,path.compl fileOut ext)
+			; xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
+			; xl.addElement("report",edID,path.compl fileOut ".rtf")
 		eventlog("Record added to worklist.xml")
 		
 		l_wqid := fldval["dev-wqid"]
@@ -2967,7 +2967,7 @@ scanOrders() {
 	xl.transformXML()
 	xl.save(worklist)
 	progress, off
-	
+
 	return
 }
 
