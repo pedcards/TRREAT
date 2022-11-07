@@ -2895,11 +2895,15 @@ scanOrders() {
 	if !IsObject(xl.selectSingleNode("/root/orders")) {
 		xl.addElement("orders","/root")
 	}
-	
-	Loop, files, % path.hl7in "*"															; Scan incoming folder for new orders and add to Orders node
+
+	progress,,Reading worklist,Scanning orders
+	fcount:=ComObjCreate("Scripting.FileSystemObject").GetFolder(path.hl7in).Files.Count
+
+	Loop, files, % path.hl7in "*"														; Scan incoming folder for new orders and add to Orders node
 	{
 		e0 := {}
 		fileIn := A_LoopFileName
+		Progress, % 100*A_Index/fcount, % fileIn
 		if RegExMatch(fileIn,"_([a-zA-Z0-9]{4,})Z.hl7",i) {								; skip old files
 			continue
 		}
@@ -2961,7 +2965,8 @@ scanOrders() {
 	}
 	xl.transformXML()
 	xl.save(worklist)
-		
+	progress, off
+	
 	return
 }
 
