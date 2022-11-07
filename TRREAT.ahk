@@ -3026,8 +3026,13 @@ matchOrder(full:="") {
 		, h100 w600 vSelBox VScroll AltSubmit gMatchOrderSelect
 		, % keylist
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
+	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders, View all orders
 	Gui, Show, AutoSize, Active orders
 	Gui, +AlwaysOnTop
+	
+	if (full) {
+		GuiControl, dev:Disable, View all orders
+	}
 	
 	winwaitclose, Active orders
 	
@@ -3072,6 +3077,12 @@ matchOrder(full:="") {
 	{
 		Gui, dev:Submit
 		return
+	}
+
+	loadAllOrders:
+	{
+		matchOrder("all")
+		Return
 	}
 }
 
