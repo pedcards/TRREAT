@@ -2436,6 +2436,7 @@ PrintOut:
 		FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1			; move RTF from pending to completed folder
 		eventlog("ORU sent to outbound.")
 		
+		FileMove, % path.hl7in "*_" l_wqid "Z.hl7", % path.hl7in "done\*.*", 1
 		removeNode("/root/orders/order[@id='" l_wqid "']")
 		xl.transformXML()
 		xl.save(worklist)
