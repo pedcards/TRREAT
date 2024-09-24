@@ -6,6 +6,7 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 ;~ SetWorkingDir %A_ScriptDir%							; Don't set workingdir so can read files from run dir
 ;~ FileInstall, pdftotext.exe, pdftotext.exe
 #Include %A_ScriptDir%\includes
+#Requires AutoHotkey v1.1
 
 Progress,100,Checking paths...,TRREAT
 IfInString, A_ScriptDir, AhkProjects					; Change enviroment if run from development vs production directory
@@ -3789,14 +3790,10 @@ utcTime(x) {
 
 setUTC() {
 /*	Get UTC offset
-	and DST offset
+	Should compensate for DST setting on local machine
 */
-	VarSetCapacity(TIME_ZONE_INFORMATION, 172, 0)											;TIME_ZONE_ID_DAYLIGHT := 2 ;TIME_ZONE_ID_STANDARD := 1
-	vIsDST := (DllCall("GetTimeZoneInformation", Ptr,&TIME_ZONE_INFORMATION, UInt) = 2)		;TIME_ZONE_ID_UNKNOWN := 0 ;'Daylight saving time is not used'
-
 	tdif := A_Now
 	tdif -= A_NowUTC, Hours
-	tdif += vIsDST
 
 	Return tdif
 }
