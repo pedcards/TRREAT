@@ -6,6 +6,7 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 ;~ SetWorkingDir %A_ScriptDir%							; Don't set workingdir so can read files from run dir
 ;~ FileInstall, pdftotext.exe, pdftotext.exe
 #Include %A_ScriptDir%\includes
+#Requires AutoHotkey v1.1
 
 Progress,100,Checking paths...,TRREAT
 IfInString, A_ScriptDir, AhkProjects					; Change enviroment if run from development vs production directory
@@ -2376,7 +2377,7 @@ PrintOut:
 			. fldval["dev-ordernum"] "_" 
 			. enc_dt.YMD "_" 
 			. fldval["dev-NameL"] "_" 
-			. fldval["dev-MRN"] ".pdf"
+			. fldval["dev-MRN"]
 	
 	FileDelete, % path.files "tmp\" fileOut ".rtf"										; delete and generate RTF fileOut.rtf
 	FileAppend, % rtfOut, % path.files "tmp\" fileOut ".rtf"
@@ -2393,10 +2394,7 @@ PrintOut:
 			eventlog("META copied to " path.compl)
 		}
 		if (ext=".xml") {
-			nBytes := Base64Dec( yp.selectSingleNode("//Encounter//Attachment//FileData").text, Bin )
-			ed_File := FileOpen( path.compl fileOut ".pdf", "w")
-			ed_File.RawWrite(Bin, nBytes)
-			ed_File.Close
+			extractXmlPdfs(fileOut,onbaseFile)
 			
 			fileWQ := enc_dt.MDY "," 			 										; date processed and MA user
 					. """" nm """" ","													; CIS name
@@ -2411,23 +2409,22 @@ PrintOut:
 		FileRead, rtfOut, % path.files "tmp\" fileOut ".rtf"							; reload edited RTF
 		FileMove, % path.files "tmp\" fileOut ".rtf", % path.report fileOut ".rtf", 1	; move RTF to the final directory
 		FileCopy, % fileIn, % path.compl fileOut ext, 1									; copy PDF to complete directory
-		FileCopy, % path.compl fileOut ".pdf", % path.onbase onbaseFile, 1				; copy PDF from complete dir to OnBase dir
 		fileDelete, % fileIn
 		
 		t_now := A_Now
-		edID := "/root/work/id[@ed='" t_now "']"
-		xl.addElement("id","/root/work",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
+		edID := "/root/done/id[@ed='" t_now "']"
+		xl.addElement("id","/root/done",{date: enc_dt.YMD, ser:fldval["dev-IPG_SN"], ed:t_now, au:user})
 			xl.addElement("wqid",edID,fldval["dev-wqid"])
 			xl.addElement("name",edID,fldval["dev-Name"])
 			xl.addElement("dev",edID,fldval["dev-IPG"])
-			xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
-			xl.addElement("status",edID,"Sent")
-			xl.addElement("paceart",edID,strQ(is_remote,"True"))
-			xl.addElement("ordernum",edID,fldval["dev-ordernum"])
-			xl.addElement("accession",edID,fldval["dev-accession"])
-			xl.addElement("file",edID,path.compl fileOut ext)
-			xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
-			xl.addElement("report",edID,path.compl fileOut ".rtf")
+			; xl.addElement("lead",edID,{date:fldval["dev-leadimpl"]},fldval["dev-lead"])
+			; xl.addElement("status",edID,"Sent")
+			; xl.addElement("paceart",edID,strQ(is_remote,"True"))
+			; xl.addElement("ordernum",edID,fldval["dev-ordernum"])
+			; xl.addElement("accession",edID,fldval["dev-accession"])
+			; xl.addElement("file",edID,path.compl fileOut ext)
+			; xl.addElement("meta",edID,(pat_meta) ? path.compl fileOut ".meta" : "")
+			; xl.addElement("report",edID,path.compl fileOut ".rtf")
 		eventlog("Record added to worklist.xml")
 		
 		l_wqid := fldval["dev-wqid"]
@@ -2440,6 +2437,7 @@ PrintOut:
 		FileMove, % path.report fileNam ".rtf", % path.compl fileNam ".rtf", 1			; move RTF from pending to completed folder
 		eventlog("ORU sent to outbound.")
 		
+		FileMove, % path.hl7in "*_" l_wqid "Z.hl7", % path.hl7in "done\*.*", 1
 		removeNode("/root/orders/order[@id='" l_wqid "']")
 		xl.transformXML()
 		xl.save(worklist)
@@ -2462,6 +2460,23 @@ PrintOut:
 	}
 	
 	return
+}
+
+extractXmlPdfs(fileOut,onbaseFile) {
+	global yp, path
+
+	loop, % (att := yp.selectNodes("//Encounter//Attachment//FileData")).Length
+	{
+		suffix := "_" A_index ".pdf"
+		fName := path.compl fileOut suffix
+		nBytes := Base64Dec( att.item(A_Index-1).text, Bin )
+		ed_File := FileOpen( fName, "w")
+		ed_File.RawWrite(Bin, nBytes)
+		ed_File.Close
+
+		FileCopy, % fName, % path.onbase onbaseFile suffix, 1							; copy PDF from complete dir to OnBase dir
+	}
+	Return
 }
 
 columns(x,blk1,blk2,excl:="",col2:="",col3:="",col4:="") {
@@ -2852,9 +2867,9 @@ FetchDem:
 	SNstring := "/root/id[data/device[@SN='" fldval["dev-IPG_SN"] "']]"
 	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
 		fldval["dev-MRN"] := k.getAttribute("mrn")								; set dev-MRN based on device SN
-		fldval["dev-NameL"] := k.selectSingleNode("demog/name_last").text
-		fldval["dev-NameF"] := k.selectSingleNode("demog/name_first").text
-		fldval["dev-Name"] := fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###")
+		fldfill("dev-NameL",k.selectSingleNode("demog/name_last").text)
+		fldfill("dev-NameF",k.selectSingleNode("demog/name_first").text)
+		fldfill("dev-Name",fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###"))
 		eventlog("Device " fldval["dev-IPG_SN"] " found in currlist (" fldval["dev-MRN"] ").")
 	} else if IsObject(k := yArch.selectSingleNode(SNstring)) {					; Look in yArch if not in y
 		fldval["dev-MRN"] := k.getAttribute("mrn")
@@ -2882,11 +2897,15 @@ scanOrders() {
 	if !IsObject(xl.selectSingleNode("/root/orders")) {
 		xl.addElement("orders","/root")
 	}
-	
-	Loop, files, % path.hl7in "*"															; Scan incoming folder for new orders and add to Orders node
+
+	progress,,Reading worklist,Scanning orders
+	fcount:=ComObjCreate("Scripting.FileSystemObject").GetFolder(path.hl7in).Files.Count
+
+	Loop, files, % path.hl7in "*"														; Scan incoming folder for new orders and add to Orders node
 	{
 		e0 := {}
 		fileIn := A_LoopFileName
+		Progress, % 100*A_Index/fcount, % fileIn
 		if RegExMatch(fileIn,"_([a-zA-Z0-9]{4,})Z.hl7",i) {								; skip old files
 			continue
 		}
@@ -2926,6 +2945,7 @@ scanOrders() {
 		xl.addElement("accession",newID,e0.accession)
 		xl.addElement("ctrlID",newID,e0.CtrlID)
 		xl.addElement("accountnum",newID,e0.accountnum)
+		xl.addElement("ordertype",newID,e0.ordertype)
 		xl.addElement("encnum",newID,e0.encnum)
 		xl.addElement("loctype",newID,e0.type)
 		xl.addElement("loc",newID,e0.loc)
@@ -2943,18 +2963,20 @@ scanOrders() {
 			. e0.uid "Z.hl7"
 			
 		FileMove, %A_LoopFileFullPath%													; rename ORM file
-			, % path.hl7in "done\" fileOut												; and move to done subfolder
+			, % path.hl7in fileOut
 	}
 	xl.transformXML()
 	xl.save(worklist)
-		
+	progress, off
+
 	return
 }
 
-matchOrder() {
+matchOrder(full:="") {
 	global fldval, xl, fetchQuit
 	static selbox, selbut
 	key := {}
+	thresh := (full) ? 1.0 : 0.15														; % fuzz tolerated, "all" = everything
 	
 	fldName := Format("{:U}",fldval["dev-Name"])
 	Loop, % (k:=xl.selectNodes("/root/orders/order")).length							; generate list of orders with fuzz levels
@@ -2968,8 +2990,10 @@ matchOrder() {
 		nodeOrdertype := node.selectSingleNode("ordertype").text
 		nodeLocation := node.selectSingleNode("loctype").text
 		nodeDate := node.selectSingleNode("date").text
-		fuzz := fuzzysearch(nodename,fldName)
-		list .= fuzz "|" nodeID "|" nodeName "|" nodeMRN "|" nodeOrdernum "|" nodeAccession "|" nodeLocation "|" nodeDate "`n"
+		fuzz := (full) ? "" : fuzzysearch(nodename,fldName)
+		if (fuzz<thresh) {
+			list .= fuzz "|" nodeName "|" nodeID "|" nodeMRN "|" nodeDate "|" nodeLocation "|" nodeOrdernum "|" nodeAccession "|" nodeOrdertype "`n"
+		}
 	}
 	Sort, list																			; sort by fuzz level
 	Loop, parse, list, `n
@@ -2979,14 +3003,18 @@ matchOrder() {
 			break
 		}
 		vals:=strsplit(k,"|")
-		key[A_Index] := {name:vals[3]													; build array of key{name,id,etc}
-						,id:vals[2]
+		key[A_Index] := {name:vals[2]													; build array of key{name,id,etc}
+						,id:vals[3]
 						,mrn:vals[4]
-						,ordernum:vals[5]
-						,accession:vals[6]
-						,location:vals[7]
-						,date:vals[8]}
-		keylist .= key[A_index].name " [" key[A_Index].ordernum " - " parseDate(key[A_Index].date).mdy "]|"
+						,date:vals[5]
+						,location:vals[6]
+						,ordernum:vals[7]
+						,accession:vals[8]
+						,ordertype:vals[9]}
+		keylist .= key[A_index].name " [" parseDate(key[A_Index].date).mdy "] " 
+				; . key[A_Index].ordernum 
+				. regexreplace(key[A_index].ordertype,".*?- ")
+				. "|"
 	}
 	
 	if (keylist="") {
@@ -2999,15 +3027,20 @@ matchOrder() {
 	Gui, dev:Destroy
 	Gui, dev:Default
 	Gui, -MinimizeBox
-	Gui, Add, Text, w180 +Wrap
-		, % "Select the order that matches this patient:"
+	Gui, Add, Text, +Wrap
+		, % "Select the order that matches this patient:`n"
 	Gui, Font, s12
 	Gui, Add, ListBox																	; listbox and button
-		, h100 w600 vSelBox VScroll AltSubmit gMatchOrderSelect
+		, h100 w640 r6 vSelBox VScroll AltSubmit gMatchOrderSelect
 		, % keylist
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
+	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders, View all orders
 	Gui, Show, AutoSize, Active orders
 	Gui, +AlwaysOnTop
+	
+	if (full) {
+		GuiControl, dev:Disable, View all orders
+	}
 	
 	winwaitclose, Active orders
 	
@@ -3052,6 +3085,12 @@ matchOrder() {
 	{
 		Gui, dev:Submit
 		return
+	}
+
+	loadAllOrders:
+	{
+		matchOrder("all")
+		Return
 	}
 }
 
@@ -3751,14 +3790,10 @@ utcTime(x) {
 
 setUTC() {
 /*	Get UTC offset
-	and DST offset
+	Should compensate for DST setting on local machine
 */
-	VarSetCapacity(TIME_ZONE_INFORMATION, 172, 0)											;TIME_ZONE_ID_DAYLIGHT := 2 ;TIME_ZONE_ID_STANDARD := 1
-	vIsDST := (DllCall("GetTimeZoneInformation", Ptr,&TIME_ZONE_INFORMATION, UInt) = 2)		;TIME_ZONE_ID_UNKNOWN := 0 ;'Daylight saving time is not used'
-
 	tdif := A_Now
 	tdif -= A_NowUTC, Hours
-	tdif += vIsDST
 
 	Return tdif
 }
