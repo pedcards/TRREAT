@@ -2995,7 +2995,7 @@ matchOrder(full:="") {
 			list .= fuzz "|" nodeName "|" nodeID "|" nodeMRN "|" nodeDate "|" nodeLocation "|" nodeOrdernum "|" nodeAccession "|" nodeOrdertype "`n"
 		}
 	}
-	Sort, list																			; sort by fuzz level
+	Sort, list, R																		; sort by fuzz level
 	Loop, parse, list, `n
 	{
 		k := A_LoopField
