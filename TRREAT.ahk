@@ -2995,7 +2995,7 @@ matchOrder(full:="") {
 			list .= fuzz "|" nodeName "|" nodeID "|" nodeMRN "|" nodeDate "|" nodeLocation "|" nodeOrdernum "|" nodeAccession "|" nodeOrdertype "`n"
 		}
 	}
-	Sort, list																			; sort by fuzz level
+	Sort, list, R																		; sort by fuzz level
 	Loop, parse, list, `n
 	{
 		k := A_LoopField
@@ -3034,7 +3034,7 @@ matchOrder(full:="") {
 		, h100 w640 r6 vSelBox VScroll AltSubmit gMatchOrderSelect
 		, % keylist
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
-	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders, View all orders
+	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders Disabled, View all orders
 	Gui, Show, AutoSize, Active orders
 	Gui, +AlwaysOnTop
 	
