@@ -1723,7 +1723,7 @@ PaceartXml:
 {
 	progress,,,Scanning...
 	yp := new XML(fileIn)
-	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
+	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice[Status='ACTIVE']/Device/Type").text
 	
 	if (fldval["dev-type"]) {
 		eventlog("Paceart " fldval["dev-type"]" report.")
