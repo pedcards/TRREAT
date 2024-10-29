@@ -1895,10 +1895,11 @@ readXmlLead(k) {
 	res.sensitivity_amp := strQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" res.chamb "']"
-	res.cap_amp := strQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
-	res.cap_pw := strQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
-	res.sensing_thr := strQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
-	res.pacing_imped := strQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
+	pathway := "[PolarityConfiguration/PathwaysSummary='" res.pacing_vector "']"
+	res.cap_amp := strQ(readNodeVal(base "//CaptureCollection" pathway "//Capture//Amplitude"),"### V") 
+	res.cap_pw := strQ(readNodeVal(base "//CaptureCollection " pathway "//Capture//Duration"),"### ms") 
+	res.sensing_thr := strQ(readNodeVal(base "//SensitivityCollection" pathway "//Sensitivity//Amplitude"),"### mV") 
+	res.pacing_imped := strQ(readNodeVal(base "//ImpedanceCollection" pathway "//Impedance//Value"),"### ohms")
 	res.HV_imped := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	
 	return res
