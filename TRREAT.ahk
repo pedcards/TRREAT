@@ -1885,6 +1885,7 @@ readXmlLead(k) {
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
 	res.pacing_pol := strQ(readNodeVal(base "//Polarity"),"###")
+	res.pacing_vector := strQ(readNodeVal(base "//PathwaysSummary"),"###")
 	res.pacing_amp := strQ(readNodeVal(base "/Amplitude"),"### V")
 	res.pacing_pw := strQ(readNodeVal(base "/PulseWidth"),"### ms")
 	res.pacing_adaptive := strQ(readNodeVal(base "/AdaptationMode"),"###")
