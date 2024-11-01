@@ -1802,7 +1802,7 @@ PaceartReadXml:
 				, "/VVDelay:CRT_VV[ms]"
 				. ""]
 	xmlFld("//Programming/HeartFailure",1,"par")
-	fldfill("par-CRT_VP",fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV>LV")
+	fldfill("par-CRT_VP",strQ(fldval["par-CRT_VP"],fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV>LV"))
 	
 	fields[1] := ["APVPPercent:ApVp[%]"
 				, "ASVPPercent:AsVp[%]"
