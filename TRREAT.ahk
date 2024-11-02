@@ -1776,6 +1776,7 @@ PaceartReadXml:
 				, "/Battery/RemainingLongevity:IPG_Longevity[months]"
 				, "/Battery/Voltage:IPG_voltage[V]"
 				, "/Battery/Impedance:IPG_impedance[ohms]"
+				, "/Battery/RemainingPercentage:Battery_percent"
 				. ""]
 	xmlFld("//Encounter",1,"dev")
 	fldfill("dev-IPG",strQ(fldval["dev-manufacturer"],"###") strQ(fldval["dev-model"]," ###"))
@@ -2193,6 +2194,7 @@ pmPrint:
 	. strQ(fldval["dev-IPG_impl"],", implanted ###") . strQ(fldval["dev-Physician"]," by ###") ". "
 	. strQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
 	. strQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . strQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
+	. strQ(fldval["dev-Battery_percent"],"Battery percentage remaining ###%. ")
 	. strQ(fldval["par-Mode"],"Brady programming mode is ###")
 	. strQ(fldval["par-LRL"],", lower rate ###")
 	. strQ(fldval["par-URL"],", upper tracking rate ###")
