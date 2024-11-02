@@ -2356,7 +2356,7 @@ PrintOut:
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. ")
 	if (fldval["dev-type"]="MONITOR") {
-		summ := "*** "
+		summ := strQ(fldval["dev-summary"],"###","***")
 	}
 	
 	; rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
