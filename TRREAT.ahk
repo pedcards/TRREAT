@@ -1875,6 +1875,11 @@ readXmlLead(k) {
 		}
 		res.ch .= num+1
 	}
+	if (fldval["dev-model"]~="i)Emblem") {
+		res.chamb := "HV"
+		res.ch := "HV"
+		fldval["leads-" res.ch "_HVimp"] := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+	}
 	if (k.selectSingleNode("Device/Comments").text~="HV") {
 		if !(res.chamb) {
 			res.chamb := "HV"
