@@ -1723,7 +1723,7 @@ PaceartXml:
 {
 	progress,,,Scanning...
 	yp := new XML(fileIn)
-	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice/Device/Type").text
+	fldval["dev-type"] := yp.selectSingleNode("//ActiveDevices/PatientActiveDevice[Status='ACTIVE']/Device/Type").text
 	
 	if (fldval["dev-type"]) {
 		eventlog("Paceart " fldval["dev-type"]" report.")
@@ -1776,6 +1776,7 @@ PaceartReadXml:
 				, "/Battery/RemainingLongevity:IPG_Longevity[months]"
 				, "/Battery/Voltage:IPG_voltage[V]"
 				, "/Battery/Impedance:IPG_impedance[ohms]"
+				, "/Battery/RemainingPercentage:Battery_percent"
 				. ""]
 	xmlFld("//Encounter",1,"dev")
 	fldfill("dev-IPG",strQ(fldval["dev-manufacturer"],"###") strQ(fldval["dev-model"]," ###"))
@@ -1802,7 +1803,7 @@ PaceartReadXml:
 				, "/VVDelay:CRT_VV[ms]"
 				. ""]
 	xmlFld("//Programming/HeartFailure",1,"par")
-	fldval["par-CRT_VP"] := fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV>LV"
+	fldfill("par-CRT_VP",strQ(fldval["par-CRT_VP"],fldval["par-CRT_VP"]~="LEFT" ? "LV>RV" : "RV>LV"))
 	
 	fields[1] := ["APVPPercent:ApVp[%]"
 				, "ASVPPercent:AsVp[%]"
@@ -1821,7 +1822,13 @@ PaceartReadXml:
 				, "/Zone[Type='ATRIAL_TACHYCARDIA']//Summary:AT"
 				, "/Zone[Type='ATRIAL_FIBRILLATION']//Summary:AF"
 				. ""]
+	if (fldval["dev-model"]~="i)Emblem") {
+		fields[1] := ["/Zone[Type='VENTRICULAR_FIBRILLATION']//Detection//Interval:VF_ms"
+					, "/Zone[Type='VENTRICULAR_TACHYCARDIA']//Detection//Interval:VT_ms" ]
+	}
 	xmlFld("//Programming/Tachycardia",1,"detect")
+	fldfill("detect-VF",strQ(fldval["detect-VF_ms"],round(60000/fldval["detect-VF_ms"])))
+	fldfill("detect-VT",strQ(fldval["detect-VT_ms"],round(60000/fldval["detect-VT_ms"])))
 	
 	fields[1] := ["/Episode[Type='AF_AT']/Count:ATAF"
 				, "/Episode[Type='VF_VT']/Count:VTVF"
@@ -1875,6 +1882,11 @@ readXmlLead(k) {
 		}
 		res.ch .= num+1
 	}
+	if (fldval["dev-model"]~="i)Emblem") {
+		res.chamb := "HV"
+		res.ch := "HV"
+		fldval["leads-" res.ch "_HVimp"] := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
+	}
 	if (k.selectSingleNode("Device/Comments").text~="HV") {
 		if !(res.chamb) {
 			res.chamb := "HV"
@@ -1885,6 +1897,7 @@ readXmlLead(k) {
 	
 	base := "//Programming//PacingData[Chamber='" res.chamb "']"
 	res.pacing_pol := strQ(readNodeVal(base "//Polarity"),"###")
+	res.pacing_vector := strQ(readNodeVal(base "//PathwaysSummary"),"###")
 	res.pacing_amp := strQ(readNodeVal(base "/Amplitude"),"### V")
 	res.pacing_pw := strQ(readNodeVal(base "/PulseWidth"),"### ms")
 	res.pacing_adaptive := strQ(readNodeVal(base "/AdaptationMode"),"###")
@@ -1894,10 +1907,11 @@ readXmlLead(k) {
 	res.sensitivity_amp := strQ(readNodeVal(base "//Amplitude"),"### mV")
 	
 	base := "//Statistics//Lead[Chamber='" res.chamb "']"
-	res.cap_amp := strQ(readNodeVal(base "/LowPowerChannel//Capture//Amplitude"),"### V") 
-	res.cap_pw := strQ(readNodeVal(base "/LowPowerChannel//Capture//Duration"),"### ms") 
-	res.sensing_thr := strQ(readNodeVal(base "/LowPowerChannel//Sensitivity//Amplitude"),"### mV") 
-	res.pacing_imped := strQ(readNodeVal(base "/LowPowerChannel//Impedance//Value"),"### ohms")
+	pathway := "[PolarityConfiguration/PathwaysSummary='" res.pacing_vector "']"
+	res.cap_amp := strQ(readNodeVal(base "//CaptureCollection" pathway "//Capture//Amplitude"),"### V") 
+	res.cap_pw := strQ(readNodeVal(base "//CaptureCollection " pathway "//Capture//Duration"),"### ms") 
+	res.sensing_thr := strQ(readNodeVal(base "//SensitivityCollection" pathway "//Sensitivity//Amplitude"),"### mV") 
+	res.pacing_imped := strQ(readNodeVal(base "//ImpedanceCollection" pathway "//Impedance//Value"),"### ohms")
 	res.HV_imped := strQ(readNodeVal("//Statistics//HighPowerChannel//Impedance//Value"),"### ohms")
 	
 	return res
@@ -2186,6 +2200,7 @@ pmPrint:
 	. strQ(fldval["dev-IPG_impl"],", implanted ###") . strQ(fldval["dev-Physician"]," by ###") ". "
 	. strQ(fldval["dev-IPG_voltage"],"Generator cell voltage ###. ")
 	. strQ(fldval["dev-Battery_stat"],"Battery status is ###. ") . strQ(fldval["dev-IPG_Longevity"],"Remaining longevity ###. ")
+	. strQ(fldval["dev-Battery_percent"],"Battery percentage remaining ###%. ")
 	. strQ(fldval["par-Mode"],"Brady programming mode is ###")
 	. strQ(fldval["par-LRL"],", lower rate ###")
 	. strQ(fldval["par-URL"],", upper tracking rate ###")
@@ -2341,7 +2356,7 @@ PrintOut:
 			. "The battery status is normal. Sensing and capture thresholds are good. The lead impedances are normal. "
 			. "Routine follow up per implantable device protocol. ")
 	if (fldval["dev-type"]="MONITOR") {
-		summ := "*** "
+		summ := strQ(fldval["dev-summary"],"###","***")
 	}
 	
 	; rtfHdr := "{\rtf1{\fonttbl{\f0\fnil Segoe UI;}}"
@@ -2995,7 +3010,7 @@ matchOrder(full:="") {
 			list .= fuzz "|" nodeName "|" nodeID "|" nodeMRN "|" nodeDate "|" nodeLocation "|" nodeOrdernum "|" nodeAccession "|" nodeOrdertype "`n"
 		}
 	}
-	Sort, list																			; sort by fuzz level
+	Sort, list, R																		; sort by fuzz level
 	Loop, parse, list, `n
 	{
 		k := A_LoopField
@@ -3034,7 +3049,7 @@ matchOrder(full:="") {
 		, h100 w640 r6 vSelBox VScroll AltSubmit gMatchOrderSelect
 		, % keylist
 	Gui, Add, Button, h30 vSelBut gMatchOrderSubmit Disabled, Select order				; disabled by default
-	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders, View all orders
+	Gui, Add, Button, h30 yp xp+120 gLoadAllOrders Disabled, View all orders
 	Gui, Show, AutoSize, Active orders
 	Gui, +AlwaysOnTop
 	
