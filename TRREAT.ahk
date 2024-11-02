@@ -1822,7 +1822,13 @@ PaceartReadXml:
 				, "/Zone[Type='ATRIAL_TACHYCARDIA']//Summary:AT"
 				, "/Zone[Type='ATRIAL_FIBRILLATION']//Summary:AF"
 				. ""]
+	if (fldval["dev-model"]~="i)Emblem") {
+		fields[1] := ["/Zone[Type='VENTRICULAR_FIBRILLATION']//Detection//Interval:VF_ms"
+					, "/Zone[Type='VENTRICULAR_TACHYCARDIA']//Detection//Interval:VT_ms" ]
+	}
 	xmlFld("//Programming/Tachycardia",1,"detect")
+	fldfill("detect-VF",strQ(fldval["detect-VF_ms"],round(60000/fldval["detect-VF_ms"])))
+	fldfill("detect-VT",strQ(fldval["detect-VT_ms"],round(60000/fldval["detect-VT_ms"])))
 	
 	fields[1] := ["/Episode[Type='AF_AT']/Count:ATAF"
 				, "/Episode[Type='VF_VT']/Count:VTVF"
