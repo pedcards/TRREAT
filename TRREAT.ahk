@@ -3367,7 +3367,6 @@ checkEP(name) {
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
 			eventlog(name " set as primary EP.")
 			eventlog(name " set as primary EP.","C")
-			writeOut(MRNstring,"prov")
 		} else {
 			name := fldval.PrimaryEP
 		}
@@ -3517,66 +3516,6 @@ RemoveNode(node) {
 	local q
 	q := xl.selectSingleNode(node)
 	q.parentNode.removeChild(q)
-}
-
-WriteOut(parentpath,node) {
-/* 
-	Prevents concurrent writing of y.MRN data. If someone is saving data (.currlock exists), script will wait
-	approx 6 secs and check every 50 msec whether the lock file is removed. When available it creates clones the y.MRN
-	node, loads a fresh currlist into Z (latest update), replaces the z.MRN node with the cloned y.MRN node,
-	saves it, then reloads this currlist into Y.
-*/
-	global y, path
-	filecheck()
-	FileOpen(path.chip ".currlock", "W")										; Create lock file.
-	
-	locPath := y.selectSingleNode(parentpath)
-	locNode := locPath.selectSingleNode(node)
-	clone := locNode.cloneNode(true)											; make copy of y.node
-	
-	z := y																		; temp Z will be most recent good currlist
-	
-	if !IsObject(z.selectSingleNode(parentpath "/" node)) {
-		If instr(node,"id[@mrn") {
-			z.addElement("id","root",{mrn: strX(node,"='",1,2,"']",1,2)})
-		} else {
-			z.addElement(node,parentpath)
-		}
-	}
-	zPath := z.selectSingleNode(parentpath)										; find same "node" in z
-	zNode := zPath.selectSingleNode(node)
-	zPath.replaceChild(clone,zNode)												; replace existing zNode with node clone
-	
-	z.save(path.chip "currlist.xml")											; write z into currlist
-	eventlog(parentpath "/" node " saved.","C")
-	eventlog("CHIPOTLE currlist updated.")
-	y := z																		; make Y match Z, don't need a file op
-	FileDelete, % path.chip ".currlock"											; release lock file.
-	return
-}
-
-filecheck() {
-	global path
-	if FileExist(path.chip ".currlock") {
-		err=0
-		Progress, , Waiting to clear lock, File write queued...
-		loop 50 {
-			if (FileExist(path.chip ".currlock")) {
-				progress, % p
-				Sleep 100
-				p += 2
-			} else {
-				err=1
-				break
-			}
-		}
-		if !(err) {
-			progress off
-			return error
-		}
-	} 
-	progress off
-	return
 }
 
 eventlog(event,ch:="") {
