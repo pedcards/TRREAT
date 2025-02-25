@@ -3118,45 +3118,6 @@ parseClip(clip) {
 
 saveChip:
 {
-	yID := y.selectSingleNode(MRNstring)
-	
-	if IsObject(q := yID.selectSingleNode("diagnoses/epdevice")) {				; Clear prior <epdevice>
-		q.parentNode.removeChild(q)
-	}
-	y.addElement("epdevice", MRNstring "/diagnoses")
-	y.addElement("dependent", MRNstring "/diagnoses/epdevice", fldval["dependent"])
-	y.addElement("indication", MRNstring "/diagnoses/epdevice", fldval["indication"])
-	WriteOut(MRNstring "/diagnoses", "epdevice")
-	
-	if IsObject(yDev := yID.selectSingleNode("data/device")) 	{				; Clear out any existing Device node
-		yDev.parentNode.removeChild(yDev)
-		eventlog("Removed existing <device> node.","C")							; chipotle\logs
-		eventlog("Removed existing <device> node from currlist.")				; trreat\logs
-	}
-	y.addElement("device"
-		,MRNstring "/data"
-		,{	au:user
-		,	ed:A_Now
-		,	model:fldval["dev-IPG"]
-		,	SN:fldval["dev-IPG_SN"]} )
-	pmNowString := MRNstring "/data/device"
-		y.addElement("mode", pmNowString, fldval["par-Mode"])
-		y.addElement("LRL", pmNowString, fldval["par-LRL"])
-		y.addElement("URL", pmNowString, fldval["par-URL"])
-		y.addElement("AVI", pmNowString, fldval["par-SAV"])
-		y.addElement("PVARP", pmNowString, fldval["par-PVARP"])
-		y.addElement("ApThr", pmNowString, leads["RA","cap"])
-		y.addElement("AsThr", pmNowString, leads["RA","sens"])
-		y.addElement("VpThr", pmNowString, leads["RV","cap"])
-		y.addElement("VsThr", pmNowString, leads["RV","sens"])
-		y.addElement("Ap", pmNowString, leads["RA","output"])
-		y.addElement("As", pmNowString, leads["RA","sensitivity"])
-		y.addElement("Vp", pmNowString, leads["RV","output"])
-		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
-	WriteOut(MRNstring "/data", "device")
-	eventlog("Add new <device> node.","C")
-	eventlog("Add new <device> node to currlist.")
-	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
 		xl.addElement("ordertype", orderString, matchEAP(enc_type))
 		xl.addElement("reading", orderString, enc_MD)
