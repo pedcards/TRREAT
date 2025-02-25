@@ -1756,10 +1756,12 @@ PaceartReadXml:
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Code:dx_code"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Description:dx_desc"
 				, "/Encounter/Evaluation/MiscellaneousComment:summary"
+				, "/Encounter/Evaluation/Dependency:dependent"
 				. ""]
 	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
 	fldfill("indication",strQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
+	fldfill("dependent",fldval["dev-dependent"])
 	
 	fields[1] := ["Device/Manufacturer:manufacturer"
 				, "Device/Model:model"
