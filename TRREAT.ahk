@@ -3147,7 +3147,6 @@ saveChip:
 makeReport:
 {
 /*	Generate the elements of the report
-	- Pull Chipotle data if it exists (dependent, indication, primary EP), make necessary data node
 	- Validate data values
 	- Generate OBR_4 string, store in <order> for makeORU
 	- Device check performed by
@@ -3155,22 +3154,6 @@ makeReport:
 	- Save values to Chipotle and Orders
 	- Final print output and file routing
 */
-	EncMRN := fldval["dev-MRN"]
-	MRNstring := "/root/id[@mrn='" EncMRN "']"
-	if !IsObject(y.selectSingleNode(MRNstring)) {
-		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
-		FetchNode("demog")
-		FetchNode("diagnoses")													; Check for existing node in Archlist,
-		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
-		FetchNode("data")
-	}
-	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
-		y.addElement("data",MRNstring)
-	}
-	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
-	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
-	fldval["primaryEP"] := y.selectSingleNode(MRNstring "/prov").getAttribute("EP")
-	
 	ciedQuery()
 	if (fetchQuit) {
 		eventlog("fetchQuit ciedQuery.")
