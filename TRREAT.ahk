@@ -2875,6 +2875,10 @@ parseORM() {
 }
 
 FetchDem:
+/*	Check Orders folder and add new records to <orders>
+	Find best match for order and select with matchOrder()
+	Used to pull demographics from chipotle worklist, but obsolete with paceart.xml
+*/
 {
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
@@ -3177,7 +3181,6 @@ makeReport:
 
 ciedQuery() {
 /*	For setting values related to this patient/device
-	Values are saved in Chipotle currlist.xml
 */
 	global fldval, leads, fetchQuit, docs
 		, tmpLead, tmpLDate
