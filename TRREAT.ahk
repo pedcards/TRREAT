@@ -2418,7 +2418,6 @@ PrintOut:
 					. """" fldval["dev-Enc"] """"										; Acct Num
 					. "`n"
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
-			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
 			
 			FileCopy, % fileIn, % path.paceart "done\"
 		}
@@ -3368,7 +3367,6 @@ checkEP(name) {
 			yID.selectSingleNode("prov").setAttribute("au", user)
 			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
 			eventlog(name " set as primary EP.")
-			eventlog(name " set as primary EP.","C")
 		} else {
 			name := fldval.PrimaryEP
 		}
@@ -3520,9 +3518,9 @@ RemoveNode(node) {
 	q.parentNode.removeChild(q)
 }
 
-eventlog(event,ch:="") {
+eventlog(event) {
 	global user, path
-	logdir := (ch="C") ? path.chip "logs\" : path.trreat "logs\"
+	logdir := path.trreat "logs\"
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
