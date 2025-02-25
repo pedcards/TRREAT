@@ -53,10 +53,6 @@ if !FileExist(path.compl) {
 	MsgBox % "Requires completed dir`n""" path.compl """"
 	ExitApp
 }
-if !FileExist(path.chip) {
-	MsgBox % "Requires CHIPOTLE dir`n""" path.chip """"
-	ExitApp
-}
 
 Progress, off
 
