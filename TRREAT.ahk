@@ -478,7 +478,7 @@ readFilesBSCI() {
 }
 
 readFilesPaceart() {
-/*	read exported PDF reports from Paceart
+/*	read exported XML reports from Paceart
 	in .\paceart\ folder
 */
 	global path, WQlvP, WQlv, HLVp, HLV
@@ -3357,18 +3357,10 @@ checkEP(name) {
 	global fldval, mrnString, enc_MD, docs
 	
 	if (name!=fldval.PrimaryEP) {
-		MsgBox, 262180, Change, % "Change primary EP `n"
+		MsgBox, , Change, % "To change primary EP `n"
 			. "from '" fldval.PrimaryEP "'`n"
-			. "to '" name "'?"
-		IfMsgBox, Yes
-		{
-			yID.selectSingleNode("prov").setAttribute("EP", name)
-			yID.selectSingleNode("prov").setAttribute("au", user)
-			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
-			eventlog(name " set as primary EP.")
-		} else {
-			name := fldval.PrimaryEP
-		}
+			. "to '" name "`n"
+			. "Must change FOLLOWING provider in Paceart."
 	}
 	
 	for key,val in docs
