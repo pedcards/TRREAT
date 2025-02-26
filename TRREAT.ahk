@@ -53,10 +53,6 @@ if !FileExist(path.compl) {
 	MsgBox % "Requires completed dir`n""" path.compl """"
 	ExitApp
 }
-if !FileExist(path.chip) {
-	MsgBox % "Requires CHIPOTLE dir`n""" path.chip """"
-	ExitApp
-}
 
 Progress, off
 
@@ -482,7 +478,7 @@ readFilesBSCI() {
 }
 
 readFilesPaceart() {
-/*	read exported PDF reports from Paceart
+/*	read exported XML reports from Paceart
 	in .\paceart\ folder
 */
 	global path, WQlvP, WQlv, HLVp, HLV
@@ -1756,10 +1752,15 @@ PaceartReadXml:
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Code:dx_code"
 				, "Diagnoses/PatientDiagnosis/Diagnosis/Description:dx_desc"
 				, "/Encounter/Evaluation/MiscellaneousComment:summary"
+				, "/Encounter/Evaluation/Dependency:dependent"
+				, "Providers/PatientProvider[ProviderType='FOLLOWING']/Provider/LastName:primaryL"
+				, "Providers/PatientProvider[ProviderType='FOLLOWING']/Provider/FirstName:primaryF"
 				. ""]
 	xmlFld("//PatientRecord",1,"dev")
 	fldfill("dev-name",fldval["dev-nameL"] ", " fldval["dev-nameF"])
 	fldfill("indication",strQ(fldval["dev-dx_code"],"### - ") fldval["dev-dx_desc"])
+	fldfill("dependent",fldval["dev-dependent"])
+	fldfill("primaryEP",substr(fldval["dev-primaryF"],1,1) ". " fldval["dev-primaryL"])
 	
 	fields[1] := ["Device/Manufacturer:manufacturer"
 				, "Device/Model:model"
@@ -2417,7 +2418,6 @@ PrintOut:
 					. """" fldval["dev-Enc"] """"										; Acct Num
 					. "`n"
 			FileAppend, % fileWQ, % path.trreat "logs\trreatWQ.csv"						; Add to logs\fileWQ list
-			FileCopy, % path.trreat "logs\trreatWQ.csv", % path.chip "trreatWQ-copy.csv", 1
 			
 			FileCopy, % fileIn, % path.paceart "done\"
 		}
@@ -2873,25 +2873,13 @@ parseORM() {
 }
 
 FetchDem:
+/*	Check Orders folder and add new records to <orders>
+	Find best match for order and select with matchOrder()
+	We used to pull demographics from chipotle worklist, but now obsolete with paceart.xml
+*/
 {
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
 		fldval["dev-MRN"] := ""
-	}
-	y := new XML(path.chip "currlist.xml")
-	yArch := new XML(path.chip "archlist.xml")
-	SNstring := "/root/id[data/device[@SN='" fldval["dev-IPG_SN"] "']]"
-	if IsObject(k := y.selectSingleNode(SNstring)) {							; Device SN found
-		fldval["dev-MRN"] := k.getAttribute("mrn")								; set dev-MRN based on device SN
-		fldfill("dev-NameL",k.selectSingleNode("demog/name_last").text)
-		fldfill("dev-NameF",k.selectSingleNode("demog/name_first").text)
-		fldfill("dev-Name",fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###"))
-		eventlog("Device " fldval["dev-IPG_SN"] " found in currlist (" fldval["dev-MRN"] ").")
-	} else if IsObject(k := yArch.selectSingleNode(SNstring)) {					; Look in yArch if not in y
-		fldval["dev-MRN"] := k.getAttribute("mrn")
-		fldval["dev-NameL"] := k.selectSingleNode("demog/name_last").text
-		fldval["dev-NameF"] := k.selectSingleNode("demog/name_first").text
-		fldval["dev-Name"] := fldval["dev-NameL"] strQ(fldval["dev-NameF"],", ###")
-		eventlog("Device " fldval["dev-IPG_SN"] " found in archlist (" fldval["dev-MRN"] ").")
 	}
 	
 	fetchQuit := false
@@ -3130,47 +3118,8 @@ parseClip(clip) {
 	return Error																		; Anything else returns Error
 }
 
-saveChip:
+saveValues:
 {
-	yID := y.selectSingleNode(MRNstring)
-	
-	if IsObject(q := yID.selectSingleNode("diagnoses/epdevice")) {				; Clear prior <epdevice>
-		q.parentNode.removeChild(q)
-	}
-	y.addElement("epdevice", MRNstring "/diagnoses")
-	y.addElement("dependent", MRNstring "/diagnoses/epdevice", fldval["dependent"])
-	y.addElement("indication", MRNstring "/diagnoses/epdevice", fldval["indication"])
-	WriteOut(MRNstring "/diagnoses", "epdevice")
-	
-	if IsObject(yDev := yID.selectSingleNode("data/device")) 	{				; Clear out any existing Device node
-		yDev.parentNode.removeChild(yDev)
-		eventlog("Removed existing <device> node.","C")							; chipotle\logs
-		eventlog("Removed existing <device> node from currlist.")				; trreat\logs
-	}
-	y.addElement("device"
-		,MRNstring "/data"
-		,{	au:user
-		,	ed:A_Now
-		,	model:fldval["dev-IPG"]
-		,	SN:fldval["dev-IPG_SN"]} )
-	pmNowString := MRNstring "/data/device"
-		y.addElement("mode", pmNowString, fldval["par-Mode"])
-		y.addElement("LRL", pmNowString, fldval["par-LRL"])
-		y.addElement("URL", pmNowString, fldval["par-URL"])
-		y.addElement("AVI", pmNowString, fldval["par-SAV"])
-		y.addElement("PVARP", pmNowString, fldval["par-PVARP"])
-		y.addElement("ApThr", pmNowString, leads["RA","cap"])
-		y.addElement("AsThr", pmNowString, leads["RA","sens"])
-		y.addElement("VpThr", pmNowString, leads["RV","cap"])
-		y.addElement("VsThr", pmNowString, leads["RV","sens"])
-		y.addElement("Ap", pmNowString, leads["RA","output"])
-		y.addElement("As", pmNowString, leads["RA","sensitivity"])
-		y.addElement("Vp", pmNowString, leads["RV","output"])
-		y.addElement("Vs", pmNowString, leads["RV","sensitivity"])
-	WriteOut(MRNstring "/data", "device")
-	eventlog("Add new <device> node.","C")
-	eventlog("Add new <device> node to currlist.")
-	
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
 		xl.addElement("ordertype", orderString, matchEAP(enc_type))
 		xl.addElement("reading", orderString, enc_MD)
@@ -3200,30 +3149,13 @@ saveChip:
 makeReport:
 {
 /*	Generate the elements of the report
-	- Pull Chipotle data if it exists (dependent, indication, primary EP), make necessary data node
 	- Validate data values
 	- Generate OBR_4 string, store in <order> for makeORU
 	- Device check performed by
 	- Normal text insert
-	- Save values to Chipotle and Orders
+	- Save values to Orders
 	- Final print output and file routing
 */
-	EncMRN := fldval["dev-MRN"]
-	MRNstring := "/root/id[@mrn='" EncMRN "']"
-	if !IsObject(y.selectSingleNode(MRNstring)) {
-		y.addElement("id", "root", {mrn: EncMRN})								; No MRN node exists, create it.
-		FetchNode("demog")
-		FetchNode("diagnoses")													; Check for existing node in Archlist,
-		FetchNode("prov")														; retrieve old Dx, Prov. Otherwise, create placeholders.
-		FetchNode("data")
-	}
-	if !IsObject(y.selectSingleNode(MRNstring "/data")) {						; Make sure <data> exists
-		y.addElement("data",MRNstring)
-	}
-	fldval["dependent"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/dependent").text
-	fldval["indication"] := y.selectSingleNode(MRNstring "/diagnoses/epdevice/indication").text
-	fldval["primaryEP"] := y.selectSingleNode(MRNstring "/prov").getAttribute("EP")
-	
 	ciedQuery()
 	if (fetchQuit) {
 		eventlog("fetchQuit ciedQuery.")
@@ -3238,7 +3170,7 @@ makeReport:
 
 	buildEncType()
 	
-	gosub saveChip
+	gosub saveValues
 	
 	gosub pmPrint
 	
@@ -3247,7 +3179,6 @@ makeReport:
 
 ciedQuery() {
 /*	For setting values related to this patient/device
-	Values are saved in Chipotle currlist.xml
 */
 	global fldval, leads, fetchQuit, docs
 		, tmpLead, tmpLDate
@@ -3423,24 +3354,13 @@ checkEP(name) {
 /*	Find responsible EP
 	and/or assign to someone
 */
-	global y, fldval, mrnString, enc_MD, docs
-	yID := y.selectSingleNode(MRNstring)
+	global fldval, mrnString, enc_MD, docs
 	
 	if (name!=fldval.PrimaryEP) {
-		MsgBox, 262180, Change, % "Change primary EP `n"
+		MsgBox, , Change, % "To change primary EP `n"
 			. "from '" fldval.PrimaryEP "'`n"
-			. "to '" name "'?"
-		IfMsgBox, Yes
-		{
-			yID.selectSingleNode("prov").setAttribute("EP", name)
-			yID.selectSingleNode("prov").setAttribute("au", user)
-			yID.selectSingleNode("prov").setAttribute("ed", A_Now)
-			eventlog(name " set as primary EP.")
-			eventlog(name " set as primary EP.","C")
-			writeOut(MRNstring,"prov")
-		} else {
-			name := fldval.PrimaryEP
-		}
+			. "to '" name "`n"
+			. "Must change FOLLOWING provider in Paceart."
 	}
 	
 	for key,val in docs
@@ -3561,18 +3481,6 @@ readWQ(idx) {
 	return res
 }
 
-FetchNode(node) {
-	global
-	local x, clone
-	if IsObject(yArch.selectSingleNode(MRNstring "/" node)) {		; Node arch exists
-		x := yArch.selectSingleNode(MRNstring "/" node)
-		clone := x.cloneNode(true)
-		y.selectSingleNode(MRNstring).appendChild(clone)			; using appendChild as no Child exists yet.
-	} else {
-		y.addElement(node, MRNstring)								; If no node arch exists, create placeholder
-	}
-}
-
 archNode(node) {
 	global
 	local clone
@@ -3589,69 +3497,9 @@ RemoveNode(node) {
 	q.parentNode.removeChild(q)
 }
 
-WriteOut(parentpath,node) {
-/* 
-	Prevents concurrent writing of y.MRN data. If someone is saving data (.currlock exists), script will wait
-	approx 6 secs and check every 50 msec whether the lock file is removed. When available it creates clones the y.MRN
-	node, loads a fresh currlist into Z (latest update), replaces the z.MRN node with the cloned y.MRN node,
-	saves it, then reloads this currlist into Y.
-*/
-	global y, path
-	filecheck()
-	FileOpen(path.chip ".currlock", "W")										; Create lock file.
-	
-	locPath := y.selectSingleNode(parentpath)
-	locNode := locPath.selectSingleNode(node)
-	clone := locNode.cloneNode(true)											; make copy of y.node
-	
-	z := y																		; temp Z will be most recent good currlist
-	
-	if !IsObject(z.selectSingleNode(parentpath "/" node)) {
-		If instr(node,"id[@mrn") {
-			z.addElement("id","root",{mrn: strX(node,"='",1,2,"']",1,2)})
-		} else {
-			z.addElement(node,parentpath)
-		}
-	}
-	zPath := z.selectSingleNode(parentpath)										; find same "node" in z
-	zNode := zPath.selectSingleNode(node)
-	zPath.replaceChild(clone,zNode)												; replace existing zNode with node clone
-	
-	z.save(path.chip "currlist.xml")											; write z into currlist
-	eventlog(parentpath "/" node " saved.","C")
-	eventlog("CHIPOTLE currlist updated.")
-	y := z																		; make Y match Z, don't need a file op
-	FileDelete, % path.chip ".currlock"											; release lock file.
-	return
-}
-
-filecheck() {
-	global path
-	if FileExist(path.chip ".currlock") {
-		err=0
-		Progress, , Waiting to clear lock, File write queued...
-		loop 50 {
-			if (FileExist(path.chip ".currlock")) {
-				progress, % p
-				Sleep 100
-				p += 2
-			} else {
-				err=1
-				break
-			}
-		}
-		if !(err) {
-			progress off
-			return error
-		}
-	} 
-	progress off
-	return
-}
-
-eventlog(event,ch:="") {
+eventlog(event) {
 	global user, path
-	logdir := (ch="C") ? path.chip "logs\" : path.trreat "logs\"
+	logdir := path.trreat "logs\"
 	comp := A_ComputerName
 	FormatTime, sessdate, A_Now, yyyyMM
 	FormatTime, now, A_Now, yyyy.MM.dd||HH:mm:ss
