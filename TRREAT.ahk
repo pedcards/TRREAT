@@ -2875,7 +2875,7 @@ parseORM() {
 FetchDem:
 /*	Check Orders folder and add new records to <orders>
 	Find best match for order and select with matchOrder()
-	Used to pull demographics from chipotle worklist, but obsolete with paceart.xml
+	We used to pull demographics from chipotle worklist, but now obsolete with paceart.xml
 */
 {
 	if !(fldval["dev-MRN"]~="^\d{6,7}$") {				; Check MRN parsed from PDF
@@ -3118,7 +3118,7 @@ parseClip(clip) {
 	return Error																		; Anything else returns Error
 }
 
-saveChip:
+saveValues:
 {
 	orderString := "//orders/order[@id='" fldval["dev-wqid"] "']"
 		xl.addElement("ordertype", orderString, matchEAP(enc_type))
@@ -3153,7 +3153,7 @@ makeReport:
 	- Generate OBR_4 string, store in <order> for makeORU
 	- Device check performed by
 	- Normal text insert
-	- Save values to Chipotle and Orders
+	- Save values to Orders
 	- Final print output and file routing
 */
 	ciedQuery()
@@ -3170,7 +3170,7 @@ makeReport:
 
 	buildEncType()
 	
-	gosub saveChip
+	gosub saveValues
 	
 	gosub pmPrint
 	
