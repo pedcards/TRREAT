@@ -3354,8 +3354,7 @@ checkEP(name) {
 /*	Find responsible EP
 	and/or assign to someone
 */
-	global y, fldval, mrnString, enc_MD, docs
-	yID := y.selectSingleNode(MRNstring)
+	global fldval, mrnString, enc_MD, docs
 	
 	if (name!=fldval.PrimaryEP) {
 		MsgBox, 262180, Change, % "Change primary EP `n"
@@ -3488,18 +3487,6 @@ readWQ(idx) {
 	res.node := k.parentNode.nodeName 
 	
 	return res
-}
-
-FetchNode(node) {
-	global
-	local x, clone
-	if IsObject(yArch.selectSingleNode(MRNstring "/" node)) {		; Node arch exists
-		x := yArch.selectSingleNode(MRNstring "/" node)
-		clone := x.cloneNode(true)
-		y.selectSingleNode(MRNstring).appendChild(clone)			; using appendChild as no Child exists yet.
-	} else {
-		y.addElement(node, MRNstring)								; If no node arch exists, create placeholder
-	}
 }
 
 archNode(node) {
