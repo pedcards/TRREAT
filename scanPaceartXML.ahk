@@ -14,9 +14,31 @@ progress,,% " ",Scanning folder
 Loop, Files, % path "\*", F
 {
 	progress, % 100 * A_index/fcount
-	flist .= A_LoopFileName "`n"
+	k := A_LoopField
+	flist0 .= A_LoopFileName "`n"
 }
-Sort flist
+Sort flist0
+
+progress,,% " ",Removing duplicates
+Loop, Parse, flist0, `n, `r`n
+{
+	k := A_LoopField
+	if (k="") {
+		Break
+	}
+	fnam := RegExReplace(k,"WQ.xml$")
+	progress, % 100 * A_Index/fcount, % fnam
+	e := StrSplit(fnam, "_")
+	if !(e.1=e0.1) {																	; novel MRN
+		flist .= k "`n"
+		Continue
+	} 
+	; same MRNxte
+	if (e.1=e0.1) && !(e.3 > e0.3) {													; Same MRN, but new date not greater than last
+		e0 := e
+		Continue
+	}
+}
 
 progress,,% " ",Scanning files
 Loop, Parse, flist, `n, `r`n
@@ -28,6 +50,11 @@ Loop, Parse, flist, `n, `r`n
 	fnam := RegExReplace(k,"WQ.xml$")
 	progress, % 100 * A_Index/fcount, % fnam
 	e := StrSplit(fnam, "_")
+	if (e.1=e0.1) && !(e.3 > e0.3) {													; Same MRN, but new date not greater than last
+		e0 := e
+		Continue
+	}
+	e0 := e
 	y := new XML("paceart\done\" k)
 
 	res := provs(y.selectSingleNode("//Providers"))
